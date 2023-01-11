@@ -5,21 +5,21 @@
     <link name="base_frame"/>
     <link name="chassis">
 
-      <xacro:body mass="0.5" d="0.125" h="0.028" w="0.1256">
+      <xacro:body mass="0.2" d="0.125" h="0.028" w="0.1256">
           <origin xyz="0 0.014 0.0" rpy="0.0 0.0 0.0"/>
       </xacro:body>
 
       <collision>
         <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
         <geometry>
-          <mesh filename="package://depthai_bridge/urdf/models/RAE-enclosure_01051900.stl" scale="0.001 0.001 0.001"/>
+          <mesh filename="package://depthai_bridge/urdf/models/RAE.stl" scale="1.0 1.0 1.0"/>
         </geometry>
       </collision>
 
       <visual>
         <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
         <geometry>
-          <mesh filename="package://depthai_bridge/urdf/models/RAE-enclosure_01051900.stl" scale="0.001 0.001 0.001"/>
+          <mesh filename="package://depthai_bridge/urdf/models/RAE.stl" scale="1.0 1.0 1.0"/>
         </geometry>
         <material name="mat">
           <lighting>1</lighting>
@@ -32,6 +32,7 @@
       
       </visual>
     </link>
+
 
     <joint name="base_chassis_joint" type="fixed">
         <parent link="base_frame"/>
@@ -47,14 +48,14 @@
       <collision>
         <origin rpy="0.0 0.0 0.0" xyz="-0.0125 0.0 0.0"/>
         <geometry>
-            <mesh filename="package://depthai_bridge/urdf/models/RAE-Wheel_01051900.stl" scale="0.001 0.001 0.001"/>
+            <mesh filename="package://depthai_bridge/urdf/models/Motor-wheel.stl" scale="1.0 1.0 1.0"/>
         </geometry>
       </collision>
 
       <visual>
         <origin rpy="0.0 0.0 0.0" xyz="-0.0125 0.0 0.0"/>
         <geometry>
-            <mesh filename="package://depthai_bridge/urdf/models/RAE-Wheel_01051900.stl" scale="0.001 0.001 0.001"/>
+            <mesh filename="package://depthai_bridge/urdf/models/Motor-wheel.stl" scale="1.0 1.0 1.0"/>
         </geometry>
       </visual>
     </link>
@@ -67,14 +68,14 @@
       <collision>
         <origin rpy="0.0 0.0 0.0" xyz="-0.0125 0.0 0.0"/>
         <geometry>
-            <mesh filename="package://depthai_bridge/urdf/models/RAE-Wheel_01051900.stl" scale="0.001 0.001 0.001"/>
+            <mesh filename="package://depthai_bridge/urdf/models/Motor-wheel.stl" scale="1.0 1.0 1.0"/>
         </geometry>
       </collision>
 
       <visual>
         <origin rpy="0.0 0.0 0.0" xyz="-0.0125 0.0 0.0"/>
         <geometry>
-            <mesh filename="package://depthai_bridge/urdf/models/RAE-Wheel_01051900.stl" scale="0.001 0.001 0.001"/>
+            <mesh filename="package://depthai_bridge/urdf/models/Motor-wheel.stl" scale="1.0 1.0 1.0"/>
         </geometry>
       </visual>
     </link>
@@ -95,9 +96,8 @@
       <axis rpy="0 0 0" xyz="1 0 0"/>
 
     </joint>
-
     <link name="left_caster_wheel">
-      <xacro:caster_wheels mass="0.035" r="0.005">
+      <xacro:caster_wheels mass="0.05" r="0.005">
             <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
       </xacro:caster_wheels>
       <collision>
@@ -139,7 +139,7 @@
     </joint>
 
     <link name="right_caster_wheel">
-      <xacro:caster_wheels mass="0.035" r="0.005">
+      <xacro:caster_wheels mass="0.05" r="0.005">
             <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
       </xacro:caster_wheels>
       <collision>
@@ -179,6 +179,7 @@
         <child link="right_caster_wheel"/>
         <origin rpy="0.0 0.0 0.0" xyz="0.0735 -0.0445 -0.001" />
     </joint>
+
     <gazebo>
         <plugin
                 filename="libignition-gazebo-diff-drive-system.so"
