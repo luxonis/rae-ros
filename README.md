@@ -23,7 +23,7 @@ ros2 launch depthai_bridge rae_desc_launch.py
 ```
 
 `rae_desc_launch.py` will use information in `rae.urdf.xacro` to create state publisher for rae.
-You can observe the robot with rviz2 using `show_model.rviz` config file that is located in 'depttai_bridge/rviz'. 
+You can observe the robot with rviz2 using `show_model.rviz` config file that is located in 'depttai_bridge/rviz'. It is neccesary to load the packages in terminal in which rviz is used so it can find meshes.
 
 ```
 ros2 launch depthai_bridge rae_gazebo_desc_launch.py 
