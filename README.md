@@ -9,7 +9,7 @@ So far only developed for ROS2 Humble. Will likely work on all recent versions o
 
 1. `mkdir -p rae_ws/src`
 2. `cd rae_ws/src`
-3. `git clone https://github.com/luxonis/depthai-ros.git`
+3. `git clone git@github.com:luxonis/rae.git` 
 4. `cd ../..`
 5. `rosdep install --from-paths src --ignore-src -r -y`
 6. `source /opt/ros/<ros-distro>/setup.bash`
