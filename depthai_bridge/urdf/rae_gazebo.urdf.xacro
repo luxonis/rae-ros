@@ -1,0 +1,198 @@
+<?xml version="1.0"?>
+<robot name="rae" xmlns:xacro="http://ros.org/wiki/xacro">
+    <xacro:include filename="inertial_moment_calc.xacro"/>
+
+    <link name="base_frame"/>
+    <link name="chassis">
+
+      <xacro:body mass="0.5" d="0.125" h="0.028" w="0.1256">
+          <origin xyz="0 0.014 0.0" rpy="0.0 0.0 0.0"/>
+      </xacro:body>
+
+      <collision>
+        <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+        <geometry>
+          <mesh filename="package://depthai_bridge/urdf/models/RAE-enclosure_01051900.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </collision>
+
+      <visual>
+        <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+        <geometry>
+          <mesh filename="package://depthai_bridge/urdf/models/RAE-enclosure_01051900.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="mat">
+          <lighting>1</lighting>
+          <color rgba="0.1 0.1 0.1 1.0"/>
+          <shader type='pixel'/>
+          <emissive>0 0 0 1</emissive>
+        </material>
+        <transparency>0</transparency>
+        <cast_shadows>1</cast_shadows>
+      
+      </visual>
+    </link>
+
+    <joint name="base_chassis_joint" type="fixed">
+        <parent link="base_frame"/>
+        <child link="chassis"/>
+        <origin rpy="1.57 0.0 1.57" xyz="0.0307 0.0 0.0" />
+    </joint>
+
+    <link name="left_wheel">
+      <xacro:wheels mass="0.05" h="0.01" r="0.0125">
+            <origin xyz="-0.005 0.0 0.0" rpy="0.0 0.0 0.0"/>
+      </xacro:wheels>
+
+      <collision>
+        <origin rpy="0.0 0.0 0.0" xyz="-0.0125 0.0 0.0"/>
+        <geometry>
+            <mesh filename="package://depthai_bridge/urdf/models/RAE-Wheel_01051900.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </collision>
+
+      <visual>
+        <origin rpy="0.0 0.0 0.0" xyz="-0.0125 0.0 0.0"/>
+        <geometry>
+            <mesh filename="package://depthai_bridge/urdf/models/RAE-Wheel_01051900.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </visual>
+    </link>
+
+    <link name="right_wheel">
+      <xacro:wheels mass="0.05" h="0.01" r="0.0125">
+            <origin xyz="-0.005 0.0 0.0" rpy="0.0 0.0 0.0"/>
+      </xacro:wheels>
+
+      <collision>
+        <origin rpy="0.0 0.0 0.0" xyz="-0.0125 0.0 0.0"/>
+        <geometry>
+            <mesh filename="package://depthai_bridge/urdf/models/RAE-Wheel_01051900.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </collision>
+
+      <visual>
+        <origin rpy="0.0 0.0 0.0" xyz="-0.0125 0.0 0.0"/>
+        <geometry>
+            <mesh filename="package://depthai_bridge/urdf/models/RAE-Wheel_01051900.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </visual>
+    </link>
+
+
+
+    <joint name='left_wheel_hinge' type='continuous'>
+      <origin rpy="0.0 0.0 -1.57 " xyz="0.0 0.0427 0.0052"/>
+      <child  link="left_wheel"/>
+      <parent link="base_frame"/>
+      <axis rpy="0 0 0" xyz="-1 0 0"/>
+    </joint>
+
+    <joint name='right_wheel_hinge' type='continuous'>
+      <origin rpy="0.0 0.0 1.57 " xyz="0.0 -0.0427 0.0052"/>
+      <child  link="right_wheel"/>
+      <parent link="base_frame"/>
+      <axis rpy="0 0 0" xyz="1 0 0"/>
+
+    </joint>
+
+    <link name="left_caster_wheel">
+      <xacro:caster_wheels mass="0.035" r="0.005">
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+      </xacro:caster_wheels>
+      <collision>
+        <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+        <geometry>
+          <mesh filename="package://depthai_bridge/urdf/models/caster-wheel.stl" scale="1.0 1.0 1.0"/>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>0.01</mu>
+              <mu2>0.01</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+
+      <visual>
+        <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+        <geometry>
+          <mesh filename="package://depthai_bridge/urdf/models/caster-wheel.stl" scale="1.0 1.0 1.0"/>
+        </geometry>
+        <material name="mat">
+          <lighting>1</lighting>
+          <color rgba="1.0 1.0 1.0 1.0"/>
+          <shader type='pixel'/>
+          <emissive>0 0 0 1</emissive>
+        </material>
+        <transparency>0</transparency>
+        <cast_shadows>1</cast_shadows>
+      
+      </visual>
+    </link>
+
+    <joint name="base_left_caster_wheel" type="fixed">
+        <parent link="base_frame"/>
+        <child link="left_caster_wheel"/>
+        <origin rpy="0.0 0.0 0.0" xyz="0.0735 0.0445 -0.001" />
+    </joint>
+
+    <link name="right_caster_wheel">
+      <xacro:caster_wheels mass="0.035" r="0.005">
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+      </xacro:caster_wheels>
+      <collision>
+        <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+        <geometry>
+          <mesh filename="package://depthai_bridge/urdf/models/caster-wheel.stl" scale="1.0 1.0 1.0"/>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>0.01</mu>
+              <mu2>0.01</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+
+      <visual>
+        <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+        <geometry>
+          <mesh filename="package://depthai_bridge/urdf/models/caster-wheel.stl" scale="1.0 1.0 1.0"/>
+        </geometry>
+        <material name="mat">
+          <lighting>1</lighting>
+          <color rgba="1.0 1.0 1.0 1.0"/>
+          <shader type='pixel'/>
+          <emissive>0 0 0 1</emissive>
+        </material>
+        <transparency>0</transparency>
+        <cast_shadows>1</cast_shadows>
+      
+      </visual>
+    </link>
+
+    <joint name="base_right_caster_wheel" type="fixed">
+        <parent link="base_frame"/>
+        <child link="right_caster_wheel"/>
+        <origin rpy="0.0 0.0 0.0" xyz="0.0735 -0.0445 -0.001" />
+    </joint>
+    <gazebo>
+        <plugin
+                filename="libignition-gazebo-diff-drive-system.so"
+                name="ignition::gazebo::systems::DiffDrive">
+                <left_joint>left_wheel_hinge</left_joint>
+                <right_joint>right_wheel_hinge</right_joint>
+                <wheel_separation>0.0854</wheel_separation>
+                <!-- check correct wheel radius when you come back to the task -->
+                <wheel_radius>0.0125</wheel_radius>
+                <odom_publish_frequency>1</odom_publish_frequency>
+                <topic>cmd_vel</topic>
+            </plugin>
+       
+    </gazebo>
+
+
+</robot>
