@@ -34,5 +34,5 @@ Launch file will spawn a basic world (with sun and ground plane) with RAE in the
 
 
 You can controll the robot via keyboard teleopt (in a new terminal) with:
-1. `sudo apt-get install ros-<ros-distro>-teleop-twist-keyboard
+1. sudo apt-get install ros-<ros-distro>-teleop-twist-keyboard
 2. ros2 run  teleop_twist_keyboard teleop_twist_keyboard
