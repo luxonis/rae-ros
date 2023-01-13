@@ -58,6 +58,7 @@
             </link>
         </model>
         <include>
+            <pose> 0 0 0.05 0 0 0 </pose>
             <uri>
                 https://fuel.gazebosim.org/1.0/danilopejovic/models/WIP-robotmodel1danilo
             </uri>
