@@ -7,8 +7,15 @@
           <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
      </xacro:body>
     </link>
-<link name="chassis">
-
+    <gazebo reference="base_frame">
+     <sensor name="imu_sensor" type="imu">
+      <always_on>1</always_on>
+      <update_rate>1</update_rate>
+      <visualize>true</visualize>
+      <topic>imu</topic>
+     </sensor>
+    </gazebo>
+    <link name="chassis">
       <xacro:body mass="0.2" d="0.125" h="0.028" w="0.1256">
           <origin xyz="0 0.014 0.0" rpy="0.0 0.0 0.0"/>
       </xacro:body>
