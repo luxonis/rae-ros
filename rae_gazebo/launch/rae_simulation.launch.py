@@ -44,7 +44,7 @@ def launch_setup(context, *args, **kwargs):
         executable='parameter_bridge',
         arguments=['/cmd_vel@geometry_msgs/msg/Twist]ignition.msgs.Twist',
                    '/camera@sensor_msgs/msg/Image@ignition.msgs.Image',
-                   #'/odometry@nav_msgs/msg/Odometry@gz.msgs.Odometry'
+                    '/camera@sensor_msgs/msg/Image@ignition.msgs.Image'
                    ],
         output='screen'
     )

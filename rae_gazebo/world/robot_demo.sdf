@@ -222,6 +222,9 @@
               <size>1 1 1</size>
             </box>
           </geometry>
+          <plugin filename="ignition-gazebo-label-system" name="ignition::gazebo::systems::Label">
+            <label>10</label>
+          </plugin>
           <material>
             <ambient>1 0 0 1</ambient>
             <diffuse>1 0 0 1</diffuse>
