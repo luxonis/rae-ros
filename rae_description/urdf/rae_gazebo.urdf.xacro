@@ -16,7 +16,7 @@
      </sensor>
     </gazebo>
     <link name="chassis">
-      <xacro:body mass="0.2" d="0.125" h="0.028" w="0.1256">
+      <xacro:body mass="0.360" d="0.125" h="0.028" w="0.1256">
           <origin xyz="0 0.014 0.0" rpy="0.0 0.0 0.0"/>
       </xacro:body>
 
@@ -49,8 +49,8 @@
         <origin rpy="1.57 0.0 1.57" xyz="0.0307 0.0 0.0" />
     </joint>
 
-    <link name="left_wheel">
-      <xacro:wheels mass="0.05" h="0.01" r="0.0125">
+   <!-- <link name="left_wheel">
+      <xacro:wheels mass="0.008" h="0.011" r="0.0119">
             <origin xyz="-0.005 0.0 0.0" rpy="0.0 0.0 0.0"/>
       </xacro:wheels>
 
@@ -65,12 +65,65 @@
         <origin rpy="0.0 0.0 0.0" xyz="-0.0125 0.0 0.0"/>
         <geometry>
             <mesh filename="package://rae_description/urdf/models/Motor-wheel.stl" scale="1.0 1.0 1.0"/>
+        </geometry>
+      </visual>
+    </link> -->
+    <link name="left_wheel">
+      <xacro:wheels mass="0.008" h="0.011" r="0.0119">
+            <origin xyz="0.0 0.0 -0.0055" rpy="0.0 0.0 0.0"/>
+      </xacro:wheels>
+
+      <collision>
+        <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 -0.0055"/>
+        <geometry>
+            <cylinder length="0.011" radius="0.0119"/>
+        </geometry>
+      </collision>
+
+      <visual>
+        <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 -0.0055"/>
+        <geometry>
+            <cylinder length="0.011" radius="0.0119"/>
         </geometry>
       </visual>
     </link>
 
     <link name="right_wheel">
-      <xacro:wheels mass="0.05" h="0.01" r="0.0125">
+      <xacro:wheels mass="0.008" h="0.011" r="0.0119">
+            <origin xyz="0.0 0.0 -0.0055" rpy="0.0 0.0 0.0"/>
+      </xacro:wheels>
+
+      <collision>
+        <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 -0.0055"/>
+        <geometry>
+            <cylinder length="0.011" radius="0.0119"/>
+        </geometry>
+      </collision>
+
+      <visual>
+        <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 -0.0055"/>
+        <geometry>
+            <cylinder length="0.011" radius="0.0119"/>
+        </geometry>
+      </visual>
+    </link>
+
+    <joint name='left_wheel_hinge' type='continuous'>
+      <origin rpy="1.57 0.0 0.00 " xyz="0.0 0.042 0.0052"/>
+      <child  link="left_wheel"/>
+      <parent link="base_frame"/>
+      <axis rpy="0 0 0" xyz="0 0 -1"/>
+    </joint>
+
+    <joint name='right_wheel_hinge' type='continuous'>
+      <origin rpy="-1.57 0.0 0.0 " xyz="0.0 -0.042 0.0052"/>
+      <child  link="right_wheel"/>
+      <parent link="base_frame"/>
+      <axis rpy="0 0 0" xyz="0 0 1"/>
+    </joint>
+
+   <!-- <link name="right_wheel">
+      <xacro:wheels mass="0.008" h="0.011" r="0.0119">
             <origin xyz="-0.005 0.0 0.0" rpy="0.0 0.0 0.0"/>
       </xacro:wheels>
 
@@ -87,11 +140,11 @@
             <mesh filename="package://rae_description/urdf/models/Motor-wheel.stl" scale="1.0 1.0 1.0"/>
         </geometry>
       </visual>
-    </link>
+    </link> -->
 
 
 
-    <joint name='left_wheel_hinge' type='continuous'>
+   <!-- <joint name='left_wheel_hinge' type='continuous'>
       <origin rpy="0.0 0.0 -1.57 " xyz="0.0 0.0427 0.0052"/>
       <child  link="left_wheel"/>
       <parent link="base_frame"/>
@@ -103,10 +156,10 @@
       <child  link="right_wheel"/>
       <parent link="base_frame"/>
       <axis rpy="0 0 0" xyz="1 0 0"/>
-    </joint>
+    </joint>-->
 
     <link name="left_caster_wheel">
-      <xacro:caster_wheels mass="0.035" r="0.005">
+      <xacro:caster_wheels mass="0.008" r="0.005">
             <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
       </xacro:caster_wheels>
       <collision>
@@ -140,7 +193,7 @@
     </joint>
 
     <link name="right_caster_wheel">
-      <xacro:caster_wheels mass="0.035" r="0.005">
+      <xacro:caster_wheels mass="0.008" r="0.005">
             <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
       </xacro:caster_wheels>
       <collision>
@@ -176,11 +229,15 @@
         <plugin
                 filename="libignition-gazebo-diff-drive-system.so"
                 name="ignition::gazebo::systems::DiffDrive">
+                <odometry_frame>base_frame</odometry_frame>
+                <publish_odom>true</publish_odom>
+                <publish_odom_tf>true</publish_odom_tf>
+                <odom_topic>odom</odom_topic>
                 <left_joint>left_wheel_hinge</left_joint>
                 <right_joint>right_wheel_hinge</right_joint>
                 <wheel_separation>0.0854</wheel_separation>
                 <!-- check correct wheel radius when you come back to the task -->
-                <wheel_radius>0.0125</wheel_radius>
+                <wheel_radius>0.0119</wheel_radius>
                 <odom_publish_frequency>1</odom_publish_frequency>
                 <topic>cmd_vel</topic>
             </plugin>
@@ -249,7 +306,7 @@
     </joint>
 
     <gazebo reference="rgb_camera_link_optical_frame">
-     <sensor name="camera" type="camera">
+     <sensor name="rgbd_camera" type="rgbd_camera">
         <camera>
             <horizontal_fov>1.047</horizontal_fov>
             <image>
@@ -308,7 +365,7 @@
         <visualize>true</visualize>
         <topic>depth_camera</topic>
      </sensor>
-    </gazebo>  
+    </gazebo> 
 
     <gazebo reference="right_caster_wheel">
      <mu1>0.001</mu1>
