@@ -23,14 +23,16 @@ def generate_launch_description():
             name='robot_state_publisher',
             parameters=[{'robot_description': Command(
                 [
-                    'xacro', ' ', xacro_path, ' ',
-                ])}]
+                    'xacro', ' ', xacro_path, ' ', ' sim_mode:=', 'true'
+                ]),
+                'use_sim_time': True}]
         )
 
     joint_state_publisher = Node(
             package='joint_state_publisher',
             executable='joint_state_publisher',
-            name='joint_state_publisher')
+            name='joint_state_publisher',
+            parameters=[{'use_sim_time': True}])
 
 
     ld = LaunchDescription()

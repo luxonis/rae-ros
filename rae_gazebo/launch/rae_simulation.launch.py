@@ -23,8 +23,10 @@ def launch_setup(context, *args, **kwargs):
         PythonLaunchDescriptionSource(
             os.path.join(pkg_ros_gz_sim, 'launch', 'gz_sim.launch.py')),
         launch_arguments={
-            'ign_args': world_file
+            'ign_args': world_file,
+            'use_sim_time': 'True'
         }.items(),
+        
     ),
     IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -36,6 +38,7 @@ def launch_setup(context, *args, **kwargs):
         executable='create',
         arguments=['-topic', '/robot_description', '-z', '0.15'
                    ],
+                   parameters=[{'use_sim_time': True}],
         output='screen'
     ),
     
@@ -44,9 +47,11 @@ def launch_setup(context, *args, **kwargs):
         executable='parameter_bridge',
         arguments=['/cmd_vel@geometry_msgs/msg/Twist]ignition.msgs.Twist',
                    '/camera@sensor_msgs/msg/Image@ignition.msgs.Image',
-                    '/camera@sensor_msgs/msg/Image@ignition.msgs.Image',
-                    '/odom@nav_msgs/msg/Odometry@ignition.msgs.Odometry'
+                    '/odom@nav_msgs/msg/Odometry@ignition.msgs.Odometry',
+                    '/clock@rosgraph_msgs/msg/Clock[ignition.msgs.Clock',
+                    '/tf@tf2_msgs/msg/TFMessage[ignition.msgs.Pose_V'
                    ],
+                   parameters=[{'use_sim_time': True}],
         output='screen'
     )
     ]

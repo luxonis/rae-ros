@@ -229,16 +229,19 @@
         <plugin
                 filename="libignition-gazebo-diff-drive-system.so"
                 name="ignition::gazebo::systems::DiffDrive">
-                <odometry_frame>base_frame</odometry_frame>
+                <frame_id>odom</frame_id>
+                <child_frame_id>base_frame</child_frame_id>
+                <tf_topic>tf</tf_topic>
                 <publish_odom>true</publish_odom>
                 <publish_odom_tf>true</publish_odom_tf>
+                <publish_wheel_tf>true</publish_wheel_tf>
                 <odom_topic>odom</odom_topic>
                 <left_joint>left_wheel_hinge</left_joint>
                 <right_joint>right_wheel_hinge</right_joint>
                 <wheel_separation>0.0854</wheel_separation>
                 <!-- check correct wheel radius when you come back to the task -->
                 <wheel_radius>0.0119</wheel_radius>
-                <odom_publish_frequency>1</odom_publish_frequency>
+                <odom_publish_frequency>50</odom_publish_frequency>
                 <topic>cmd_vel</topic>
             </plugin>
        
@@ -388,7 +391,7 @@
     </gazebo>
 
 
-    <gazebo reference="base_left_caster_wheel">
+    <!-- <gazebo reference="base_left_caster_wheel">
      <preserveFixedJoint>true</preserveFixedJoint>
     </gazebo>
     
@@ -414,7 +417,7 @@
 
     <gazebo reference="base_chassis_joint">
      <preserveFixedJoint>true</preserveFixedJoint>
-    </gazebo>
+    </gazebo> -->
 
 
 </robot>
