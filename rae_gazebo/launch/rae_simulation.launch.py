@@ -46,7 +46,8 @@ def launch_setup(context, *args, **kwargs):
         package='ros_gz_bridge',
         executable='parameter_bridge',
         arguments=['/cmd_vel@geometry_msgs/msg/Twist]ignition.msgs.Twist',
-                   '/camera@sensor_msgs/msg/Image@ignition.msgs.Image',
+                   '/camera/image@sensor_msgs/msg/Image@ignition.msgs.Image',
+                   '/camera/depth_image@sensor_msgs/msg/Image@ignition.msgs.Image',
                     '/odom@nav_msgs/msg/Odometry@ignition.msgs.Odometry',
                     '/clock@rosgraph_msgs/msg/Clock[ignition.msgs.Clock',
                     '/tf@tf2_msgs/msg/TFMessage[ignition.msgs.Pose_V'

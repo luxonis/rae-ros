@@ -20,6 +20,9 @@
           <origin xyz="0 0.014 0.0" rpy="0.0 0.0 0.0"/>
       </xacro:body>
 
+
+
+
       <collision>
         <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
         <geometry>
@@ -73,6 +76,7 @@
             <origin xyz="0.0 0.0 -0.0055" rpy="0.0 0.0 0.0"/>
       </xacro:wheels>
 
+
       <collision>
         <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 -0.0055"/>
         <geometry>
@@ -89,9 +93,24 @@
     </link>
 
     <link name="right_wheel">
-      <xacro:wheels mass="0.008" h="0.011" r="0.0119">
+      <!-- <xacro:wheels mass="0.008" h="0.011" r="0.0119">
             <origin xyz="0.0 0.0 -0.0055" rpy="0.0 0.0 0.0"/>
-      </xacro:wheels>
+      </xacro:wheels> -->
+
+    <inertial>
+      <origin
+        xyz="-0.046973 0.00518 -0.03067"
+        rpy="0 0 0" />
+      <mass
+        value="0.008" />
+      <inertia
+        ixx="2.8106E-07"
+        ixy="-3.5503E-14"
+        ixz="-3.4849E-10"
+        iyy="2.0307E-07"
+        iyz="3.6705E-14"
+        izz="2.0323E-07" />
+    </inertial>
 
       <collision>
         <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 -0.0055"/>
@@ -251,7 +270,7 @@
      <xacro:body mass="0.001" d="0.010" h="0.03" w="0.03">
           <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
      </xacro:body>
-     <visual>
+     <!-- <visual>
         <geometry>
             <box size="0.010 0.03 0.03"/>
         </geometry>
@@ -260,7 +279,7 @@
         <geometry>
             <box size="0.010 0.03 0.03"/>
         </geometry>
-     </collision>
+     </collision> -->
     </link>
     
     <joint name="rgb_camera_joint" type="fixed">
@@ -291,7 +310,7 @@
     
     
     <joint name="rgb_camera_link_optical_frame_joint" type="fixed">
-      <origin xyz="0.0051 0 0" rpy="-1.57 0.0 -1.57"/>
+      <origin xyz="0.0051 0 0" rpy="0.0 0.0 0.0"/>
       <parent link="rgb_camera_link"/>
       <child link="rgb_camera_link_optical_frame"/>
     </joint>
@@ -349,7 +368,7 @@
      </sensor>
     </gazebo>  
 
-    <gazebo reference="depth_camera_link_optical_frame">
+    <!-- <gazebo reference="depth_camera_link_optical_frame">
      <sensor name="depth_camera1" type="depth_camera">
         <camera>
             <segmentation_type>instance</segmentation_type>
@@ -368,7 +387,7 @@
         <visualize>true</visualize>
         <topic>depth_camera</topic>
      </sensor>
-    </gazebo> 
+    </gazebo>  -->
 
     <gazebo reference="right_caster_wheel">
      <mu1>0.001</mu1>
