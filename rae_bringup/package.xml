@@ -4,8 +4,8 @@
   <name>rae_bringup</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
-  <maintainer email="serafadam@gmail.com">root</maintainer>
-  <license>TODO: License declaration</license>
+  <maintainer email="adam.serafin@luxonis.com">Adam Serafin</maintainer>
+  <license>MIT</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
