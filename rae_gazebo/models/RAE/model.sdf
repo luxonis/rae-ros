@@ -1,7 +1,7 @@
 <?xml version='1.0' ?>
 <sdf version='1.9'>
     <model name='rae'>
-      <link name='base_frame'>
+      <link name='base_link'>
        <sensor name="imu_sensor" type="imu">
     		<always_on>1</always_on>
    		 <update_rate>1</update_rate>
@@ -20,7 +20,7 @@
             <izz>0.00084455000000000001</izz>
           </inertia>
         </inertial>
-        <collision name='base_frame_fixed_joint_lump__chassis_collision'>
+        <collision name='base_link_fixed_joint_lump__chassis_collision'>
           <pose>0.0307 0 0 1.57 -5.551115123125783e-17 1.57</pose>
           <geometry>
             <mesh>
@@ -29,7 +29,7 @@
             </mesh>
           </geometry>
         </collision>
-        <collision name='base_frame_fixed_joint_lump__left_caster_wheel_collision_1'>
+        <collision name='base_link_fixed_joint_lump__left_caster_wheel_collision_1'>
           <pose>0.0735 0.0445 -0.001 0 0 0</pose>
           <geometry>
             <mesh>
@@ -38,7 +38,7 @@
             </mesh>
           </geometry>
         </collision>
-        <collision name='base_frame_fixed_joint_lump__right_caster_wheel_collision_2'>
+        <collision name='base_link_fixed_joint_lump__right_caster_wheel_collision_2'>
           <pose>0.0735 -0.0445 -0.001 0 0 0</pose>
           <geometry>
             <mesh>
@@ -47,7 +47,7 @@
             </mesh>
           </geometry>
         </collision>
-        <visual name='base_frame_fixed_joint_lump__chassis_visual'>
+        <visual name='base_link_fixed_joint_lump__chassis_visual'>
           <pose>0.0307 0 0 1.57 -5.551115123125783e-17 1.57</pose>
           <geometry>
             <mesh>
@@ -60,7 +60,7 @@
             <ambient>0.125 0.125 0.125 1</ambient>
           </material>
         </visual>
-        <visual name='base_frame_fixed_joint_lump__left_caster_wheel_visual_1'>
+        <visual name='base_link_fixed_joint_lump__left_caster_wheel_visual_1'>
           <pose>0.0735 0.0445 -0.001 0 0 0</pose>
           <geometry>
             <mesh>
@@ -73,7 +73,7 @@
             <ambient>0.125 0.125 0.125 1</ambient>
           </material>
         </visual>
-        <visual name='base_frame_fixed_joint_lump__right_caster_wheel_visual_2'>
+        <visual name='base_link_fixed_joint_lump__right_caster_wheel_visual_2'>
           <pose>0.0735 -0.0445 -0.001 0 0 0</pose>
           <geometry>
             <mesh>
@@ -91,7 +91,7 @@
       </link>
       <joint name='left_wheel_hinge' type='revolute'>
         <pose>0 0 0 0 -0 0</pose>
-        <parent>base_frame</parent>
+        <parent>base_link</parent>
         <child>left_wheel</child>
         <axis>
           <xyz>-1 0 0</xyz>
@@ -147,7 +147,7 @@
       </link>
       <joint name='right_wheel_hinge' type='revolute'>
         <pose>0 -0 0 0 -0 0</pose>
-        <parent>base_frame</parent>
+        <parent>base_link</parent>
         <child>right_wheel</child>
         <axis>
           <xyz>1 0 0</xyz>

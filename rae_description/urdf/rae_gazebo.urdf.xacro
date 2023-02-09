@@ -1,58 +1,61 @@
 <?xml version="1.0"?>
-<robot name="rae" xmlns:xacro="http://ros.org/wiki/xacro">
-    <xacro:include filename="inertial_moment_calc.xacro"/>
-
-    <link name="base_frame">
-     <xacro:body mass="0.00001" d="0.0000010" h="0.000003" w="0.00003">
-          <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-     </xacro:body>
-    </link>
-    <gazebo reference="base_frame">
-     <sensor name="imu_sensor" type="imu">
+<robot name="rae"
+  xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:include filename="inertial_moment_calc.xacro"/>
+  <link name="base_footprint"/>
+  <joint name="dummy" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+    <origin rpy="0 0.0 0" xyz="0 0.0 0.0" />
+  </joint>
+  <link name="base_link">
+    <xacro:body mass="0.00001" d="0.0000010" h="0.000003" w="0.00003">
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+    </xacro:body>
+  </link>
+  <gazebo reference="base_link">
+    <sensor name="imu_sensor" type="imu">
       <always_on>1</always_on>
       <update_rate>1</update_rate>
       <visualize>true</visualize>
       <topic>imu</topic>
-     </sensor>
-    </gazebo>
-    <link name="chassis">
-      <xacro:body mass="0.360" d="0.125" h="0.028" w="0.1256">
-          <origin xyz="0 0.014 0.0" rpy="0.0 0.0 0.0"/>
-      </xacro:body>
+    </sensor>
+  </gazebo>
+  <link name="chassis">
+    <xacro:body mass="0.360" d="0.125" h="0.028" w="0.1256">
+      <origin xyz="0 0.014 0.0" rpy="0.0 0.0 0.0"/>
+    </xacro:body>
 
+    <collision>
+      <origin rpy="0.0 0.0 0.0" xyz="0 0.018 0"/>
+      <geometry>
+        <box size="0.1 0.015 0.1"/>
+      </geometry>
+    </collision>
 
+    <visual>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <geometry>
+        <mesh filename="package://rae_description/urdf/models/RAE.stl" scale="1.0 1.0 1.0"/>
+      </geometry>
+      <material name="mat">
+        <lighting>1</lighting>
+        <color rgba="0.1 0.1 0.1 1.0"/>
+        <shader type='pixel'/>
+        <emissive>0 0 0 1</emissive>
+      </material>
+      <transparency>0</transparency>
+      <cast_shadows>1</cast_shadows>
 
+    </visual>
+  </link>
+  <joint name="base_chassis_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="chassis"/>
+    <origin rpy="1.57 0.0 1.57" xyz="0.0307 0.0 0.0" />
+  </joint>
 
-      <collision>
-        <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
-        <geometry>
-          <mesh filename="package://rae_description/urdf/models/RAE.stl" scale="1.0 1.0 1.0"/>
-        </geometry>
-      </collision>
-
-      <visual>
-        <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
-        <geometry>
-          <mesh filename="package://rae_description/urdf/models/RAE.stl" scale="1.0 1.0 1.0"/>
-        </geometry>
-        <material name="mat">
-          <lighting>1</lighting>
-          <color rgba="0.1 0.1 0.1 1.0"/>
-          <shader type='pixel'/>
-          <emissive>0 0 0 1</emissive>
-        </material>
-        <transparency>0</transparency>
-        <cast_shadows>1</cast_shadows>
-      
-      </visual>
-    </link>
-    <joint name="base_chassis_joint" type="fixed">
-        <parent link="base_frame"/>
-        <child link="chassis"/>
-        <origin rpy="1.57 0.0 1.57" xyz="0.0307 0.0 0.0" />
-    </joint>
-
-   <!-- <link name="left_wheel">
+  <!-- <link name="left_wheel">
       <xacro:wheels mass="0.008" h="0.011" r="0.0119">
             <origin xyz="-0.005 0.0 0.0" rpy="0.0 0.0 0.0"/>
       </xacro:wheels>
@@ -71,77 +74,68 @@
         </geometry>
       </visual>
     </link> -->
-    <link name="left_wheel">
-      <xacro:wheels mass="0.008" h="0.011" r="0.0119">
-            <origin xyz="0.0 0.0 -0.0055" rpy="0.0 0.0 0.0"/>
-      </xacro:wheels>
+  <link name="left_wheel">
+    <xacro:wheels mass="0.008" h="0.011" r="0.0119">
+      <origin xyz="0.0 0.0 -0.0055" rpy="0.0 0.0 0.0"/>
+    </xacro:wheels>
 
 
-      <collision>
-        <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 -0.0055"/>
-        <geometry>
-            <cylinder length="0.011" radius="0.0119"/>
-        </geometry>
-      </collision>
+    <collision>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 -0.0055"/>
+      <geometry>
+        <cylinder length="0.011" radius="0.0119"/>
+      </geometry>
+    </collision>
 
-      <visual>
-        <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 -0.0055"/>
-        <geometry>
-            <cylinder length="0.011" radius="0.0119"/>
-        </geometry>
-      </visual>
-    </link>
+    <visual>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 -0.0055"/>
+      <geometry>
+        <cylinder length="0.011" radius="0.0119"/>
+      </geometry>
+    </visual>
+  </link>
 
-    <link name="right_wheel">
-      <!-- <xacro:wheels mass="0.008" h="0.011" r="0.0119">
+  <link name="right_wheel">
+    <!-- <xacro:wheels mass="0.008" h="0.011" r="0.0119">
             <origin xyz="0.0 0.0 -0.0055" rpy="0.0 0.0 0.0"/>
       </xacro:wheels> -->
 
     <inertial>
-      <origin
-        xyz="-0.046973 0.00518 -0.03067"
-        rpy="0 0 0" />
-      <mass
-        value="0.008" />
-      <inertia
-        ixx="2.8106E-07"
-        ixy="-3.5503E-14"
-        ixz="-3.4849E-10"
-        iyy="2.0307E-07"
-        iyz="3.6705E-14"
-        izz="2.0323E-07" />
+      <origin xyz="-0.046973 0.00518 -0.03067" rpy="0 0 0" />
+      <mass value="0.008" />
+      <inertia ixx="2.8106E-07" ixy="-3.5503E-14" ixz="-3.4849E-10" iyy="2.0307E-07" iyz="3.6705E-14" izz="2.0323E-07" />
     </inertial>
 
-      <collision>
-        <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 -0.0055"/>
-        <geometry>
-            <cylinder length="0.011" radius="0.0119"/>
-        </geometry>
-      </collision>
+    <collision>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 -0.0055"/>
+      <geometry>
+        <cylinder length="0.011" radius="0.0119"/>
+      </geometry>
+    </collision>
 
-      <visual>
-        <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 -0.0055"/>
-        <geometry>
-            <cylinder length="0.011" radius="0.0119"/>
-        </geometry>
-      </visual>
-    </link>
+    <visual>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 -0.0055"/>
+      <geometry>
+        <cylinder length="0.011" radius="0.0119"/>
+      </geometry>
+    </visual>
+  </link>
 
-    <joint name='left_wheel_hinge' type='continuous'>
-      <origin rpy="1.57 0.0 0.00 " xyz="0.0 0.042 0.0052"/>
-      <child  link="left_wheel"/>
-      <parent link="base_frame"/>
-      <axis rpy="0 0 0" xyz="0 0 -1"/>
-    </joint>
+  <joint name='left_wheel_hinge' type='continuous'>
+    <origin rpy="1.57 0.0 0.00 " xyz="0.0 0.042 0.0052"/>
+    <child link="left_wheel"/>
+    <parent link="base_link"/>
+    <axis rpy="0 0 0" xyz="0 0 -1"/>
+  </joint>
 
-    <joint name='right_wheel_hinge' type='continuous'>
-      <origin rpy="-1.57 0.0 0.0 " xyz="0.0 -0.042 0.0052"/>
-      <child  link="right_wheel"/>
-      <parent link="base_frame"/>
-      <axis rpy="0 0 0" xyz="0 0 1"/>
-    </joint>
+  <joint name='right_wheel_hinge' type='continuous'>
+    <origin rpy="-1.57 0.0 0.0 " xyz="0.0 -0.042 0.0052"/>
+    <child link="right_wheel"/>
+    <parent link="base_link"/>
+    <axis rpy="0 0 0" xyz="0 0 1"/>
+  </joint>
 
-   <!-- <link name="right_wheel">
+  <!-- <link name="right_wheel">
       <xacro:wheels mass="0.008" h="0.011" r="0.0119">
             <origin xyz="-0.005 0.0 0.0" rpy="0.0 0.0 0.0"/>
       </xacro:wheels>
@@ -163,114 +157,112 @@
 
 
 
-   <!-- <joint name='left_wheel_hinge' type='continuous'>
+  <!-- <joint name='left_wheel_hinge' type='continuous'>
       <origin rpy="0.0 0.0 -1.57 " xyz="0.0 0.0427 0.0052"/>
-      <child  link="left_wheel"/>
-      <parent link="base_frame"/>
+      <child link="left_wheel"/>
+      <parent link="base_link"/>
       <axis rpy="0 0 0" xyz="-1 0 0"/>
     </joint>
 
     <joint name='right_wheel_hinge' type='continuous'>
       <origin rpy="0.0 0.0 1.57 " xyz="0.0 -0.0427 0.0052"/>
-      <child  link="right_wheel"/>
-      <parent link="base_frame"/>
+      <child link="right_wheel"/>
+      <parent link="base_link"/>
       <axis rpy="0 0 0" xyz="1 0 0"/>
     </joint>-->
 
-    <link name="left_caster_wheel">
-      <xacro:caster_wheels mass="0.008" r="0.005">
-            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-      </xacro:caster_wheels>
-      <collision>
-        <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
-        <geometry>
-          <mesh filename="package://rae_description/urdf/models/caster-wheel.stl" scale="1.0 1.0 1.0"/>
-        </geometry>
-      </collision>
+  <link name="left_caster_wheel">
+    <xacro:caster_wheels mass="0.008" r="0.005">
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+    </xacro:caster_wheels>
+    <collision>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <geometry>
+        <sphere radius="0.006"/>
+      </geometry>
+    </collision>
 
-      <visual>
-        <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
-        <geometry>
-          <mesh filename="package://rae_description/urdf/models/caster-wheel.stl" scale="1.0 1.0 1.0"/>
-        </geometry>
-        <material name="mat">
-          <lighting>1</lighting>
-          <color rgba="1.0 1.0 1.0 1.0"/>
-          <shader type='pixel'/>
-          <emissive>0 0 0 1</emissive>
-        </material>
-        <transparency>0</transparency>
-        <cast_shadows>1</cast_shadows>
-      
-      </visual>
-    </link>
+    <visual>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <geometry>
+        <mesh filename="package://rae_description/urdf/models/caster-wheel.stl" scale="1.0 1.0 1.0"/>
+      </geometry>
+      <material name="mat">
+        <lighting>1</lighting>
+        <color rgba="1.0 1.0 1.0 1.0"/>
+        <shader type='pixel'/>
+        <emissive>0 0 0 1</emissive>
+      </material>
+      <transparency>0</transparency>
+      <cast_shadows>1</cast_shadows>
 
-    <joint name="base_left_caster_wheel" type="fixed">
-        <parent link="base_frame"/>
-        <child link="left_caster_wheel"/>
-        <origin rpy="0.0 0.0 0.0" xyz="0.0735 0.0445 -0.001" />
-    </joint>
+    </visual>
+  </link>
 
-    <link name="right_caster_wheel">
-      <xacro:caster_wheels mass="0.008" r="0.005">
-            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-      </xacro:caster_wheels>
-      <collision>
-        <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
-        <geometry>
-          <mesh filename="package://rae_description/urdf/models/caster-wheel.stl" scale="1.0 1.0 1.0"/>
-        </geometry>
-      </collision>
+  <joint name="base_left_caster_wheel" type="fixed">
+    <parent link="base_link"/>
+    <child link="left_caster_wheel"/>
+    <origin rpy="0.0 0.0 0.0" xyz="0.0735 0.0445 -0.001" />
+  </joint>
 
-      <visual>
-        <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
-        <geometry>
-          <mesh filename="package://rae_description/urdf/models/caster-wheel.stl" scale="1.0 1.0 1.0"/>
-        </geometry>
-        <material name="mat">
-          <lighting>1</lighting>
-          <color rgba="1.0 1.0 1.0 1.0"/>
-          <shader type='pixel'/>
-          <emissive>0 0 0 1</emissive>
-        </material>
-        <transparency>0</transparency>
-        <cast_shadows>1</cast_shadows>
-      
-      </visual>
-    </link>
+  <link name="right_caster_wheel">
+    <xacro:caster_wheels mass="0.008" r="0.005">
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+    </xacro:caster_wheels>
+    <collision>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <geometry>
+        <sphere radius="0.006"/>
+      </geometry>
+    </collision>
 
-    <joint name="base_right_caster_wheel" type="fixed">
-        <parent link="base_frame"/>
-        <child link="right_caster_wheel"/>
-        <origin rpy="0.0 0.0 0.0" xyz="0.0735 -0.0445 -0.001" />
-    </joint>
-    <gazebo>
-        <plugin
-                filename="libignition-gazebo-diff-drive-system.so"
-                name="ignition::gazebo::systems::DiffDrive">
-                <frame_id>odom</frame_id>
-                <child_frame_id>base_frame</child_frame_id>
-                <tf_topic>tf</tf_topic>
-                <publish_odom>true</publish_odom>
-                <publish_odom_tf>true</publish_odom_tf>
-                <publish_wheel_tf>true</publish_wheel_tf>
-                <odom_topic>odom</odom_topic>
-                <left_joint>left_wheel_hinge</left_joint>
-                <right_joint>right_wheel_hinge</right_joint>
-                <wheel_separation>0.0854</wheel_separation>
-                <!-- check correct wheel radius when you come back to the task -->
-                <wheel_radius>0.0119</wheel_radius>
-                <odom_publish_frequency>50</odom_publish_frequency>
-                <topic>cmd_vel</topic>
-            </plugin>
-       
-    </gazebo>
-    
-    <link name="rgb_camera_link">
-     <xacro:body mass="0.001" d="0.010" h="0.03" w="0.03">
-          <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-     </xacro:body>
-     <!-- <visual>
+    <visual>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <geometry>
+        <mesh filename="package://rae_description/urdf/models/caster-wheel.stl" scale="1.0 1.0 1.0"/>
+      </geometry>
+      <material name="mat">
+        <lighting>1</lighting>
+        <color rgba="1.0 1.0 1.0 1.0"/>
+        <shader type='pixel'/>
+        <emissive>0 0 0 1</emissive>
+      </material>
+      <transparency>0</transparency>
+      <cast_shadows>1</cast_shadows>
+
+    </visual>
+  </link>
+
+  <joint name="base_right_caster_wheel" type="fixed">
+    <parent link="base_link"/>
+    <child link="right_caster_wheel"/>
+    <origin rpy="0.0 0.0 0.0" xyz="0.0735 -0.0445 -0.001" />
+  </joint>
+  <gazebo>
+    <plugin filename="libignition-gazebo-diff-drive-system.so" name="ignition::gazebo::systems::DiffDrive">
+      <frame_id>odom</frame_id>
+      <child_frame_id>base_footprint</child_frame_id>
+      <tf_topic>tf</tf_topic>
+      <publish_odom>true</publish_odom>
+      <publish_odom_tf>true</publish_odom_tf>
+      <publish_wheel_tf>true</publish_wheel_tf>
+      <odom_topic>odom</odom_topic>
+      <left_joint>left_wheel_hinge</left_joint>
+      <right_joint>right_wheel_hinge</right_joint>
+      <wheel_separation>0.0854</wheel_separation>
+      <!-- check correct wheel radius when you come back to the task -->
+      <wheel_radius>0.0119</wheel_radius>
+      <odom_publish_frequency>50</odom_publish_frequency>
+      <topic>cmd_vel</topic>
+    </plugin>
+
+  </gazebo>
+
+  <link name="rgb_camera_link">
+    <xacro:body mass="0.001" d="0.010" h="0.03" w="0.03">
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+    </xacro:body>
+    <!-- <visual>
         <geometry>
             <box size="0.010 0.03 0.03"/>
         </geometry>
@@ -280,95 +272,97 @@
             <box size="0.010 0.03 0.03"/>
         </geometry>
      </collision> -->
-    </link>
-    
-    <joint name="rgb_camera_joint" type="fixed">
-    	<parent link="base_frame"/>
-    	<child link="rgb_camera_link"/>
-    	<origin xyz="0.09 0.0 0.025" rpy="0 0 0"/>
-    </joint>
-    
-    <link name="rgb_camera_link_optical_frame">
-     <xacro:body mass="0.00001" d="0.0000010" h="0.000003" w="0.00003">
-          <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-     </xacro:body>
+  </link>
 
-    </link>
+  <joint name="rgb_camera_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="rgb_camera_link"/>
+    <origin xyz="0.09 0.0 0.025" rpy="0 0 0"/>
+  </joint>
 
-    <link name="segmentation_camera_link_optical_frame">
-     <xacro:body mass="0.00001" d="0.0000010" h="0.000003" w="0.00003">
-          <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-     </xacro:body>
+  <link name="rgb_camera_link_optical_frame">
+    <xacro:body mass="0.00001" d="0.0000010" h="0.000003" w="0.00003">
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+    </xacro:body>
 
-    </link>
-    <link name="depth_camera_link_optical_frame">
-     <xacro:body mass="0.00001" d="0.0000010" h="0.000003" w="0.00003">
-          <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-     </xacro:body>
+  </link>
 
-    </link>
-    
-    
-    <joint name="rgb_camera_link_optical_frame_joint" type="fixed">
-      <origin xyz="0.0051 0 0" rpy="0.0 0.0 0.0"/>
-      <parent link="rgb_camera_link"/>
-      <child link="rgb_camera_link_optical_frame"/>
-    </joint>
+  <link name="segmentation_camera_link_optical_frame">
+    <xacro:body mass="0.00001" d="0.0000010" h="0.000003" w="0.00003">
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+    </xacro:body>
 
-    <joint name="segmentation_camera_link_optical_frame_joint" type="fixed">
-      <origin xyz="0.0051 0 0" rpy="0.0 0.0 0.0"/>
-      <parent link="rgb_camera_link"/>
-      <child link="segmentation_camera_link_optical_frame"/>
-    </joint>
+  </link>
+  <link name="depth_camera_link_optical_frame">
+    <xacro:body mass="0.00001" d="0.0000010" h="0.000003" w="0.00003">
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+    </xacro:body>
 
-    <joint name="depth_camera_link_optical_frame_joint" type="fixed">
-      <origin xyz="0.0051 0 0" rpy="0.0 0.0 0.0"/>
-      <parent link="rgb_camera_link"/>
-      <child link="depth_camera_link_optical_frame"/>
-    </joint>
+  </link>
 
-    <gazebo reference="rgb_camera_link_optical_frame">
-     <sensor name="rgbd_camera" type="rgbd_camera">
-        <camera>
-            <horizontal_fov>1.047</horizontal_fov>
-            <image>
-                <width>320</width>
-                <height>240</height>
-            </image>
-            <clip>
-                <near>0.1</near>
-                <far>100</far>
-            </clip>
-        </camera>
-        <always_on>1</always_on>
-        <update_rate>30</update_rate>
-        <visualize>true</visualize>
-        <topic>camera</topic>
-     </sensor>
-    </gazebo>  
 
-    <gazebo reference="segmentation_camera_link_optical_frame">
-     <sensor name="segmentation_camera" type="segmentation">
-        <camera>
-            <segmentation_type>instance</segmentation_type>
-            <horizontal_fov>1.047</horizontal_fov>
-            <image>
-                <width>320</width>
-                <height>240</height>
-            </image>
-            <clip>
-                <near>0.1</near>
-                <far>100</far>
-            </clip>
-        </camera>
-        <always_on>1</always_on>
-        <update_rate>30</update_rate>
-        <visualize>true</visualize>
-        <topic>segmentation</topic>
-     </sensor>
-    </gazebo>  
+  <joint name="rgb_camera_link_optical_frame_joint" type="fixed">
+    <origin xyz="0.0051 0 0" rpy="0.0 0.0 0.0"/>
+    <parent link="rgb_camera_link"/>
+    <child link="rgb_camera_link_optical_frame"/>
+  </joint>
 
-    <!-- <gazebo reference="depth_camera_link_optical_frame">
+  <joint name="segmentation_camera_link_optical_frame_joint" type="fixed">
+    <origin xyz="0.0051 0 0" rpy="0.0 0.0 0.0"/>
+    <parent link="rgb_camera_link"/>
+    <child link="segmentation_camera_link_optical_frame"/>
+  </joint>
+
+  <joint name="depth_camera_link_optical_frame_joint" type="fixed">
+    <origin xyz="0.0051 0 0" rpy="0.0 0.0 0.0"/>
+    <parent link="rgb_camera_link"/>
+    <child link="depth_camera_link_optical_frame"/>
+  </joint>
+
+  <gazebo reference="rgb_camera_link_optical_frame">
+    <sensor name="rgbd_camera" type="rgbd_camera">
+      <camera>
+        <horizontal_fov>1.047</horizontal_fov>
+        <image>
+          <width>320</width>
+          <height>240</height>
+        </image>
+        <clip>
+          <near>0.1</near>
+          <far>100</far>
+        </clip>
+      </camera>
+      <ignition_frame_id>rgb_camera_link_optical_frame</ignition_frame_id>
+      <always_on>1</always_on>
+      <update_rate>30</update_rate>
+      <visualize>true</visualize>
+      <topic>camera</topic>
+    </sensor>
+  </gazebo>
+
+  <gazebo reference="segmentation_camera_link_optical_frame">
+    <sensor name="segmentation_camera" type="segmentation">
+      <camera>
+        <segmentation_type>instance</segmentation_type>
+        <horizontal_fov>1.047</horizontal_fov>
+        <image>
+          <width>320</width>
+          <height>240</height>
+        </image>
+        <clip>
+          <near>0.1</near>
+          <far>100</far>
+        </clip>
+      </camera>
+      <ignition_frame_id>segmentation_camera_link_optical_frame</ignition_frame_id>
+      <always_on>1</always_on>
+      <update_rate>30</update_rate>
+      <visualize>true</visualize>
+      <topic>segmentation</topic>
+    </sensor>
+  </gazebo>
+
+  <!-- <gazebo reference="depth_camera_link_optical_frame">
      <sensor name="depth_camera1" type="depth_camera">
         <camera>
             <segmentation_type>instance</segmentation_type>
@@ -389,28 +383,28 @@
      </sensor>
     </gazebo>  -->
 
-    <gazebo reference="right_caster_wheel">
-     <mu1>0.001</mu1>
-     <mu2>0.001</mu2>
-    </gazebo>
+  <gazebo reference="right_caster_wheel">
+    <mu1>0.001</mu1>
+    <mu2>0.001</mu2>
+  </gazebo>
 
-    <gazebo reference="left_caster_wheel">
-     <mu1>0.001</mu1>
-     <mu2>0.001</mu2>
-    </gazebo>
-    
-    <gazebo reference="right_wheel">
-     <mu1>100.0</mu1>
-     <mu2>100.0</mu2>
-    </gazebo>
+  <gazebo reference="left_caster_wheel">
+    <mu1>0.001</mu1>
+    <mu2>0.001</mu2>
+  </gazebo>
 
-    <gazebo reference="left_wheel">
-     <mu1>100.0</mu1>
-     <mu2>100.0</mu2>
-    </gazebo>
+  <gazebo reference="right_wheel">
+    <mu1>100.0</mu1>
+    <mu2>100.0</mu2>
+  </gazebo>
+
+  <gazebo reference="left_wheel">
+    <mu1>100.0</mu1>
+    <mu2>100.0</mu2>
+  </gazebo>
 
 
-    <!-- <gazebo reference="base_left_caster_wheel">
+  <!-- <gazebo reference="base_left_caster_wheel">
      <preserveFixedJoint>true</preserveFixedJoint>
     </gazebo>
     
