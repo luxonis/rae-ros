@@ -14,7 +14,7 @@ import os
 
 def generate_launch_description():
     bringup_dir = get_package_share_directory('rae_description')
-    xacro_path = os.path.join(bringup_dir, 'urdf', 'rae_gazebo.urdf.xacro')
+    xacro_path = os.path.join(bringup_dir, 'urdf', 'rae.urdf.xacro')
 
 
     rsp_node =  Node(

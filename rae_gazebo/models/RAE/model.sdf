@@ -89,7 +89,7 @@
         <pose>0 0 0 0 -0 0</pose>
         <enable_wind>false</enable_wind>
       </link>
-      <joint name='left_wheel_hinge' type='revolute'>
+      <joint name='left_wheel_joint' type='revolute'>
         <pose>0 0 0 0 -0 0</pose>
         <parent>base_link</parent>
         <child>left_wheel</child>
@@ -145,7 +145,7 @@
         </visual>
         <enable_wind>false</enable_wind>
       </link>
-      <joint name='right_wheel_hinge' type='revolute'>
+      <joint name='right_wheel_joint' type='revolute'>
         <pose>0 -0 0 0 -0 0</pose>
         <parent>base_link</parent>
         <child>right_wheel</child>
@@ -203,8 +203,8 @@
       </link>
       <static>false</static>
       <plugin name='ignition::gazebo::systems::DiffDrive' filename='libignition-gazebo-diff-drive-system.so'>
-        <left_joint>left_wheel_hinge</left_joint>
-        <right_joint>right_wheel_hinge</right_joint>
+        <left_joint>left_wheel_joint</left_joint>
+        <right_joint>right_wheel_joint</right_joint>
         <wheel_separation>0.0854</wheel_separation>
         <wheel_radius>0.01</wheel_radius>
         <odom_publish_frequency>1</odom_publish_frequency>
