@@ -22,86 +22,99 @@
 
 namespace rae_hw
 {
-hardware_interface::CallbackReturn RaeHW::on_init(
-  const hardware_interface::HardwareInfo & info)
-{
-  if (hardware_interface::SystemInterface::on_init(info) != CallbackReturn::SUCCESS) {
-    return CallbackReturn::ERROR;
+  hardware_interface::CallbackReturn RaeHW::on_init(
+      const hardware_interface::HardwareInfo &info)
+  {
+    if (hardware_interface::SystemInterface::on_init(info) != CallbackReturn::SUCCESS)
+    {
+      return CallbackReturn::ERROR;
+    }
+    // TODO(anyone): read parameters and initialize the hardware
+
+    leftWheelName = info_.hardware_parameters["left_wheel_name"];
+    rightWheelName = info_.hardware_parameters["right_wheel_name"];
+    motorL = std::make_unique<RaeMotor>(leftWheelName, std::stoi(info_.hardware_parameters["enA"]), std::stoi(info_.hardware_parameters["phA"]));
+    motorR = std::make_unique<RaeMotor>(rightWheelName, std::stoi(info_.hardware_parameters["enB"]), std::stoi(info_.hardware_parameters["phB"]));
+    return CallbackReturn::SUCCESS;
   }
-  // TODO(anyone): read parameters and initialize the hardware
-  hw_states_.resize(info_.joints.size(), std::numeric_limits<double>::quiet_NaN());
-  hw_commands_.resize(info_.joints.size(), std::numeric_limits<double>::quiet_NaN());
 
-  return CallbackReturn::SUCCESS;
-}
+  hardware_interface::CallbackReturn RaeHW::on_configure(
+      const rclcpp_lifecycle::State & /*previous_state*/)
+  {
+    // TODO(anyone): prepare the robot to be ready for read calls and write calls of some interfaces
+    motorL->run();
+    motorR->run();
+    return CallbackReturn::SUCCESS;
+  }
 
-hardware_interface::CallbackReturn RaeHW::on_configure(
-  const rclcpp_lifecycle::State & /*previous_state*/)
-{
-  // TODO(anyone): prepare the robot to be ready for read calls and write calls of some interfaces
+  std::vector<hardware_interface::StateInterface> RaeHW::export_state_interfaces()
+  {
+    std::vector<hardware_interface::StateInterface> state_interfaces;
 
-  return CallbackReturn::SUCCESS;
-}
-
-std::vector<hardware_interface::StateInterface> RaeHW::export_state_interfaces()
-{
-  std::vector<hardware_interface::StateInterface> state_interfaces;
-  for (size_t i = 0; i < info_.joints.size(); ++i) {
     state_interfaces.emplace_back(hardware_interface::StateInterface(
-      // TODO(anyone): insert correct interfaces
-      info_.joints[i].name, hardware_interface::HW_IF_POSITION, &hw_states_[i]));
+        leftWheelName, hardware_interface::HW_IF_POSITION, &leftPos));
+    state_interfaces.emplace_back(hardware_interface::StateInterface(
+        rightWheelName, hardware_interface::HW_IF_POSITION, &rightPos));
+
+    state_interfaces.emplace_back(hardware_interface::StateInterface(
+        leftWheelName, hardware_interface::HW_IF_VELOCITY, &leftVel));
+
+    state_interfaces.emplace_back(hardware_interface::StateInterface(
+        rightWheelName, hardware_interface::HW_IF_VELOCITY, &rightVel));
+
+    return state_interfaces;
   }
 
-  return state_interfaces;
-}
-
-std::vector<hardware_interface::CommandInterface> RaeHW::export_command_interfaces()
-{
-  std::vector<hardware_interface::CommandInterface> command_interfaces;
-  for (size_t i = 0; i < info_.joints.size(); ++i) {
+  std::vector<hardware_interface::CommandInterface> RaeHW::export_command_interfaces()
+  {
+    std::vector<hardware_interface::CommandInterface> command_interfaces;
     command_interfaces.emplace_back(hardware_interface::CommandInterface(
-      // TODO(anyone): insert correct interfaces
-      info_.joints[i].name, hardware_interface::HW_IF_POSITION, &hw_commands_[i]));
+        leftWheelName, hardware_interface::HW_IF_VELOCITY, &leftMotorCMD));
+        command_interfaces.emplace_back(hardware_interface::CommandInterface(
+        rightWheelName, hardware_interface::HW_IF_VELOCITY, &rightMotorCMD));
+
+    return command_interfaces;
   }
 
-  return command_interfaces;
-}
+  hardware_interface::CallbackReturn RaeHW::on_activate(
+      const rclcpp_lifecycle::State & /*previous_state*/)
+  {
+    // TODO(anyone): prepare the robot to receive commands
+    return CallbackReturn::SUCCESS;
+  }
 
-hardware_interface::CallbackReturn RaeHW::on_activate(
-  const rclcpp_lifecycle::State & /*previous_state*/)
-{
-  // TODO(anyone): prepare the robot to receive commands
+  hardware_interface::CallbackReturn RaeHW::on_deactivate(
+      const rclcpp_lifecycle::State & /*previous_state*/)
+  {
+    // TODO(anyone): prepare the robot to stop receiving commands
+    motorL->stop();
+    motorR->stop();
+    return CallbackReturn::SUCCESS;
+  }
 
-  return CallbackReturn::SUCCESS;
-}
+  hardware_interface::return_type RaeHW::read(
+      const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/)
+  {
+    // TODO(anyone): read robot states
+    leftPos=0;
+    rightPos=0;
+    leftVel=0;
+    rightVel=0;
+    return hardware_interface::return_type::OK;
+  }
 
-hardware_interface::CallbackReturn RaeHW::on_deactivate(
-  const rclcpp_lifecycle::State & /*previous_state*/)
-{
-  // TODO(anyone): prepare the robot to stop receiving commands
+  hardware_interface::return_type RaeHW::write(
+      const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/)
+  {
+    // TODO(anyone): write robot's commands'
+    motorL->motorSet(leftMotorCMD);
+    motorR->motorSet(rightMotorCMD);
+    return hardware_interface::return_type::OK;
+  }
 
-  return CallbackReturn::SUCCESS;
-}
-
-hardware_interface::return_type RaeHW::read(
-  const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/)
-{
-  // TODO(anyone): read robot states
-
-  return hardware_interface::return_type::OK;
-}
-
-hardware_interface::return_type RaeHW::write(
-  const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/)
-{
-  // TODO(anyone): write robot's commands'
-
-  return hardware_interface::return_type::OK;
-}
-
-}  // namespace rae_hw
+} // namespace rae_hw
 
 #include "pluginlib/class_list_macros.hpp"
 
 PLUGINLIB_EXPORT_CLASS(
-  rae_hw::RaeHW, hardware_interface::SystemInterface)
+    rae_hw::RaeHW, hardware_interface::SystemInterface)

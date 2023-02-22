@@ -4,13 +4,19 @@ project(rae_hw)
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
-
+set(BUILD_SHARED_LIBS ON)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(hardware_interface REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_lifecycle REQUIRED)
+
+find_library(GPIOD_LIBRARY NAMES libgpiodcxx.so)
+if(NOT GPIOD_LIBRARY)
+  message(FATAL_ERROR "gpiod library not found. Install apt install libgpiod-dev")
+endif()
 
 add_library(
   rae_hw
@@ -29,6 +35,8 @@ ament_target_dependencies(
   rclcpp
   rclcpp_lifecycle
 )
+target_link_libraries(rae_hw ${GPIOD_LIBRARY})
+
 # prevent pluginlib from using boost
 target_compile_definitions(rae_hw PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
 
@@ -70,7 +78,7 @@ if(BUILD_TESTING)
     ros2_control_test_assets
   )
 endif()
-
+install(DIRECTORY launch config DESTINATION share/${PROJECT_NAME})
 ament_export_include_directories(
   include
 )
