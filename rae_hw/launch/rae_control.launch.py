@@ -43,6 +43,7 @@ def generate_launch_description():
         package='controller_manager',
         executable='ros2_control_node',
         parameters=[robot_description, test_controller],
+        remappings=[('/diff_controller/cmd_vel_unstamped', 'cmd_vel')],
         output={
           'stdout': 'screen',
           'stderr': 'screen',

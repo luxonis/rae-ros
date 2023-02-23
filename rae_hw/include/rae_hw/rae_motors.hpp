@@ -29,11 +29,11 @@ private:
     std::thread motorThread, encoderThread;
     void pwmMotor();
     void readEncoders();
-
+    uint32_t speedToPWM(float speed);
 
    public:
     RaeMotor(const std::string name, int enPinNum, int phPinNum);
-
+    ~RaeMotor();
     void motorSet(float speed);
 
     void run();
