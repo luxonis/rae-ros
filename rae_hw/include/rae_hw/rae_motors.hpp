@@ -23,7 +23,7 @@ private:
     volatile uint32_t dutyTarget = 0;
     volatile uint32_t dutyTrue = 0;
     std::atomic<bool> _running{true};
-    gpiod::line enPin;
+    gpiod::line pwmPin;
     gpiod::line phPin;
     bool direction = 0;
     std::thread motorThread, encoderThread;
@@ -32,7 +32,7 @@ private:
     uint32_t speedToPWM(float speed);
 
    public:
-    RaeMotor(const std::string name, int enPinNum, int phPinNum);
+    RaeMotor(const std::string& name, const std::string& chipName, int pwmPinNum, int phPinNum);
     ~RaeMotor();
     void motorSet(float speed);
 

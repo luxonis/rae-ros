@@ -33,8 +33,8 @@ namespace rae_hw
 
     leftWheelName = info_.hardware_parameters["left_wheel_name"];
     rightWheelName = info_.hardware_parameters["right_wheel_name"];
-    motorL = std::make_unique<RaeMotor>(leftWheelName, std::stoi(info_.hardware_parameters["enA"]), std::stoi(info_.hardware_parameters["phA"]));
-    motorR = std::make_unique<RaeMotor>(rightWheelName, std::stoi(info_.hardware_parameters["enB"]), std::stoi(info_.hardware_parameters["phB"]));
+    motorL = std::make_unique<RaeMotor>(leftWheelName, info_.hardware_parameters["chip_name"], std::stoi(info_.hardware_parameters["pwmA"]), std::stoi(info_.hardware_parameters["phA"]));
+    motorR = std::make_unique<RaeMotor>(rightWheelName, info_.hardware_parameters["chip_name"], std::stoi(info_.hardware_parameters["pwmB"]), std::stoi(info_.hardware_parameters["phB"]));
     return CallbackReturn::SUCCESS;
   }
 

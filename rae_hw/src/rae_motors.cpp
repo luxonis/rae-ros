@@ -2,12 +2,12 @@
 
 namespace rae_hw
 {
-    RaeMotor::RaeMotor(const std::string name, int enPinNum, int phPinNum)
+    RaeMotor::RaeMotor(const std::string& name, const std::string& chipName, int pwmPinNum, int phPinNum)
     {
-        gpiod::chip chip("gpiochip0");
-        enPin = chip.get_line(enPinNum);
+        gpiod::chip chip(chipName);
+        pwmPin = chip.get_line(pwmPinNum);
         phPin = chip.get_line(phPinNum);
-        enPin.request({name+"_en", gpiod::line_request::DIRECTION_OUTPUT, 0}, 0);
+        pwmPin.request({name+"_en", gpiod::line_request::DIRECTION_OUTPUT, 0}, 0);
         phPin.request({name+"_ph", gpiod::line_request::DIRECTION_OUTPUT, 0}, 0);
     }
     RaeMotor::~RaeMotor(){
@@ -18,10 +18,10 @@ namespace rae_hw
         {
             if (dutyTrue)
             {
-                enPin.set_value(1);
+                pwmPin.set_value(1);
             }
             usleep(dutyTrue);
-            enPin.set_value(0);
+            pwmPin.set_value(0);
             usleep((1000 - dutyTrue));
             dutyTrue = dutyTarget;
         }
@@ -81,8 +81,8 @@ namespace rae_hw
     {
         _running = false;
         motorThread.join();
-        enPin.set_value(0);
-        enPin.release();
+        pwmPin.set_value(0);
+        pwmPin.release();
         phPin.set_value(0);
         phPin.release();
     }
