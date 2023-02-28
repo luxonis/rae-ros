@@ -23,8 +23,8 @@ private:
     volatile uint32_t dutyTarget = 0;
     volatile uint32_t dutyTrue = 0;
     std::atomic<bool> _running{true};
-    gpiod::line pwmPin;
-    gpiod::line phPin;
+    int pwmPin;
+    int phPin;
     bool direction = 0;
     std::thread motorThread, encoderThread;
     void pwmMotor();

@@ -58,6 +58,10 @@ public:
     const rclcpp_lifecycle::State & previous_state) override;
 
   TEMPLATES__ROS2_CONTROL__VISIBILITY_PUBLIC
+  hardware_interface::CallbackReturn on_shutdown(
+    const rclcpp_lifecycle::State & previous_state) override;
+
+  TEMPLATES__ROS2_CONTROL__VISIBILITY_PUBLIC
   hardware_interface::return_type read(
     const rclcpp::Time & time, const rclcpp::Duration & period) override;
 
@@ -68,6 +72,7 @@ public:
 private:
   std::unique_ptr<RaeMotor> motorL, motorR;
   double leftMotorCMD, rightMotorCMD;
+  int pwmA, pwmB, phA, phB;
   double leftPos, rightPos, leftVel, rightVel;
   std::string leftWheelName, rightWheelName;
 };
