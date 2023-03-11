@@ -2,10 +2,11 @@
 
 namespace rae_hw
 {
-    RaeMotor::RaeMotor(const std::string &name, const std::string &chipName, int pwmPinNum, int phPinNum)
+    RaeMotor::RaeMotor(const std::string &name, const std::string &chipName, int pwmPinNum, int phPinNum, bool reversePhPinLogic)
     {
         pwmPin = pwmPinNum;
         phPin = phPinNum;
+        reversePhPinLogic_ = reversePhPinLogic;
     }
     RaeMotor::~RaeMotor()
     {
@@ -34,7 +35,7 @@ namespace rae_hw
     }
     void RaeMotor::motorSet(float speed)
     {
-        bool _direction = speed > 0.0;
+        bool _direction = (speed >= 0) ^ reversePhPinLogic_;
         uint32_t speedMil = speedToPWM(speed);
         if (_direction == direction)
         {

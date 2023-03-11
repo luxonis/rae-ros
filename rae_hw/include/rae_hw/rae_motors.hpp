@@ -30,9 +30,9 @@ private:
     void pwmMotor();
     void readEncoders();
     uint32_t speedToPWM(float speed);
-
+    bool reversePhPinLogic_ = false;
    public:
-    RaeMotor(const std::string& name, const std::string& chipName, int pwmPinNum, int phPinNum);
+    RaeMotor(const std::string& name, const std::string& chipName, int pwmPinNum, int phPinNum, bool reversePhPinLogic);
     ~RaeMotor();
     void motorSet(float speed);
 

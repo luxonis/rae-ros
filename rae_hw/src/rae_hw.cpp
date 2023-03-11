@@ -40,8 +40,8 @@ namespace rae_hw
     if(phA < 0 || phB < 0 || pwmA < 0 || pwmB < 0) {
         throw std::runtime_error("Couldn't open required GPIOs to control the motors\n");
     }
-    motorL = std::make_unique<RaeMotor>(leftWheelName, info_.hardware_parameters["chip_name"], pwmA, phA);
-    motorR = std::make_unique<RaeMotor>(rightWheelName, info_.hardware_parameters["chip_name"], pwmB, phB);
+    motorL = std::make_unique<RaeMotor>(leftWheelName, info_.hardware_parameters["chip_name"], pwmA, phA, false);
+    motorR = std::make_unique<RaeMotor>(rightWheelName, info_.hardware_parameters["chip_name"], pwmB, phB, true);
     return CallbackReturn::SUCCESS;
   }
 
