@@ -39,5 +39,5 @@ RUN echo "if [ -f ${WS}/install/setup.zsh ]; then source ${WS}/install/setup.zsh
 RUN echo 'eval "$(register-python-argcomplete3 ros2)"' >> $HOME/.zshrc
 RUN echo 'eval "$(register-python-argcomplete3 colcon)"' >> $HOME/.zshrc
 RUN echo "if [ -f ${WS}/install/setup.bash ]; then source ${WS}/install/setup.bash; fi" >> $HOME/.bashrc
-ENTRYPOINT [ "/ws/src/depthai-ros/entrypoint.sh" ]
+ENTRYPOINT [ "/ws/src/rae/entrypoint.sh" ]
 CMD ["zsh"]
