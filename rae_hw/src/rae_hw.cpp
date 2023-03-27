@@ -33,8 +33,15 @@ namespace rae_hw
 
     leftWheelName = info_.hardware_parameters["left_wheel_name"];
     rightWheelName = info_.hardware_parameters["right_wheel_name"];
-    motorL = std::make_unique<RaeMotor>(leftWheelName, info_.hardware_parameters["chip_name"], std::stoi(info_.hardware_parameters["pwmA"]), std::stoi(info_.hardware_parameters["phA"]));
-    motorR = std::make_unique<RaeMotor>(rightWheelName, info_.hardware_parameters["chip_name"], std::stoi(info_.hardware_parameters["pwmB"]), std::stoi(info_.hardware_parameters["phB"]));
+    phA = open("/sys/class/gpio/gpio473/value", O_WRONLY);
+    phB = open("/sys/class/gpio/gpio477/value", O_WRONLY);
+    pwmA = open("/sys/class/gpio/gpio451/value", O_WRONLY);
+    pwmB = open("/sys/class/gpio/gpio452/value", O_WRONLY);
+    if(phA < 0 || phB < 0 || pwmA < 0 || pwmB < 0) {
+        throw std::runtime_error("Couldn't open required GPIOs to control the motors\n");
+    }
+    motorL = std::make_unique<RaeMotor>(leftWheelName, info_.hardware_parameters["chip_name"], pwmA, phA, false);
+    motorR = std::make_unique<RaeMotor>(rightWheelName, info_.hardware_parameters["chip_name"], pwmB, phB, true);
     return CallbackReturn::SUCCESS;
   }
 
@@ -91,6 +98,25 @@ namespace rae_hw
     motorR->stop();
     return CallbackReturn::SUCCESS;
   }
+
+  hardware_interface::CallbackReturn RaeHW::on_shutdown(
+      const rclcpp_lifecycle::State & /*previous_state*/)
+  {
+    // TODO(anyone): prepare the robot to stop receiving commands
+    motorL->stop();
+    motorR->stop();
+    int ret = 0;
+    ret |= close(phA);
+    ret |= close(phB);
+    ret |= close(pwmA);
+    ret |= close(pwmB);
+    if(ret) {
+        printf("Couldn't close GPIOs\n");
+        return CallbackReturn::FAILURE;
+    }
+    return CallbackReturn::SUCCESS;
+  }
+
 
   hardware_interface::return_type RaeHW::read(
       const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/)

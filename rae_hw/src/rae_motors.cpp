@@ -2,38 +2,40 @@
 
 namespace rae_hw
 {
-    RaeMotor::RaeMotor(const std::string& name, const std::string& chipName, int pwmPinNum, int phPinNum)
+    RaeMotor::RaeMotor(const std::string &name, const std::string &chipName, int pwmPinNum, int phPinNum, bool reversePhPinLogic)
     {
-        gpiod::chip chip(chipName);
-        pwmPin = chip.get_line(pwmPinNum);
-        phPin = chip.get_line(phPinNum);
-        pwmPin.request({name+"_en", gpiod::line_request::DIRECTION_OUTPUT, 0}, 0);
-        phPin.request({name+"_ph", gpiod::line_request::DIRECTION_OUTPUT, 0}, 0);
+        pwmPin = pwmPinNum;
+        phPin = phPinNum;
+        reversePhPinLogic_ = reversePhPinLogic;
     }
-    RaeMotor::~RaeMotor(){
+    RaeMotor::~RaeMotor()
+    {
         stop();
     }
-    void RaeMotor::pwmMotor(){
+    void RaeMotor::pwmMotor()
+    {
         while (_running)
         {
             if (dutyTrue)
             {
-                pwmPin.set_value(1);
+                write(pwmPin, "1", 1);
             }
             usleep(dutyTrue);
-            pwmPin.set_value(0);
+            write(pwmPin, "0", 1);
             usleep((1000 - dutyTrue));
             dutyTrue = dutyTarget;
         }
     }
-    uint32_t RaeMotor::speedToPWM(float speed){
+
+    uint32_t RaeMotor::speedToPWM(float speed)
+    {
         // TODO: update with real values
         float clSpeed = std::clamp(speed, -1.0f, 1.0f);
         return static_cast<uint32_t>(std::abs(clSpeed) * 1000.0);
     }
     void RaeMotor::motorSet(float speed)
     {
-        bool _direction = speed > 0.0;
+        bool _direction = (speed >= 0) ^ reversePhPinLogic_;
         uint32_t speedMil = speedToPWM(speed);
         if (_direction == direction)
         {
@@ -51,11 +53,11 @@ namespace rae_hw
             direction = _direction;
             if (direction)
             {
-                phPin.set_value(1);
+                write(phPin, "1", 1);
             }
             else
             {
-                phPin.set_value(0);
+                write(phPin, "0", 1);
             }
 
             // Set speed
@@ -69,11 +71,11 @@ namespace rae_hw
         motorThread = std::thread(&RaeMotor::pwmMotor, this);
         if (direction)
         {
-            phPin.set_value(1);
+            write(phPin, "1", 1);
         }
         else
         {
-            phPin.set_value(0);
+            write(phPin, "0", 1);
         }
     }
 
@@ -81,11 +83,6 @@ namespace rae_hw
     {
         _running = false;
         motorThread.join();
-        pwmPin.set_value(0);
-        pwmPin.release();
-        phPin.set_value(0);
-        phPin.release();
     }
-
 
 }
