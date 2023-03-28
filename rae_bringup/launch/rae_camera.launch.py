@@ -19,12 +19,11 @@ def launch_setup(context, *args, **kwargs):
                 os.path.join(depthai_prefix, 'launch', 'camera.launch.py')),
             launch_arguments={"name": name,
                               "params_file": params_file}.items())
-
     ]
 
 
 def generate_launch_description():
-    rae_prefix = get_package_share_directory("depthai_ros_driver")
+    rae_prefix = get_package_share_directory("rae_bringup")
     declared_arguments = [
         DeclareLaunchArgument("name", default_value="oak"),
         DeclareLaunchArgument("params_file", default_value=os.path.join(rae_prefix, 'config', 'camera.yaml')),

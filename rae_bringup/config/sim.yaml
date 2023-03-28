@@ -419,3 +419,68 @@ slam_toolbox:
     minimum_angle_penalty: 0.9
     minimum_distance_penalty: 0.5
     use_response_expansion: true
+cliff_detector:
+  ros__parameters:
+    output_frame_id: chassis
+    rate: 10
+    range_min: 0.01
+    range_max: 20.0
+    sensor_mount_height: 0.05
+    sensor_tilt_angle: -2.0
+
+    publish_depth: true
+    cam_model_update: false
+    used_depth_height: 240
+    block_size: 2
+    block_points_thresh: 3
+    depth_img_step_row: 8
+    depth_img_step_col: 8
+    ground_margin: 0.01
+depth_sensor_pose:
+  ros__parameters:
+    range_min: 0.5
+    range_max: 8.0
+    mount_height_min: 0.7
+    mount_height_max: 1.0
+    tilt_angle_min: 5.0
+    tilt_angle_max: 35.0
+
+    cam_model_update: false
+    used_depth_height: 240
+    depth_img_step_row: 8
+    depth_img_step_col: 8
+
+    ground_max_points: 2500
+    ransac_max_iter: 2000
+    ransac_dist_thresh: 0.001
+
+    publish_dbg_info: true
+laserscan_kinect:
+  ros__parameters:
+    # Frame id for the output laserscan.
+    output_frame_id: rgb_camera_link_optical_frame
+    # Minimum sensor range (m).
+    range_min: 0.4
+    # Maximum sensor range (m).
+    range_max: 20.0
+    # Height of used part of depth img (px).
+    scan_height: 240
+    # Row step in depth image processing (px).
+    depth_img_row_step: 1
+    # If continously camera data update.
+    cam_model_update: false
+
+    # Height of sensor optical center mount (m).
+    sensor_mount_height: 0.8
+    # Sensor tilt angle compensation.
+    sensor_tilt_angle: 0
+    # Remove ground from scan.
+    ground_remove_en: true
+    # Ground margin (m).
+    ground_margin: 0.05
+    # Sensor tilt angle compensation.
+    tilt_compensation_en: true
+
+    publish_dbg_info: true
+    threads_num: 1
+    use_sim_time: true
