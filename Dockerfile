@@ -26,14 +26,15 @@ ENV WS=/ws
 RUN mkdir -p $WS/src
 RUN ls
 RUN if [ "$SIM" = "0" ] ; then cd .$WS/src && git clone --branch rae_pipeline_humble https://github.com/luxonis/depthai-ros.git ; fi
-
-RUN if [ "$SIM" = "0" ] ; then cd .$WS/ && rosdep init && rosdep update && rosdep install --from-paths src --ignore-src  -y --skip-keys depthai ; fi
+RUN rosdep init && rosdep update
+RUN if [ "$SIM" = "0" ] ; then cd .$WS/ && rosdep install --from-paths src --ignore-src  -y --skip-keys depthai ; fi
 RUN if [ "$SIM" = "0" ] ; then cd .$WS/ && . /opt/ros/${ROS_DISTRO}/setup.sh && colcon build --symlink-install ; fi
 
 FROM builder AS final
 COPY ./ .$WS/src/rae
 RUN if [ "$SIM" = "0" ] ; then rm -rf .$WS/src/rae/rae_gazebo ; fi
-RUN cd .$WS/ && rosdep init && rosdep update && rosdep install --from-paths src --ignore-src  -y --skip-keys depthai
+RUN cd .$WS/ && rosdep install --from-paths src --ignore-src  -y --skip-keys depthai
+RUN apt install -y gpiod
 
 RUN cd .$WS/ && . /opt/ros/${ROS_DISTRO}/setup.sh && colcon build --symlink-install
 RUN if [ "$USE_RVIZ" = "1" ] ; then echo "RVIZ ENABLED" && sudo apt install -y ros-${ROS_DISTRO}-rviz2 ros-${ROS_DISTRO}-rviz-imu-plugin ; else echo "RVIZ NOT ENABLED"; fi

@@ -33,15 +33,24 @@ namespace rae_hw
 
     leftWheelName = info_.hardware_parameters["left_wheel_name"];
     rightWheelName = info_.hardware_parameters["right_wheel_name"];
-    phA = open("/sys/class/gpio/gpio473/value", O_WRONLY);
-    phB = open("/sys/class/gpio/gpio477/value", O_WRONLY);
-    pwmA = open("/sys/class/gpio/gpio451/value", O_WRONLY);
-    pwmB = open("/sys/class/gpio/gpio452/value", O_WRONLY);
-    if(phA < 0 || phB < 0 || pwmA < 0 || pwmB < 0) {
-        throw std::runtime_error("Couldn't open required GPIOs to control the motors\n");
-    }
-    motorL = std::make_unique<RaeMotor>(leftWheelName, info_.hardware_parameters["chip_name"], pwmA, phA, false);
-    motorR = std::make_unique<RaeMotor>(rightWheelName, info_.hardware_parameters["chip_name"], pwmB, phB, true);
+    auto chipName = info_.hardware_parameters["chip_name"];
+    int pwmL = std::stoi(info_.hardware_parameters["pwmL"]);
+    int phL = std::stoi(info_.hardware_parameters["phL"]);
+    int enLA = std::stoi(info_.hardware_parameters["enLA"]);
+    int enLB = std::stoi(info_.hardware_parameters["enLB"]);
+    float encTicsPerRevL = std::stof(info_.hardware_parameters["encTicsPerRevL"]);
+    
+    motorL = std::make_unique<RaeMotor>(leftWheelName, 
+    chipName, pwmL, phL, enLA, enLB, encTicsPerRevL, false);
+
+    int pwmR = std::stoi(info_.hardware_parameters["pwmR"]);
+    int phR = std::stoi(info_.hardware_parameters["phR"]);
+    int enRA = std::stoi(info_.hardware_parameters["enRA"]);
+    int enRB = std::stoi(info_.hardware_parameters["enRB"]);
+    float encTicsPerRevR = std::stof(info_.hardware_parameters["encTicsPerRevR"]);
+    
+    motorR = std::make_unique<RaeMotor>(rightWheelName, 
+    chipName, pwmR, phR, enRA, enRB, encTicsPerRevR, true);
     return CallbackReturn::SUCCESS;
   }
 
@@ -77,7 +86,7 @@ namespace rae_hw
     std::vector<hardware_interface::CommandInterface> command_interfaces;
     command_interfaces.emplace_back(hardware_interface::CommandInterface(
         leftWheelName, hardware_interface::HW_IF_VELOCITY, &leftMotorCMD));
-        command_interfaces.emplace_back(hardware_interface::CommandInterface(
+    command_interfaces.emplace_back(hardware_interface::CommandInterface(
         rightWheelName, hardware_interface::HW_IF_VELOCITY, &rightMotorCMD));
 
     return command_interfaces;
@@ -105,27 +114,15 @@ namespace rae_hw
     // TODO(anyone): prepare the robot to stop receiving commands
     motorL->stop();
     motorR->stop();
-    int ret = 0;
-    ret |= close(phA);
-    ret |= close(phB);
-    ret |= close(pwmA);
-    ret |= close(pwmB);
-    if(ret) {
-        printf("Couldn't close GPIOs\n");
-        return CallbackReturn::FAILURE;
-    }
     return CallbackReturn::SUCCESS;
   }
-
 
   hardware_interface::return_type RaeHW::read(
       const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/)
   {
     // TODO(anyone): read robot states
-    leftPos=0;
-    rightPos=0;
-    leftVel=0;
-    rightVel=0;
+    leftPos = motorL->getEncVal();
+    rightPos = motorR->getEncVal();
     return hardware_interface::return_type::OK;
   }
 
