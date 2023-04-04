@@ -31,33 +31,36 @@ namespace rae_hw
     }
     // TODO(anyone): read parameters and initialize the hardware
 
+    prevTime = std::chrono::high_resolution_clock::now();
     leftWheelName = info_.hardware_parameters["left_wheel_name"];
     rightWheelName = info_.hardware_parameters["right_wheel_name"];
     auto chipName = info_.hardware_parameters["chip_name"];
+
     int pwmL = std::stoi(info_.hardware_parameters["pwmL"]);
     int phL = std::stoi(info_.hardware_parameters["phL"]);
     int enLA = std::stoi(info_.hardware_parameters["enLA"]);
     int enLB = std::stoi(info_.hardware_parameters["enLB"]);
     float encTicsPerRevL = std::stof(info_.hardware_parameters["encTicsPerRevL"]);
-    
-    motorL = std::make_unique<RaeMotor>(leftWheelName, 
-    chipName, pwmL, phL, enLA, enLB, encTicsPerRevL, false);
+    float maxVelL = std::stof(info_.hardware_parameters["maxVelL"]);
+
+    motorL = std::make_unique<RaeMotor>(leftWheelName,
+                                        chipName, pwmL, phL, enLA, enLB, encTicsPerRevL, maxVelL, true);
 
     int pwmR = std::stoi(info_.hardware_parameters["pwmR"]);
     int phR = std::stoi(info_.hardware_parameters["phR"]);
     int enRA = std::stoi(info_.hardware_parameters["enRA"]);
     int enRB = std::stoi(info_.hardware_parameters["enRB"]);
     float encTicsPerRevR = std::stof(info_.hardware_parameters["encTicsPerRevR"]);
-    
-    motorR = std::make_unique<RaeMotor>(rightWheelName, 
-    chipName, pwmR, phR, enRA, enRB, encTicsPerRevR, true);
+    float maxVelR = std::stof(info_.hardware_parameters["maxVelR"]);
+
+    motorR = std::make_unique<RaeMotor>(rightWheelName,
+                                        chipName, pwmR, phR, enRA, enRB, encTicsPerRevR, maxVelR, false);
     return CallbackReturn::SUCCESS;
   }
 
   hardware_interface::CallbackReturn RaeHW::on_configure(
       const rclcpp_lifecycle::State & /*previous_state*/)
   {
-    // TODO(anyone): prepare the robot to be ready for read calls and write calls of some interfaces
     motorL->run();
     motorR->run();
     return CallbackReturn::SUCCESS;
@@ -102,7 +105,6 @@ namespace rae_hw
   hardware_interface::CallbackReturn RaeHW::on_deactivate(
       const rclcpp_lifecycle::State & /*previous_state*/)
   {
-    // TODO(anyone): prepare the robot to stop receiving commands
     motorL->stop();
     motorR->stop();
     return CallbackReturn::SUCCESS;
@@ -111,7 +113,6 @@ namespace rae_hw
   hardware_interface::CallbackReturn RaeHW::on_shutdown(
       const rclcpp_lifecycle::State & /*previous_state*/)
   {
-    // TODO(anyone): prepare the robot to stop receiving commands
     motorL->stop();
     motorR->stop();
     return CallbackReturn::SUCCESS;
@@ -120,16 +121,21 @@ namespace rae_hw
   hardware_interface::return_type RaeHW::read(
       const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/)
   {
-    // TODO(anyone): read robot states
-    leftPos = motorL->getEncVal();
-    rightPos = motorR->getEncVal();
+    auto currTime = std::chrono::high_resolution_clock::now();
+    float currLeftPos = motorL->getPos();
+    float currRightPos = motorR->getPos();
+    float timeDiff = std::chrono::duration<float>(currTime - prevTime).count();
+    leftVel = (currLeftPos - leftPos) / timeDiff;
+    rightVel = (currRightPos - rightPos) / timeDiff;
+    prevTime = currTime;
+    leftPos = currLeftPos;
+    rightPos = currRightPos;
     return hardware_interface::return_type::OK;
   }
 
   hardware_interface::return_type RaeHW::write(
       const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/)
   {
-    // TODO(anyone): write robot's commands'
     motorL->motorSet(leftMotorCMD);
     motorR->motorSet(rightMotorCMD);
     return hardware_interface::return_type::OK;

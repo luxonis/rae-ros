@@ -10,27 +10,29 @@
       <param name="pwmR">20</param>
       <param name="phL">41</param>
       <param name="phR">45</param>
-      <param name="enAL">42</param>
-      <param name="enBL">43</param>
-      <param name="enAR">46</param>
-      <param name="enBR">47</param>
+      <param name="enLA">42</param>
+      <param name="enLB">43</param>
+      <param name="enRA">46</param>
+      <param name="enRB">47</param>
       <param name="encTicsPerRevL">187</param>
       <param name="encTicsPerRevR">187</param>
+      <param name="maxVelL">32</param>
+      <param name="maxVelR">32</param>
       <param name="loop_rate">30</param>
       <param name="chip_name">gpiochip0</param>
     </hardware>
     <joint name="left_wheel_joint">
       <command_interface name="velocity">
-        <param name="min">-1</param>
-        <param name="max">1</param>
+        <param name="min">-1.68</param>
+        <param name="max">1.68</param>
       </command_interface>
       <state_interface name="velocity"/>
       <state_interface name="position"/>
     </joint>
     <joint name="right_wheel_joint">
       <command_interface name="velocity">
-        <param name="min">-1</param>
-        <param name="max">1</param>
+        <param name="min">-1.68</param>
+        <param name="max">1.68</param>
       </command_interface>
       <state_interface name="velocity"/>
       <state_interface name="position"/>

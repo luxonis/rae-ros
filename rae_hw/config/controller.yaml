@@ -23,11 +23,11 @@ diff_controller:
 
     publish_rate: 50.0
     odom_frame_id: odom
-    base_frame_id: base_link
+    base_frame_id: base_footprint
     pose_covariance_diagonal : [0.001, 0.001, 0.001, 0.001, 0.001, 0.01]
     twist_covariance_diagonal: [0.001, 0.001, 0.001, 0.001, 0.001, 0.01]
 
-    open_loop: true
+    open_loop: false
     enable_odom_tf: true
 
     cmd_vel_timeout: 0.5
@@ -38,17 +38,17 @@ diff_controller:
     linear.x.has_velocity_limits: true
     linear.x.has_acceleration_limits: true
     linear.x.has_jerk_limits: false
-    linear.x.max_velocity: 1.0
-    linear.x.min_velocity: -1.0
+    linear.x.max_velocity: 0.36
+    linear.x.min_velocity: -0.36
     linear.x.max_acceleration: 1.0
     linear.x.max_jerk: 0.0
     linear.x.min_jerk: 0.0
 
     angular.z.has_velocity_limits: true
-    angular.z.has_acceleration_limits: true
+    angular.z.has_acceleration_limits: false
     angular.z.has_jerk_limits: false
-    angular.z.max_velocity: 1.0
-    angular.z.min_velocity: -1.0
+    angular.z.max_velocity: 2.5
+    angular.z.min_velocity: -2.5
     angular.z.max_acceleration: 1.0
     angular.z.min_acceleration: -1.0
     angular.z.max_jerk: 0.0

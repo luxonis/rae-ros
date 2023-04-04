@@ -17,6 +17,8 @@ import os
 from ament_index_python.packages import get_package_share_directory
 
 from launch import LaunchDescription
+from launch.actions import IncludeLaunchDescription
+from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 
 import xacro
@@ -39,6 +41,11 @@ def generate_launch_description():
         )
 
     return LaunchDescription([
+      IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(
+                os.path.join(get_package_share_directory('rae_description'), 'launch', 'rae_gazebo_desc_launch.py')),
+      launch_arguments={"sim": "false"}.items()
+      ),
       Node(
         package='controller_manager',
         executable='ros2_control_node',
@@ -53,5 +60,10 @@ def generate_launch_description():
             package="controller_manager",
             executable="spawner",
             arguments=["diff_controller", "-c", "/controller_manager"],
-        )
+        ),
+      Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["joint_state_broadcaster", "--controller-manager", "/controller_manager"],
+    )
     ])
