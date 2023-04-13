@@ -14,6 +14,10 @@
   <depend>ros_gz_sim</depend>
   <depend>ros_ign_gazebo</depend>
   <depend>joint_state_publisher</depend>
+
+  <!-- Adding dependency here to make docker image smaller for the robot -->
+  <depend>nav2_bringup</depend>
+
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
 

@@ -29,10 +29,19 @@ def launch_setup(context, *args, **kwargs):
         
     ),
     IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(pkg_rae_description, 'launch', 'rae_gazebo_desc_launch.py')),
-    ),
-    
+            PythonLaunchDescriptionSource(
+                os.path.join(get_package_share_directory('rae_description'), 'launch', 'rae_gazebo_desc_launch.py')),
+      launch_arguments={"sim": "true"}.items()
+      ),
+    Node(
+            package='depthimage_to_laserscan',
+            executable='depthimage_to_laserscan_node',
+            name='depthimage_to_laserscan_node',
+            remappings=[('depth', '/camera/depth_image'),
+                        ('depth_camera_info', '/camera/camera_info')],
+            parameters=[{'output_frame': 'rgb_camera_link_optical_frame',
+                        'range_max': 20.0}]
+        ),
     Node(
         package='ros_gz_sim',
         executable='create',
