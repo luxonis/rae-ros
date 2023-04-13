@@ -246,5 +246,4 @@
     <child link="rae_right_camera_optical_frame"/>
   </joint>
 
-
 </robot>
