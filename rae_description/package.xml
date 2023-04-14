@@ -3,7 +3,7 @@
 <package format="3">
   <name>rae_description</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
+  <description>RAE description package</description>
   <maintainer email="danilo.pejovic@luxonis.com">Danilo Pejovic</maintainer>
   <license>MIT</license>
 

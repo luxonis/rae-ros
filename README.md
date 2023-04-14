@@ -130,7 +130,7 @@ Parameters for differential driver controller are present in `rae_hw/config/cont
 
 
 ```
-ros2 launch rae_gazebo rae_simulation.launch.py 
+ros2 launch rae_bringup bringup.launch.py use_rviz:=true
 ```
 Launch file will spawn a basic world (with sun and ground plane) with RAE in the middle, along with ROS2 bridge which will send over Twist commands to the simulation. It may take a while for program to start for the first time since it will be downloading RAE model from Fuel. If you want to use local model you can point IGN_GAZEBO_RESOURCE_PATH enivroment variable towards models folder in this package. You can also add this model to any world (defined by a sdf file) with this code snippet, where pose defines a starting position:
 

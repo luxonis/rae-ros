@@ -3,7 +3,7 @@
 <package format="3">
   <name>rae_gazebo</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
+  <description>RAE Gazebo package.</description>
   <maintainer email="danilo.pejovic@luxonis.com">Danilo Pejovic</maintainer>
   <license>MIT</license>
 
@@ -16,7 +16,8 @@
   <depend>joint_state_publisher</depend>
 
   <!-- Adding dependency here to make docker image smaller for the robot -->
-  <depend>nav2_bringup</depend>
+  <exec_depend>nav2_bringup</exec_depend>
+  <exec_depend>teleop_twist_keyboard</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
