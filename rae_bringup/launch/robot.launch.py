@@ -16,9 +16,9 @@ def generate_launch_description():
             package='depthimage_to_laserscan',
             executable='depthimage_to_laserscan_node',
             name='depthimage_to_laserscan_node',
-            remappings=[('depth', '/oak/stereo_front/depth_image'),
-                        ('depth_camera_info', '/oak/stereo_front/camera_info')],
-            parameters=[{'output_frame': 'rgb_camera_link_optical_frame',
+            remappings=[('depth', '/rae/stereo_front/image_raw'),
+                        ('depth_camera_info', '/rae/right_front/camera_info')],
+            parameters=[{'output_frame': 'rae_right_camera_optical_frame',
                         'range_max': 20.0}]
         ),
         IncludeLaunchDescription(
@@ -27,7 +27,4 @@ def generate_launch_description():
             IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(hw_prefix, 'launch', 'rae_control.launch.py'))),
-        IncludeLaunchDescription(os.path.join(get_package_share_path('rae_bringup'), 'launch', 'nav.launch.py'),
-        launch_arguments={'use_sim_time': LaunchConfiguration('use_sim_time'),
-        'params_file': params}.items())
     ])

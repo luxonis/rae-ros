@@ -12,11 +12,14 @@ find_package(hardware_interface REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_lifecycle REQUIRED)
+find_package(sensor_msgs REQUIRED)
 
 find_library(GPIOD_LIBRARY NAMES libgpiodcxx.so)
 if(NOT GPIOD_LIBRARY)
   message(FATAL_ERROR "gpiod library not found. Install apt install libgpiod-dev")
 endif()
+
+include_directories(include)
 
 add_library(
   rae_hw
@@ -43,6 +46,9 @@ target_compile_definitions(rae_hw PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
 pluginlib_export_plugin_description_file(
   hardware_interface rae_hw.xml)
 
+add_executable(battery src/battery.cpp)
+ament_target_dependencies(battery rclcpp sensor_msgs)
+
 install(
   TARGETS
   rae_hw
@@ -50,6 +56,10 @@ install(
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
 )
+
+install(TARGETS
+  battery
+  DESTINATION lib/${PROJECT_NAME})
 
 install(
   DIRECTORY include/

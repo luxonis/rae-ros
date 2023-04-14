@@ -13,24 +13,27 @@ def launch_setup(context, *args, **kwargs):
     if LaunchConfiguration('sim').perform(context):
         sim = True
 
-    rsp_node =  Node(
-            package='robot_state_publisher',
-            executable='robot_state_publisher',
-            name='robot_state_publisher',
-            parameters=[{'robot_description': Command(
+    rsp_node = Node(
+        package='robot_state_publisher',
+        executable='robot_state_publisher',
+        name='robot_state_publisher',
+        parameters=[{'robot_description': Command(
                 [
-                    'xacro', ' ', xacro_path, ' ', ' sim_mode:=', LaunchConfiguration('sim').perform(context)
+                    'xacro', ' ', xacro_path, ' ', ' sim_mode:=', LaunchConfiguration(
+                        'sim').perform(context)
                 ]),
-                'use_sim_time': sim}]
-        )
+            'use_sim_time': sim}]
+    )
 
     joint_state_publisher = Node(
-            package='joint_state_publisher',
-            executable='joint_state_publisher',
-            name='joint_state_publisher',
-            parameters=[{'use_sim_time': sim}])
+        package='joint_state_publisher',
+        executable='joint_state_publisher',
+        name='joint_state_publisher',
+        parameters=[{'use_sim_time': sim}])
 
     return [rsp_node]
+
+
 def generate_launch_description():
     declared_arguments = [
         DeclareLaunchArgument("sim", default_value="false"),

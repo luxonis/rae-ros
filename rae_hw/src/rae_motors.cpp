@@ -38,9 +38,9 @@ namespace rae_hw
             {
                 pwmPin.set_value(1);
             }
-            std::this_thread::sleep_for(std::chrono::microseconds(dutyTrue));
+            usleep(dutyTrue);
             pwmPin.set_value(0);
-            std::this_thread::sleep_for(1000us - std::chrono::microseconds(dutyTrue));
+             usleep((1000 - dutyTrue));
             dutyTrue = dutyTarget;
         }
     }
@@ -48,6 +48,7 @@ namespace rae_hw
     {
         while (_running)
         {
+            usleep(100);
             int currA = enAPin.get_value();
             int currB = enBPin.get_value();
             State currS{currA, currB};
@@ -92,8 +93,6 @@ namespace rae_hw
             }
             prevState = currS;
         }
-
-        std::this_thread::sleep_for(1ms);
     }
     float RaeMotor::getPos()
     {
@@ -122,7 +121,7 @@ namespace rae_hw
             dutyTarget = 0;
             while (dutyTrue != 0)
             {
-                std::this_thread::sleep_for(100us);
+                usleep(100);
             }
             motDirection = dir;
             if (motDirection)

@@ -1,7 +1,23 @@
-/oak:
-  ros__parameters:
-    camera:
-      i_nn_type: none
-      i_pipeline_type: Rae
-      i_enable_ir: false
-      i_enable_imu: false
+
+/rae:
+   ros__parameters:
+     camera:
+        i_nn_type: none
+        i_pipeline_type: RAE
+        i_enable_ir: false
+        i_enable_imu: false
+        i_external_calibration_path: '/ws/src/rae/rae_bringup/config/cal.json'
+     left_front:
+       i_resolution: '800'
+       i_publish_topic: true
+       i_board_socket_id: 1
+       i_set_isp_scale: false
+     right_front:
+       i_publish_topic: true
+       i_board_socket_id: 2
+       i_resolution: '800'
+       i_set_isp_scale: false
+     stereo_front:
+       i_align_depth: false
+     rgb:
+       i_output_isp: false

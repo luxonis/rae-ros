@@ -233,5 +233,17 @@
     <child link="depth_camera_link_optical_frame"/>
   </joint>
 
+  <link name="rae_right_camera_optical_frame">
+    <xacro:body mass="0.00001" d="0.0000010" h="0.000003" w="0.00003">
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+    </xacro:body>
+
+  </link>
+
+  <joint name="rae_right_camera_optical_frame_joint" type="fixed">
+    <origin xyz="0.0051 0 0" rpy="0.0 0.0 0.0"/>
+    <parent link="rgb_camera_link"/>
+    <child link="rae_right_camera_optical_frame"/>
+  </joint>
 
 </robot>
