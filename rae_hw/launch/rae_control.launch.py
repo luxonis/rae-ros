@@ -38,32 +38,37 @@ def generate_launch_description():
         get_package_share_directory('rae_hw'),
         'config',
         'controller.yaml'
-        )
+    )
 
     return LaunchDescription([
-      IncludeLaunchDescription(
+        IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
                 os.path.join(get_package_share_directory('rae_description'), 'launch', 'rae_gazebo_desc_launch.py')),
-      launch_arguments={"sim": "false"}.items()
-      ),
-      Node(
-        package='controller_manager',
-        executable='ros2_control_node',
-        parameters=[robot_description, test_controller],
-        remappings=[('/diff_controller/cmd_vel_unstamped', 'cmd_vel')],
-        output={
-          'stdout': 'screen',
-          'stderr': 'screen',
-          },
+            launch_arguments={"sim": "false"}.items()
+        ),
+        Node(
+            package='controller_manager',
+            executable='ros2_control_node',
+            parameters=[robot_description, test_controller],
+            remappings=[('/diff_controller/cmd_vel_unstamped', 'cmd_vel')],
+            output={
+                'stdout': 'screen',
+                'stderr': 'screen',
+            },
         ),
         Node(
             package="controller_manager",
             executable="spawner",
             arguments=["diff_controller", "-c", "/controller_manager"],
         ),
-      Node(
-        package="controller_manager",
-        executable="spawner",
-        arguments=["joint_state_broadcaster", "--controller-manager", "/controller_manager"],
-    )
+        Node(
+            package="controller_manager",
+            executable="spawner",
+            arguments=["joint_state_broadcaster",
+                       "--controller-manager", "/controller_manager"],
+        ),
+        Node(
+            package="rae_hw",
+            executable="battery",
+        )
     ])

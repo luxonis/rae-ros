@@ -11,10 +11,11 @@ def launch_setup(context, *args, **kwargs):
     LaunchConfiguration('sim')
     bringup_prefix = get_package_share_path('rae_bringup')
     param_file_name = 'sim.yaml'
-    if not LaunchConfiguration('sim').perform(context):
+    if LaunchConfiguration('sim').perform(context) == "false":
         param_file_name = 'robot.yaml'
 
     params = os.path.join(bringup_prefix, 'config', param_file_name)
+    print(param_file_name)
 
     return [
 
@@ -23,7 +24,8 @@ def launch_setup(context, *args, **kwargs):
                 os.path.join(get_package_share_path('rae_bringup'), 'launch', 'rviz.launch.py')),
             condition=IfCondition(LaunchConfiguration(
                 "use_rviz").perform(context)),
-                launch_arguments={'rviz_config': LaunchConfiguration('rviz_config').perform(context)}.items()
+            launch_arguments={'rviz_config': LaunchConfiguration(
+                'rviz_config').perform(context)}.items()
         ),
 
         IncludeLaunchDescription(
@@ -36,9 +38,9 @@ def launch_setup(context, *args, **kwargs):
                                  launch_arguments={
             'params_file': params}.items()),
 
-        # IncludeLaunchDescription(os.path.join(bringup_prefix, 'launch', 'nav.launch.py'),
-        #                          launch_arguments={
-        #     'params_file': params}.items())
+        IncludeLaunchDescription(os.path.join(bringup_prefix, 'launch', 'nav.launch.py'),
+                                 launch_arguments={'use_sim_time': LaunchConfiguration("sim").perform(context),
+            'params_file': params}.items())
     ]
 
 
