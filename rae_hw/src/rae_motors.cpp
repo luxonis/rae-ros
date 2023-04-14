@@ -93,7 +93,6 @@ namespace rae_hw
             }
             prevState = currS;
         }
-
     }
     float RaeMotor::getPos()
     {

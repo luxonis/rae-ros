@@ -16,17 +16,20 @@ RUN  if [ "$SIM" = "1" ] ; then wget https://packages.osrfoundation.org/gazebo.g
  && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null \
  && apt-get update \
  && apt-get install -y ignition-fortress ; fi
-RUN cd /tmp \
+
+
+RUN if [ "$SIM" = "0" ] ; then cd /tmp \
    && git clone --recursive https://github.com/luxonis/depthai-core.git --branch rvc3_develop \
    && cmake -Hdepthai-core -Bdepthai-core/build -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr/local \
    && cmake --build depthai-core/build --target install --parallel ${CORE_NUM} \
    && cd /tmp \
-   && rm -r depthai-core
+   && rm -r depthai-core ; fi
 
 ENV WS=/ws
 RUN mkdir -p $WS/src
 RUN if [ "$SIM" = "0" ] ; then cd .$WS/src && git clone --branch rae_pipeline_humble https://github.com/luxonis/depthai-ros.git ; fi
 RUN apt update && rosdep init && rosdep update
+
 RUN if [ "$SIM" = "0" ] ; then cd .$WS/ && rosdep install --from-paths src --ignore-src  -y --skip-keys depthai ; fi
 RUN if [ "$SIM" = "0" ] ; then cd .$WS/ && . /opt/ros/${ROS_DISTRO}/setup.sh && colcon build --symlink-install ; fi
 
