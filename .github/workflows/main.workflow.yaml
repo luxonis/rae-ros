@@ -21,7 +21,7 @@ jobs:
     strategy:
       fail-fast: false
     env: 
-      PUSH: ${{ (github.event_name != 'pull_request') && (github.repository == 'luxonis/rae') && startsWith(github.ref, 'refs/tags/v') }}
+      PUSH: ${{ (github.event_name != 'pull_request') && (github.repository == 'luxonis/rae') }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
