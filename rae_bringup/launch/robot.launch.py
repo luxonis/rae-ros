@@ -17,7 +17,7 @@ def generate_launch_description():
             executable='depthimage_to_laserscan_node',
             name='depthimage_to_laserscan_node',
             remappings=[('depth', '/rae/stereo_front/image_raw'),
-                        ('depth_camera_info', '/rae/right_front/camera_info')],
+                        ('depth_camera_info', '/rae/stereo_front/camera_info')],
             parameters=[{'output_frame': 'rae_right_camera_optical_frame',
                         'range_max': 20.0}]
         ),
