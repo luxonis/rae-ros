@@ -3,17 +3,15 @@
 <package format="3">
   <name>rae_description</name>
   <version>0.0.0</version>
-  <description>RAE description package</description>
-  <maintainer email="danilo.pejovic@luxonis.com">Danilo Pejovic</maintainer>
-  <license>MIT</license>
+  <description>TODO: Package description</description>
+  <maintainer email="matej.hladky@luxonis.com">mateo</maintainer>
+  <license>TODO: License declaration</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
 
-  <exec_depend>robot_state_publisher</exec_depend>
-  <exec_depend>xacro</exec_depend>
   <export>
     <build_type>ament_cmake</build_type>
   </export>
