@@ -39,7 +39,7 @@
     <visual>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
       <geometry>
-        <mesh filename="package://rae_description/urdf/models/RAE.stl" scale="1.0 1.0 1.0"/>
+        <mesh filename="package://rae_description/urdf/models/RAE-TOP-ASSY_0417.STL" scale="1.0 1.0 1.0"/>
       </geometry>
       <material name="mat">
         <lighting>1</lighting>
