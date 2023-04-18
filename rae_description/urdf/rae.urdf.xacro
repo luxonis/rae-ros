@@ -215,7 +215,7 @@
   </link>
 
   <joint name="a_camera_link_optical_frame_joint" type="fixed">
-    <origin xyz="0.0 0 0" rpy="0.0 -1.57 0.0"/>
+    <origin xyz="0.0 0 0" rpy="3.14 3.14 0.0"/>
     <parent link="a_camera_link"/>
     <child link="a_camera_link_optical_frame"/>
   </joint>
@@ -241,7 +241,7 @@
   </link>
 
   <joint name="b_camera_link_optical_frame_joint" type="fixed">
-    <origin xyz="0.000 0 0" rpy="0.0 -1.57 0.0"/>
+    <origin xyz="0.000 0 0" rpy="3.14 3.14 0.0"/>
     <parent link="b_camera_link"/>
     <child link="b_camera_link_optical_frame"/>
   </joint>
@@ -267,7 +267,7 @@
   </link>
 
   <joint name="c_camera_link_optical_frame_joint" type="fixed">
-    <origin xyz="0.000 0 0" rpy="0.0 1.57  0.0"/>
+    <origin xyz="0.000 0 0" rpy="3.14 0.0 0.0"/>
     <parent link="c_camera_link"/>
     <child link="c_camera_link_optical_frame"/>
   </joint>
@@ -293,7 +293,7 @@
   </link>
 
   <joint name="d_camera_link_optical_frame_joint" type="fixed">
-    <origin xyz="0.000 0 0" rpy="0.0 1.57 0.0"/>
+    <origin xyz="0.000 0 0" rpy="3.14 0.0 0.0"/>
     <parent link="d_camera_link"/>
     <child link="d_camera_link_optical_frame"/>
   </joint>
