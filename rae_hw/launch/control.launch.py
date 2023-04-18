@@ -3,6 +3,7 @@ import os
 from ament_index_python.packages import get_package_share_directory
 
 from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, OpaqueFunction
 from launch_ros.actions import Node
 
 import xacro
@@ -38,5 +39,12 @@ def generate_launch_description():
             executable="spawner",
             arguments=["joint_state_broadcaster",
                        "--controller-manager", "/controller_manager"],
+        ),
+        Node(
+            package="rae_hw",
+            executable="battery",
+        ),
+        IncludeLaunchDescription(
+            (os.path.join(get_package_share_directory('rosbridge_server'), 'launch', 'rosbridge_websocket_launch.xml'))
         ),
     ])
