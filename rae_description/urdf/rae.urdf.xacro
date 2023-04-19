@@ -2,9 +2,9 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="rae">
     <xacro:include filename="rae_core.urdf.xacro" />
     <!-- Gazebo control -->
-    <xacro:include filename="rae_gazebo_control.urdf.xacro" />
+    <!-- <xacro:include filename="rae_gazebo_control.urdf.xacro" /> -->
      <!-- Real robot control -->
-    <!-- <xacro:include filename="robot_ros2_control.urdf.xacro" /> -->
+    <xacro:include filename="rae_ros2_control.urdf.xacro" />
     <xacro:include filename="camera.urdf.xacro" />
     <!-- <xacro:include filename="lidar.urdf.xacro" /> -->
 </robot>
