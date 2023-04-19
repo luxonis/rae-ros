@@ -18,8 +18,9 @@ def generate_launch_description():
             name='depthimage_to_laserscan_node',
             remappings=[('depth', '/rae/stereo_front/image_raw'),
                         ('depth_camera_info', '/rae/stereo_front/camera_info')],
-            parameters=[{'output_frame': 'rae_right_camera_optical_frame',
-                        'range_max': 20.0}]
+            parameters=[{'output_frame': 'base_link',
+                        'range_max': 20.0,
+                        'scan_row': 250}]
         ),
         IncludeLaunchDescription(
         PythonLaunchDescriptionSource(

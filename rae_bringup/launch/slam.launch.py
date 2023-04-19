@@ -1,18 +1,23 @@
 import os
 from ament_index_python.packages import get_package_share_path
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, OpaqueFunction
-from launch.conditions import IfCondition
-from launch_ros.actions import Node
+from launch.actions import DeclareLaunchArgument, OpaqueFunction
 from launch.substitutions import LaunchConfiguration
+from launch_ros.actions import Node
+
 
 def launch_setup(context, *args, **kwargs):
     params_file = LaunchConfiguration("params_file")
     return [
-
-        IncludeLaunchDescription(os.path.join(get_package_share_path('nav2_bringup'), 'launch', 'slam_launch.py'),
-        launch_arguments={
-        'params_file': params_file}.items())
+        Node(
+        parameters=[
+          params_file,
+          {'use_sim_time': False}
+        ],
+        package='slam_toolbox',
+        executable='async_slam_toolbox_node',
+        name='slam_toolbox',
+        output='screen')
     ]
 def generate_launch_description():
     bringup_prefix = get_package_share_path('rae_bringup')

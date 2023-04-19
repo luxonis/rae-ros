@@ -35,11 +35,11 @@ RUN if [ "$SIM" = "0" ] ; then cd .$WS/ && . /opt/ros/${ROS_DISTRO}/setup.sh && 
 
 FROM builder AS final
 COPY ./ .$WS/src/rae
-RUN if [ "$SIM" = "0" ] ; then rm -rf .$WS/src/rae/rae_gazebo ; fi
-RUN cd .$WS/ && rosdep install --from-paths src --ignore-src  -y --skip-keys depthai
+RUN if [ "$SIM" = "0" ] ; then cd .$WS/ && apt update && rosdep update && rosdep install --from-paths src --ignore-src  -y --skip-keys depthai ros_gz_bridge ros_gz_sim ros_ign_gazebo nav2_bringup ; fi
+RUN if [ "$SIM" = "1" ] ; then cd .$WS/ && apt update && rosdep update && rosdep install --from-paths src --ignore-src  -y --skip-keys depthai
 RUN apt install -y gpiod
 
-RUN cd .$WS/ && . /opt/ros/${ROS_DISTRO}/setup.sh && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
+RUN cd .$WS/ && . /opt/ros/${ROS_DISTRO}/setup.sh && colcon build --symlink-install --packages-ignore depthai-ros depthai_ros_driver depthai_examples depthai_filters depthai_bridge depthai_descriptions depthai_ros_msgs --cmake-args -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
 RUN if [ "$USE_RVIZ" = "1" ] ; then echo "RVIZ ENABLED" && sudo apt install -y ros-${ROS_DISTRO}-rviz2 ros-${ROS_DISTRO}-rviz-imu-plugin ; else echo "RVIZ NOT ENABLED"; fi
 RUN echo "if [ -f ${WS}/install/setup.zsh ]; then source ${WS}/install/setup.zsh; fi" >> $HOME/.zshrc
 RUN echo 'eval "$(register-python-argcomplete3 ros2)"' >> $HOME/.zshrc
@@ -47,5 +47,5 @@ RUN echo 'eval "$(register-python-argcomplete3 colcon)"' >> $HOME/.zshrc
 RUN echo "if [ -f ${WS}/install/setup.bash ]; then source ${WS}/install/setup.bash; fi" >> $HOME/.bashrc
 ENTRYPOINT [ "/ws/src/rae/entrypoint.sh" ]
 RUN rm -rf /usr/share/doc
-RUN apt install -y neovim tmux htop
+RUN apt install -y neovim tmux htop net-tools iputils-ping
 CMD ["zsh"]

@@ -5,6 +5,8 @@ from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, Opaq
 from launch.conditions import IfCondition, UnlessCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
+from launch_ros.actions import Node
+
 
 
 def launch_setup(context, *args, **kwargs):
@@ -18,7 +20,6 @@ def launch_setup(context, *args, **kwargs):
     print(param_file_name)
 
     return [
-
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
                 os.path.join(get_package_share_path('rae_bringup'), 'launch', 'rviz.launch.py')),
@@ -27,11 +28,18 @@ def launch_setup(context, *args, **kwargs):
             launch_arguments={'rviz_config': LaunchConfiguration(
                 'rviz_config').perform(context)}.items()
         ),
-
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
                 os.path.join(get_package_share_path('rae_gazebo'), 'launch', 'rae_simulation.launch.py')),
             condition=IfCondition(LaunchConfiguration("sim").perform(context))
+        ),
+        IncludeLaunchDescription(
+            (os.path.join(get_package_share_path('rosbridge_server'), 'launch', 'rosbridge_websocket_launch.xml'))
+        ),
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(
+                os.path.join(get_package_share_path('rae_bringup'), 'launch', 'robot.launch.py')),
+            condition=UnlessCondition(LaunchConfiguration("sim").perform(context))
         ),
 
         IncludeLaunchDescription(os.path.join(bringup_prefix, 'launch', 'slam.launch.py'),
