@@ -11,11 +11,20 @@ RUN apt-get update \
 ENV DEBIAN_FRONTEND=dialog
 RUN sh -c "$(wget https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O -)"
 
+RUN if [ "$SIM" = "0" ] ; then cd /tmp \
+   && git clone --recursive https://github.com/luxonis/depthai-core.git --branch rvc3_develop \
+   && cmake -Hdepthai-core -Bdepthai-core/build -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr/local \
+   && cmake --build depthai-core/build --target install --parallel ${CORE_NUM} \
+   && cd /tmp \
+   && rm -r depthai-core ; fi
+
 ENV WS=/ws
 RUN mkdir -p $WS/src
+RUN if [ "$SIM" = "0" ] ; then cd .$WS/src && git clone --branch rae_pipeline_humble https://github.com/luxonis/depthai-ros.git ; fi
+RUN apt update && rosdep init && rosdep update
 
 COPY ./ .$WS/src/rae
-RUN cd .$WS/ && rosdep update && rosdep install --from-paths src --ignore-src  -y
+RUN cd .$WS/ && rosdep install --from-paths src --ignore-src  -y
 RUN if [ "$SIM" = "0" ] ; then cd .$WS/ && . /opt/ros/${ROS_DISTRO}/setup.sh && colcon build --symlink-install ; fi
 
 RUN cd .$WS/ && . /opt/ros/${ROS_DISTRO}/setup.sh && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
