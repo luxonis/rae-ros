@@ -37,7 +37,7 @@
     </collision>
 
     <visual>
-      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <origin rpy="0.0 3.14 0.0" xyz="0.0 0.0 0.0"/>
       <geometry>
         <mesh filename="package://rae_description/urdf/models/RAE-TOP-ASSY_0417.STL" scale="1.0 1.0 1.0"/>
       </geometry>
@@ -55,7 +55,7 @@
   <joint name="base_chassis_joint" type="fixed">
     <parent link="base_link"/>
     <child link="chassis"/>
-    <origin rpy="1.57 0.0 1.57" xyz="0.0307 0.0 0.0" />
+    <origin rpy="1.57 0.0 1.57" xyz="-0.0307 0.0 0.0" />
   </joint>
 
   <link name="left_wheel">
@@ -102,14 +102,14 @@
     <origin rpy="1.57 0.0 0.00 " xyz="0.0 0.042 0.0052"/>
     <child link="left_wheel"/>
     <parent link="base_link"/>
-    <axis rpy="0 0 0" xyz="0 0 1"/>
+    <axis rpy="0 0 0" xyz="0 0 -1"/>
   </joint>
 
   <joint name='right_wheel_joint' type='continuous'>
     <origin rpy="-1.57 0.0 0.0 " xyz="0.0 -0.042 0.0052"/>
     <child link="right_wheel"/>
     <parent link="base_link"/>
-    <axis rpy="0 0 0" xyz="0 0 -1"/>
+    <axis rpy="0 0 0" xyz="0 0 1"/>
   </joint>
 
   <link name="left_caster_wheel">
@@ -143,7 +143,7 @@
   <joint name="base_left_caster_wheel" type="fixed">
     <parent link="base_link"/>
     <child link="left_caster_wheel"/>
-    <origin rpy="0.0 0.0 0.0" xyz="0.0735 0.0445 -0.001" />
+    <origin rpy="0.0 0.0 0.0" xyz="-0.0735 0.0445 -0.001" />
   </joint>
 
   <link name="right_caster_wheel">
@@ -177,7 +177,7 @@
   <joint name="base_right_caster_wheel" type="fixed">
     <parent link="base_link"/>
     <child link="right_caster_wheel"/>
-    <origin rpy="0.0 0.0 0.0" xyz="0.0735 -0.0445 -0.001" />
+    <origin rpy="0.0 0.0 0.0" xyz="-0.0735 -0.0445 -0.001" />
   </joint>
 
 
@@ -189,113 +189,113 @@
   </link>
 
   <joint name="rgb_camera_joint" type="fixed">
-    <parent link="base_link"/>
+    <parent link="chassis"/>
     <child link="rgb_camera_link"/>
-    <origin xyz="0.09 0.0 0.025" rpy="0 0 0"/>
+    <origin xyz="-0.025 0.0101195 0.0517014" rpy="-0.523599 0 0"/>
   </joint>
 
-  <link name="a_camera_link">
+  <link name="left_front_camera_link">
     <xacro:body mass="0.001" d="0.010" h="0.03" w="0.03">
       <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
     </xacro:body>
 
   </link>
 
-   <joint name="a_camera_joint" type="fixed">
+   <joint name="left_front_camera_joint" type="fixed">
     <parent link="chassis"/>
-    <child link="a_camera_link"/>
+    <child link="left_front_camera_link"/>
     <origin xyz="0.0375 0.0100195 0.0515282" rpy="-0.523599 0 0"/>
   </joint>
 
-  <link name="a_camera_link_optical_frame">
+  <link name="left_front_camera_link_optical_frame">
     <xacro:body mass="0.00001" d="0.0000010" h="0.000003" w="0.00003">
       <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
     </xacro:body>
 
   </link>
 
-  <joint name="a_camera_link_optical_frame_joint" type="fixed">
+  <joint name="left_front_camera_link_optical_frame_joint" type="fixed">
     <origin xyz="0.0 0 0" rpy="3.14 3.14 0.0"/>
-    <parent link="a_camera_link"/>
-    <child link="a_camera_link_optical_frame"/>
+    <parent link="left_front_camera_link"/>
+    <child link="left_front_camera_link_optical_frame"/>
   </joint>
 
-  <link name="b_camera_link">
+  <link name="right_front_camera_link">
     <xacro:body mass="0.001" d="0.010" h="0.03" w="0.03">
       <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
     </xacro:body>
 
   </link>
 
-   <joint name="b_camera_joint" type="fixed">
+   <joint name="right_front_camera_joint" type="fixed">
     <parent link="chassis"/>
-    <child link="b_camera_link"/>
+    <child link="right_front_camera_link"/>
     <origin xyz="-0.0375 0.0100195 0.0515282" rpy="-0.523599 0 0"/>
   </joint>
 
-  <link name="b_camera_link_optical_frame">
+  <link name="right_front_camera_link_optical_frame">
     <xacro:body mass="0.00001" d="0.0000010" h="0.000003" w="0.00003">
       <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
     </xacro:body>
 
   </link>
 
-  <joint name="b_camera_link_optical_frame_joint" type="fixed">
+  <joint name="right_front_camera_link_optical_frame_joint" type="fixed">
     <origin xyz="0.000 0 0" rpy="3.14 3.14 0.0"/>
-    <parent link="b_camera_link"/>
-    <child link="b_camera_link_optical_frame"/>
+    <parent link="right_front_camera_link"/>
+    <child link="right_front_camera_link_optical_frame"/>
   </joint>
 
-  <link name="c_camera_link">
+  <link name="right_back_camera_link">
     <xacro:body mass="0.001" d="0.010" h="0.03" w="0.03">
       <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
     </xacro:body>
 
   </link>
 
-   <joint name="c_camera_joint" type="fixed">
+   <joint name="right_back_camera_joint" type="fixed">
     <parent link="chassis"/>
-    <child link="c_camera_link"/>
+    <child link="right_back_camera_link"/>
     <origin xyz="-0.0375 0.0100195 -0.0515282" rpy="0.523599 0 0"/>
   </joint>
 
-  <link name="c_camera_link_optical_frame">
+  <link name="right_back_camera_link_optical_frame">
     <xacro:body mass="0.00001" d="0.0000010" h="0.000003" w="0.00003">
       <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
     </xacro:body>
 
   </link>
 
-  <joint name="c_camera_link_optical_frame_joint" type="fixed">
+  <joint name="right_back_camera_link_optical_frame_joint" type="fixed">
     <origin xyz="0.000 0 0" rpy="3.14 0.0 0.0"/>
-    <parent link="c_camera_link"/>
-    <child link="c_camera_link_optical_frame"/>
+    <parent link="right_back_camera_link"/>
+    <child link="right_back_camera_link_optical_frame"/>
   </joint>
 
-  <link name="d_camera_link">
+  <link name="left_back_camera_link">
     <xacro:body mass="0.001" d="0.010" h="0.03" w="0.03">
       <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
     </xacro:body>
 
   </link>
 
-   <joint name="d_camera_joint" type="fixed">
+   <joint name="left_back_camera_joint" type="fixed">
     <parent link="chassis"/>
-    <child link="d_camera_link"/>
+    <child link="left_back_camera_link"/>
     <origin xyz="0.0375 0.0100195 -0.0515282" rpy="0.523599 0 0"/>
   </joint>
 
-  <link name="d_camera_link_optical_frame">
+  <link name="left_back_camera_link_optical_frame">
     <xacro:body mass="0.00001" d="0.0000010" h="0.000003" w="0.00003">
       <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
     </xacro:body>
 
   </link>
 
-  <joint name="d_camera_link_optical_frame_joint" type="fixed">
+  <joint name="left_back_camera_link_optical_frame_joint" type="fixed">
     <origin xyz="0.000 0 0" rpy="3.14 0.0 0.0"/>
-    <parent link="d_camera_link"/>
-    <child link="d_camera_link_optical_frame"/>
+    <parent link="left_back_camera_link"/>
+    <child link="left_back_camera_link_optical_frame"/>
   </joint>
 
 
@@ -321,7 +321,7 @@
 
 
   <joint name="rgb_camera_link_optical_frame_joint" type="fixed">
-    <origin xyz="0.0051 0 0" rpy="0.0 0.0 0.0"/>
+    <origin xyz="0.0051 0 0" rpy="3.14 3.14 0.0"/>
     <parent link="rgb_camera_link"/>
     <child link="rgb_camera_link_optical_frame"/>
   </joint>
