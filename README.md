@@ -125,6 +125,13 @@ Scipt arguments - `[encRatioL encRatioR]`. Full arg version `ros2 run rae_hw tes
 2. Finding out max speed - `ros2 run rae_hw test_max_speed`. Script arguments `[duration encRatioL encRatioR]`. Full arg version `ros2 run rae_hw test_max_speed 1.0 187 187`
 3. Motor verification - `ros2 run rae_hw test_motors`. Script arguments `[duration speedL speedR encRatioL encRatioR maxVelL maxVelR]`. Full arg version `ros2 run rae_hw test_motors 5.0 16.0 16.0 187 187 32 32`
 
+### Setting up procedure - testing cameras on host with VSCode
+
+1. Make workspace & clone repository
+2. Copy .devcontainer directory to workspace directory
+3. Open workspace directory in VSCode
+4. Use reopen in container option
+
 ### Setting up procedure - Simulation
 
 

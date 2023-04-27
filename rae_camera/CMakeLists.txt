@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(rae_camera_example)
+project(rae_camera)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -33,13 +33,14 @@ include_directories(
   ${ament_INCLUDE_DIRS}
 )
 
-  add_executable(camera src/camera.cpp)
+add_executable(camera src/camera.cpp)
 
 
-  ament_target_dependencies(camera
-                            ${dependencies})
+ament_target_dependencies(camera
+${dependencies})
 install(TARGETS
-        camera
-        DESTINATION lib/${PROJECT_NAME})
+camera
+DESTINATION lib/${PROJECT_NAME})
 
+install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
 ament_package()

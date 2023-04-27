@@ -19,19 +19,18 @@
 #include "depthai_bridge/BridgePublisher.hpp"
 #include "depthai_bridge/ImageConverter.hpp"
 
-std::vector<std::string> usbStrings = {"UNKNOWN", "LOW", "FULL", "HIGH", "SUPER", "SUPER_PLUS"};
-
 dai::Pipeline createPipeline(bool enable_rgb, bool enable_depth)
 {
     dai::Pipeline pipeline;
     if (enable_rgb)
     {
         auto camRgb = pipeline.create<dai::node::ColorCamera>();
-        camRgb->setResolution(dai::node::ColorCamera::Properties::SensorResolution::THE_1080_P);
+        // camRgb->setResolution(dai::node::ColorCamera::Properties::SensorResolution::THE_1080_P);
         auto xoutRgb = pipeline.create<dai::node::XLinkOut>();
         camRgb->setBoardSocket(dai::CameraBoardSocket::RGB);
         camRgb->setColorOrder(dai::ColorCameraProperties::ColorOrder::BGR);
         camRgb->setInterleaved(false);
+        camRgb->setVideoSize(1280,800);
         xoutRgb->setStreamName("rgb");
         camRgb->video.link(xoutRgb->input);
     }
@@ -44,9 +43,11 @@ dai::Pipeline createPipeline(bool enable_rgb, bool enable_depth)
 
         // MonoCamera
         left->setResolution(dai::node::ColorCamera::Properties::SensorResolution::THE_800_P);
+        left->setVideoSize(640, 400);
         left->setBoardSocket(dai::CameraBoardSocket::LEFT);
         left->setFps(30.0);
         right->setResolution(dai::node::ColorCamera::Properties::SensorResolution::THE_800_P);
+        right->setVideoSize(640, 400);
         right->setBoardSocket(dai::CameraBoardSocket::RIGHT);
         right->setFps(30.0);
 
@@ -82,43 +83,44 @@ int main(int argc, char **argv)
 
     device = std::make_shared<dai::Device>(pipeline);
 
-
     auto calibrationHandler = device->readCalibration();
 
-    auto boardName = calibrationHandler.getEepromData().boardName;
-    std::string tfPrefix = "rae";
+    // ROS part
 
+    std::string tfPrefix = "rae";
 
     int width = 1280;
     int height = 800;
+    std::shared_ptr<dai::rosBridge::BridgePublisher<sensor_msgs::msg::Image, dai::ImgFrame>> rgbPublish;
+    std::shared_ptr<dai::rosBridge::BridgePublisher<sensor_msgs::msg::Image, dai::ImgFrame>> depthPublish;
+    dai::rosBridge::ImageConverter rightconverter(tfPrefix + "_right_camera_optical_frame", true);
+    dai::rosBridge::ImageConverter rgbConverter(tfPrefix + "_rgb_camera_optical_frame", false);
+
     if (enable_depth)
     {
-        dai::rosBridge::ImageConverter rightconverter(tfPrefix + "_right_camera_optical_frame", true);
         auto rightCameraInfo = rightconverter.calibrationToCameraInfo(calibrationHandler, dai::CameraBoardSocket::RIGHT, width, height);
         auto depthCameraInfo = rightCameraInfo;
-        auto depthconverter = rightconverter;
 
         auto stereoQueue = device->getOutputQueue("depth", 30, false);
-        dai::rosBridge::BridgePublisher<sensor_msgs::msg::Image, dai::ImgFrame> depthPublish(
+        depthPublish = std::make_shared<dai::rosBridge::BridgePublisher<sensor_msgs::msg::Image, dai::ImgFrame>>(
             stereoQueue,
             node,
             std::string("stereo/depth"),
             std::bind(&dai::rosBridge::ImageConverter::toRosMsg,
-                      &depthconverter, // since the converter has the same frame name
+                      &rightconverter, // since the converter has the same frame name
                                        // and image type is also same we can reuse it
                       std::placeholders::_1,
                       std::placeholders::_2),
             30,
             depthCameraInfo,
             "stereo");
-        depthPublish.addPublisherCallback();
+        depthPublish->addPublisherCallback();
     }
     if (enable_rgb)
     {
-        dai::rosBridge::ImageConverter rgbConverter(tfPrefix + "_rgb_camera_optical_frame", false);
-        sensor_msgs::msg::CameraInfo rgbCameraInfo;
+        sensor_msgs::msg::CameraInfo rgbCameraInfo = rgbConverter.calibrationToCameraInfo(calibrationHandler, dai::CameraBoardSocket::RIGHT, width, height);;
         auto imgQueue = device->getOutputQueue("rgb", 30, false);
-        dai::rosBridge::BridgePublisher<sensor_msgs::msg::Image, dai::ImgFrame> rgbPublish(
+        rgbPublish = std::make_shared<dai::rosBridge::BridgePublisher<sensor_msgs::msg::Image, dai::ImgFrame>>(
             imgQueue,
             node,
             std::string("color/image"),
@@ -126,8 +128,10 @@ int main(int argc, char **argv)
             30,
             rgbCameraInfo,
             "color");
-        rgbPublish.addPublisherCallback();
+        rgbPublish->addPublisherCallback();
     }
+    RCLCPP_INFO(node->get_logger(), "Camera set up, starting publishing.");
     rclcpp::spin(node);
+    RCLCPP_INFO(node->get_logger(), "Shutting down.");
     return 0;
 }
