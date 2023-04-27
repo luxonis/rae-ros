@@ -21,10 +21,12 @@ RUN if [ "$SIM" = "0" ] ; then cd /tmp \
 ENV WS=/ws
 RUN mkdir -p $WS/src
 RUN if [ "$SIM" = "0" ] ; then cd .$WS/src && git clone --branch rae_pipeline_humble https://github.com/luxonis/depthai-ros.git ; fi
-RUN apt update && rosdep init && rosdep update
+RUN if [ "$SIM" = "0" ] ; then cd .$WS/src/depthai-ros && rm -rf depthai_ros_driver depthai-ros depthai_examples depthai_descriptions depthai_filters depthai_ros_msgs ; fi
+
+RUN apt update && rosdep update
 
 COPY ./ .$WS/src/rae
-RUN cd .$WS/ && rosdep install --from-paths src --ignore-src  -y
+RUN cd .$WS/ && rosdep install --from-paths src --ignore-src  -y --skip-keys depthai
 RUN if [ "$SIM" = "0" ] ; then cd .$WS/ && . /opt/ros/${ROS_DISTRO}/setup.sh && colcon build --symlink-install ; fi
 
 RUN cd .$WS/ && . /opt/ros/${ROS_DISTRO}/setup.sh && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
