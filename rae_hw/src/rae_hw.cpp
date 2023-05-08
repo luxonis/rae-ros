@@ -11,19 +11,19 @@ hardware_interface::CallbackReturn RaeHW::on_init(const hardware_interface::Hard
     if (hardware_interface::SystemInterface::on_init(info) != CallbackReturn::SUCCESS) {
         return CallbackReturn::ERROR;
     }
-
-    prevTime = std::chrono::high_resolution_clock::now();
     leftWheelName = info_.hardware_parameters["left_wheel_name"];
     rightWheelName = info_.hardware_parameters["right_wheel_name"];
     auto chipName = info_.hardware_parameters["chip_name"];
-
+    
     int pwmL = std::stoi(info_.hardware_parameters["pwmL"]);
     int phL = std::stoi(info_.hardware_parameters["phL"]);
     int enLA = std::stoi(info_.hardware_parameters["enLA"]);
     int enLB = std::stoi(info_.hardware_parameters["enLB"]);
     float encTicsPerRevL = std::stof(info_.hardware_parameters["encTicsPerRevL"]);
     float maxVelL = std::stof(info_.hardware_parameters["maxVelL"]);
-    motorL = std::make_unique<RaeMotor>(leftWheelName, chipName, pwmL, phL, enLA, enLB, encTicsPerRevL, maxVelL, true);
+    bool closedLoopL = static_cast<bool>(std::stoi(info_.hardware_parameters["closed_loopL"]));
+    PID pidL{std::stof(info_.hardware_parameters["PID_P_L"]), std::stof(info_.hardware_parameters["PID_I_L"]), std::stof(info_.hardware_parameters["PID_D_L"])};
+    motorL = std::make_unique<RaeMotor>(leftWheelName, chipName, pwmL, phL, enLA, enLB, encTicsPerRevL, maxVelL, true, closedLoopL, pidL);
 
     int pwmR = std::stoi(info_.hardware_parameters["pwmR"]);
     int phR = std::stoi(info_.hardware_parameters["phR"]);
@@ -31,7 +31,9 @@ hardware_interface::CallbackReturn RaeHW::on_init(const hardware_interface::Hard
     int enRB = std::stoi(info_.hardware_parameters["enRB"]);
     float encTicsPerRevR = std::stof(info_.hardware_parameters["encTicsPerRevR"]);
     float maxVelR = std::stof(info_.hardware_parameters["maxVelR"]);
-    motorR = std::make_unique<RaeMotor>(rightWheelName, chipName, pwmR, phR, enRA, enRB, encTicsPerRevR, maxVelR, false);
+    bool closedLoopR = static_cast<bool>(std::stoi(info_.hardware_parameters["closed_loopR"]));
+    PID pidR{std::stof(info_.hardware_parameters["PID_P_R"]), std::stof(info_.hardware_parameters["PID_I_R"]), std::stof(info_.hardware_parameters["PID_D_R"])};
+    motorR = std::make_unique<RaeMotor>(rightWheelName, chipName, pwmR, phR, enRA, enRB, encTicsPerRevR, maxVelR, false, closedLoopR, pidR);
 
     return CallbackReturn::SUCCESS;
 }
@@ -82,13 +84,10 @@ hardware_interface::CallbackReturn RaeHW::on_shutdown(const rclcpp_lifecycle::St
 }
 
 hardware_interface::return_type RaeHW::read(const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/) {
-    auto currTime = std::chrono::high_resolution_clock::now();
     float currLeftPos = motorL->getPos();
     float currRightPos = motorR->getPos();
-    float timeDiff = std::chrono::duration<float>(currTime - prevTime).count();
-    leftVel = (currLeftPos - leftPos) / timeDiff;
-    rightVel = (currRightPos - rightPos) / timeDiff;
-    prevTime = currTime;
+    leftVel = motorL->getSpeed();
+    rightVel = motorR->getSpeed();
     leftPos = currLeftPos;
     rightPos = currRightPos;
 

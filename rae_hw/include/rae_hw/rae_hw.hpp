@@ -53,7 +53,6 @@ class RaeHW : public hardware_interface::SystemInterface {
         int pwmA, pwmB, phA, phB;
         double leftPos, rightPos, leftVel, rightVel;
         std::string leftWheelName, rightWheelName;
-        std::chrono::high_resolution_clock::time_point prevTime;
 };
 
 } // namespace rae_hw
