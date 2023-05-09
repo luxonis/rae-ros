@@ -29,7 +29,7 @@ RUN cd .$WS/ && rosdep install --from-paths src --ignore-src  -y --skip-keys dep
 FROM builder AS final
 COPY ./ .$WS/src/rae
 RUN if [ "$SIM" = "0" ] ; then cd .$WS/ && apt update && rosdep update && rosdep install --from-paths src --ignore-src  -y --skip-keys depthai ros_gz_bridge ros_gz_sim ros_ign_gazebo nav2_bringup ; fi
-RUN if [ "$SIM" = "1" ] ; then cd .$WS/ && apt update && rosdep update && rosdep install --from-paths src --ignore-src  -y --skip-keys depthai
+RUN if [ "$SIM" = "1" ] ; then cd .$WS/ && apt update && rosdep update && rosdep install --from-paths src --ignore-src  -y --skip-keys depthai ; fi
 
 RUN cd .$WS/ && . /opt/ros/${ROS_DISTRO}/setup.sh && colcon build --symlink-install --packages-ignore depthai-ros depthai_ros_driver depthai_examples depthai_filters depthai_bridge depthai_descriptions depthai_ros_msgs --cmake-args -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
 
