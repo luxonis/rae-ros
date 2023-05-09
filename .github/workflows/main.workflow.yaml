@@ -96,4 +96,3 @@ jobs:
           no-cache: true
           tags: | 
             luxonis/rae-ros-robot:${{ steps.vars.outputs.short_ref }}
-            luxonis/rae-ros-robot:${{ env.ROS_DISTRO }}-latest
