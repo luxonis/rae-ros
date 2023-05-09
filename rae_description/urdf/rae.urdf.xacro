@@ -1,10 +1,355 @@
 <?xml version="1.0"?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="rae">
-    <xacro:include filename="rae_core.urdf.xacro" />
-    <!-- Gazebo control -->
-    <!-- <xacro:include filename="rae_gazebo_control.urdf.xacro" /> -->
-     <!-- Real robot control -->
-    <xacro:include filename="rae_ros2_control.urdf.xacro" />
-    <xacro:include filename="camera.urdf.xacro" />
-    <!-- <xacro:include filename="lidar.urdf.xacro" /> -->
+
+<robot name="rae"
+  xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:include filename="inertial_moment_calc.xacro"/>
+  <xacro:include filename="rae_gazebo.xacro"/>
+  <xacro:include filename="rae_control.xacro"/>
+  <xacro:property name="deg_to_rad" value="0.01745329251994329577" />
+  <link name="base_footprint"/>
+  <joint name="dummy" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+    <origin rpy="0 0.0 0" xyz="0 0.0 0.0" />
+  </joint>
+  <link name="base_link">
+    <xacro:body mass="0.00001" d="0.0000010" h="0.000003" w="0.00003">
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+    </xacro:body>
+  </link>
+  <gazebo reference="base_link">
+    <sensor name="imu_sensor" type="imu">
+      <always_on>1</always_on>
+      <update_rate>1</update_rate>
+      <visualize>true</visualize>
+      <topic>imu</topic>
+    </sensor>
+  </gazebo>
+  <link name="chassis">
+    <xacro:body mass="0.360" d="0.125" h="0.028" w="0.1256">
+      <origin xyz="0 0.014 0.0" rpy="0.0 0.0 0.0"/>
+    </xacro:body>
+
+    <collision>
+      <origin rpy="0.0 0.0 0.0" xyz="0 0.018 0"/>
+      <geometry>
+        <box size="0.1 0.015 0.1"/>
+      </geometry>
+    </collision>
+
+    <visual>
+      <origin rpy="0.0 3.14 0.0" xyz="0.0 0.0 0.0"/>
+      <geometry>
+        <mesh filename="package://rae_description/urdf/models/RAE-TOP-ASSY_0417.STL" scale="1.0 1.0 1.0"/>
+      </geometry>
+      <material name="mat">
+        <lighting>1</lighting>
+        <color rgba="0.1 0.1 0.1 1.0"/>
+        <shader type='pixel'/>
+        <emissive>0 0 0 1</emissive>
+      </material>
+      <transparency>0</transparency>
+      <cast_shadows>1</cast_shadows>
+
+    </visual>
+  </link>
+  <joint name="base_chassis_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="chassis"/>
+    <origin rpy="1.57 0.0 1.57" xyz="-0.0307 0.0 0.0" />
+  </joint>
+
+  <link name="left_wheel">
+    <xacro:wheels mass="0.008" h="0.011" r="0.0119">
+      <origin xyz="0.0 0.0 -0.0055" rpy="0.0 0.0 0.0"/>
+    </xacro:wheels>
+
+
+    <collision>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 -0.0055"/>
+      <geometry>
+        <cylinder length="0.011" radius="0.0119"/>
+      </geometry>
+    </collision>
+
+    <visual>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 -0.0055"/>
+      <geometry>
+        <cylinder length="0.011" radius="0.0119"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <link name="right_wheel">
+    <xacro:wheels mass="0.008" h="0.011" r="0.0119">
+      <origin xyz="0.0 0.0 -0.0055" rpy="0.0 0.0 0.0"/>
+    </xacro:wheels>
+    <collision>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 -0.0055"/>
+      <geometry>
+        <cylinder length="0.011" radius="0.0119"/>
+      </geometry>
+    </collision>
+
+    <visual>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 -0.0055"/>
+      <geometry>
+        <cylinder length="0.011" radius="0.0119"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <joint name='left_wheel_joint' type='continuous'>
+    <origin rpy="1.57 0.0 0.00 " xyz="0.0 0.042 0.0052"/>
+    <child link="left_wheel"/>
+    <parent link="base_link"/>
+    <axis rpy="0 0 0" xyz="0 0 -1"/>
+  </joint>
+
+  <joint name='right_wheel_joint' type='continuous'>
+    <origin rpy="-1.57 0.0 0.0 " xyz="0.0 -0.042 0.0052"/>
+    <child link="right_wheel"/>
+    <parent link="base_link"/>
+    <axis rpy="0 0 0" xyz="0 0 1"/>
+  </joint>
+
+  <link name="left_caster_wheel">
+    <xacro:caster_wheels mass="0.008" r="0.005">
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+    </xacro:caster_wheels>
+    <collision>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <geometry>
+        <sphere radius="0.006"/>
+      </geometry>
+    </collision>
+
+    <visual>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <geometry>
+        <mesh filename="package://rae_description/urdf/models/caster-wheel.stl" scale="1.0 1.0 1.0"/>
+      </geometry>
+      <material name="mat">
+        <lighting>1</lighting>
+        <color rgba="1.0 1.0 1.0 1.0"/>
+        <shader type='pixel'/>
+        <emissive>0 0 0 1</emissive>
+      </material>
+      <transparency>0</transparency>
+      <cast_shadows>1</cast_shadows>
+
+    </visual>
+  </link>
+
+  <joint name="base_left_caster_wheel" type="fixed">
+    <parent link="base_link"/>
+    <child link="left_caster_wheel"/>
+    <origin rpy="0.0 0.0 0.0" xyz="-0.0735 0.0445 -0.001" />
+  </joint>
+
+  <link name="right_caster_wheel">
+    <xacro:caster_wheels mass="0.008" r="0.005">
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+    </xacro:caster_wheels>
+    <collision>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <geometry>
+        <sphere radius="0.006"/>
+      </geometry>
+    </collision>
+
+    <visual>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <geometry>
+        <mesh filename="package://rae_description/urdf/models/caster-wheel.stl" scale="1.0 1.0 1.0"/>
+      </geometry>
+      <material name="mat">
+        <lighting>1</lighting>
+        <color rgba="1.0 1.0 1.0 1.0"/>
+        <shader type='pixel'/>
+        <emissive>0 0 0 1</emissive>
+      </material>
+      <transparency>0</transparency>
+      <cast_shadows>1</cast_shadows>
+
+    </visual>
+  </link>
+
+  <joint name="base_right_caster_wheel" type="fixed">
+    <parent link="base_link"/>
+    <child link="right_caster_wheel"/>
+    <origin rpy="0.0 0.0 0.0" xyz="-0.0735 -0.0445 -0.001" />
+  </joint>
+
+
+  <link name="rgb_camera_link">
+    <xacro:body mass="0.001" d="0.010" h="0.03" w="0.03">
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+    </xacro:body>
+
+  </link>
+
+  <joint name="rgb_camera_joint" type="fixed">
+    <parent link="chassis"/>
+    <child link="rgb_camera_link"/>
+    <origin xyz="-0.025 0.0101195 0.0517014" rpy="-0.523599 0 0"/>
+  </joint>
+
+  <link name="left_front_camera_link">
+    <xacro:body mass="0.001" d="0.010" h="0.03" w="0.03">
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+    </xacro:body>
+
+  </link>
+
+   <joint name="left_front_camera_joint" type="fixed">
+    <parent link="chassis"/>
+    <child link="left_front_camera_link"/>
+    <origin xyz="0.0375 0.0100195 0.0515282" rpy="-0.523599 0 0"/>
+  </joint>
+
+  <link name="left_front_camera_link_optical_frame">
+    <xacro:body mass="0.00001" d="0.0000010" h="0.000003" w="0.00003">
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+    </xacro:body>
+
+  </link>
+
+  <joint name="left_front_camera_link_optical_frame_joint" type="fixed">
+    <origin xyz="0.0 0 0" rpy="3.14 3.14 0.0"/>
+    <parent link="left_front_camera_link"/>
+    <child link="left_front_camera_link_optical_frame"/>
+  </joint>
+
+  <link name="right_front_camera_link">
+    <xacro:body mass="0.001" d="0.010" h="0.03" w="0.03">
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+    </xacro:body>
+
+  </link>
+
+   <joint name="right_front_camera_joint" type="fixed">
+    <parent link="chassis"/>
+    <child link="right_front_camera_link"/>
+    <origin xyz="-0.0375 0.0100195 0.0515282" rpy="-0.523599 0 0"/>
+  </joint>
+
+  <link name="right_front_camera_link_optical_frame">
+    <xacro:body mass="0.00001" d="0.0000010" h="0.000003" w="0.00003">
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+    </xacro:body>
+
+  </link>
+
+  <joint name="right_front_camera_link_optical_frame_joint" type="fixed">
+    <origin xyz="0.000 0 0" rpy="3.14 3.14 0.0"/>
+    <parent link="right_front_camera_link"/>
+    <child link="right_front_camera_link_optical_frame"/>
+  </joint>
+
+  <link name="right_back_camera_link">
+    <xacro:body mass="0.001" d="0.010" h="0.03" w="0.03">
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+    </xacro:body>
+
+  </link>
+
+   <joint name="right_back_camera_joint" type="fixed">
+    <parent link="chassis"/>
+    <child link="right_back_camera_link"/>
+    <origin xyz="-0.0375 0.0100195 -0.0515282" rpy="0.523599 0 0"/>
+  </joint>
+
+  <link name="right_back_camera_link_optical_frame">
+    <xacro:body mass="0.00001" d="0.0000010" h="0.000003" w="0.00003">
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+    </xacro:body>
+
+  </link>
+
+  <joint name="right_back_camera_link_optical_frame_joint" type="fixed">
+    <origin xyz="0.000 0 0" rpy="3.14 0.0 0.0"/>
+    <parent link="right_back_camera_link"/>
+    <child link="right_back_camera_link_optical_frame"/>
+  </joint>
+
+  <link name="left_back_camera_link">
+    <xacro:body mass="0.001" d="0.010" h="0.03" w="0.03">
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+    </xacro:body>
+
+  </link>
+
+   <joint name="left_back_camera_joint" type="fixed">
+    <parent link="chassis"/>
+    <child link="left_back_camera_link"/>
+    <origin xyz="0.0375 0.0100195 -0.0515282" rpy="0.523599 0 0"/>
+  </joint>
+
+  <link name="left_back_camera_link_optical_frame">
+    <xacro:body mass="0.00001" d="0.0000010" h="0.000003" w="0.00003">
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+    </xacro:body>
+
+  </link>
+
+  <joint name="left_back_camera_link_optical_frame_joint" type="fixed">
+    <origin xyz="0.000 0 0" rpy="3.14 0.0 0.0"/>
+    <parent link="left_back_camera_link"/>
+    <child link="left_back_camera_link_optical_frame"/>
+  </joint>
+
+
+  <link name="rgb_camera_link_optical_frame">
+    <xacro:body mass="0.00001" d="0.0000010" h="0.000003" w="0.00003">
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+    </xacro:body>
+
+  </link>
+
+  <link name="segmentation_camera_link_optical_frame">
+    <xacro:body mass="0.00001" d="0.0000010" h="0.000003" w="0.00003">
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+    </xacro:body>
+
+  </link>
+  <link name="depth_camera_link_optical_frame">
+    <xacro:body mass="0.00001" d="0.0000010" h="0.000003" w="0.00003">
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+    </xacro:body>
+
+  </link>
+
+
+  <joint name="rgb_camera_link_optical_frame_joint" type="fixed">
+    <origin xyz="0.0051 0 0" rpy="3.14 3.14 0.0"/>
+    <parent link="rgb_camera_link"/>
+    <child link="rgb_camera_link_optical_frame"/>
+  </joint>
+
+  <joint name="segmentation_camera_link_optical_frame_joint" type="fixed">
+    <origin xyz="0.0051 0 0" rpy="0.0 0.0 0.0"/>
+    <parent link="rgb_camera_link"/>
+    <child link="segmentation_camera_link_optical_frame"/>
+  </joint>
+
+  <joint name="depth_camera_link_optical_frame_joint" type="fixed">
+    <origin xyz="0.0051 0 0" rpy="0.0 0.0 0.0"/>
+    <parent link="rgb_camera_link"/>
+    <child link="depth_camera_link_optical_frame"/>
+  </joint>
+
+  <link name="rae_right_camera_optical_frame">
+    <xacro:body mass="0.00001" d="0.0000010" h="0.000003" w="0.00003">
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+    </xacro:body>
+
+  </link>
+
+  <joint name="rae_right_camera_optical_frame_joint" type="fixed">
+    <origin xyz="0.0051 0 0" rpy="0.0 0.0 0.0"/>
+    <parent link="rgb_camera_link"/>
+    <child link="rae_right_camera_optical_frame"/>
+  </joint>
+
 </robot>
