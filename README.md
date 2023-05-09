@@ -116,6 +116,15 @@ Pin numbers shouldn't change between devices, but if that's the case you can edi
 
 Parameters for differential driver controller are present in `rae_hw/config/controller.yaml`. `wheel_separation` and `wheel_radius` parameters might also need tuning depending on the setup.
 
+#### Testing motors
+
+In `rae_hw/test` you can find three scripts that will help you verify that the motors are running correctly. If you want to change arguments, you need to provide all of them.
+
+1. To find out if encoder is working accurately, execute `ros2 run rae_hw test_encoders` and rotate the wheel by 360 degrees. After rotation, encoder readout should be ~2PI. If not, adjust encoder tick per rev parameter.
+Scipt arguments - `[encRatioL encRatioR]`. Full arg version `ros2 run rae_hw test_encoders 187 187`
+2. Finding out max speed - `ros2 run rae_hw test_max_speed`. Script arguments `[duration encRatioL encRatioR]`. Full arg version `ros2 run rae_hw test_max_speed 1.0 187 187`
+3. Motor verification - `ros2 run rae_hw test_motors`. Script arguments `[duration speedL speedR encRatioL encRatioR maxVelL maxVelR]`. Full arg version `ros2 run rae_hw test_motors 5.0 16.0 16.0 187 187 32 32`
+
 ### Setting up procedure - Simulation
 
 

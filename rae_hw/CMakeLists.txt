@@ -46,8 +46,7 @@ target_compile_definitions(rae_hw PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
 pluginlib_export_plugin_description_file(
   hardware_interface rae_hw.xml)
 
-add_executable(battery src/battery.cpp)
-ament_target_dependencies(battery rclcpp sensor_msgs)
+
 
 install(
   TARGETS
@@ -57,8 +56,22 @@ install(
   LIBRARY DESTINATION lib
 )
 
+add_executable(battery src/battery.cpp)
+ament_target_dependencies(battery rclcpp sensor_msgs)
+
+add_executable(test_motors test/test_motors.cpp src/rae_motors.cpp)
+target_link_libraries(test_motors ${GPIOD_LIBRARY})
+
+add_executable(test_encoders test/test_encoders.cpp src/rae_motors.cpp)
+target_link_libraries(test_encoders ${GPIOD_LIBRARY})
+
+add_executable(test_max_speed test/test_max_speed.cpp src/rae_motors.cpp)
+target_link_libraries(test_max_speed ${GPIOD_LIBRARY})
+
+ament_target_dependencies(battery rclcpp sensor_msgs)
+
 install(TARGETS
-  battery
+  battery test_motors test_encoders test_max_speed
   DESTINATION lib/${PROJECT_NAME})
 
 install(
