@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+
+<package format="3">
+  <name>laserscan_kinect</name>
+  <version>1.1.0</version>
+  <description>
+  Package laserscan_kinect converts depth image from the depth sensor
+  to a 2D laser scanner format. The conversion algorithm allows to remove a ground from the depth image
+  and compensate the sensor mount tilt angle relative to the ground.
+  </description>
+  <maintainer email="drwiega.michal@gmail.com">Michal Drwiega (https://mdrwiega.com/)</maintainer>
+  <license>BSD</license>
+  <url type="website">http://ros.org/wiki/depth_nav_tools</url>
+
+  <buildtool_depend>ament_cmake_auto</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>rclcpp_components</depend>
+  <depend>sensor_msgs</depend>
+  <depend>cv_bridge</depend>
+  <depend>image_geometry</depend>
+  <depend>image_transport</depend>
+
+  <test_depend>ament_cmake_gtest</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+  <test_depend>ament_lint_auto</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
