@@ -1,5 +1,5 @@
 ARG ROS_DISTRO=humble
-FROM ghcr.io/luxonis/robothub-app-v2:2023.108.0914-ros2humble-regular
+FROM ros:${ROS_DISTRO}-ros-core AS builder
 ARG SIM=0
 ARG CORE_NUM=1
 ARG BUILD_TYPE="RelWithDebInfo"
