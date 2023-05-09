@@ -1,22 +1,15 @@
 ARG ROS_DISTRO=humble
-FROM ros:${ROS_DISTRO}-ros-core AS builder
-ARG USE_RVIZ=0
+FROM ghcr.io/luxonis/robothub-app-v2:2023.108.0914-ros2humble-regular
 ARG SIM=0
 ARG CORE_NUM=1
 ARG BUILD_TYPE="RelWithDebInfo"
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
-   && apt-get -y install --no-install-recommends software-properties-common git libusb-1.0-0-dev wget zsh python3-colcon-common-extensions python3-rosdep build-essential
+   && apt-get -y install --no-install-recommends software-properties-common git libusb-1.0-0-dev wget zsh python3-colcon-common-extensions python3-rosdep build-essential neovim tmux htop net-tools iputils-ping gpiod
 
 ENV DEBIAN_FRONTEND=dialog
 RUN sh -c "$(wget https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O -)"
-
-RUN  if [ "$SIM" = "1" ] ; then wget https://packages.osrfoundation.org/gazebo.gpg -O /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg \
- && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null \
- && apt-get update \
- && apt-get install -y ignition-fortress ; fi
-
 
 RUN if [ "$SIM" = "0" ] ; then cd /tmp \
    && git clone --recursive https://github.com/luxonis/depthai-core.git --branch rvc3_develop \
@@ -28,9 +21,12 @@ RUN if [ "$SIM" = "0" ] ; then cd /tmp \
 ENV WS=/ws
 RUN mkdir -p $WS/src
 RUN if [ "$SIM" = "0" ] ; then cd .$WS/src && git clone --branch rae_pipeline_humble https://github.com/luxonis/depthai-ros.git ; fi
-RUN apt update && rosdep init && rosdep update
+RUN if [ "$SIM" = "0" ] ; then cd .$WS/src/depthai-ros && rm -rf depthai_ros_driver depthai-ros depthai_examples depthai_descriptions depthai_filters depthai_ros_msgs ; fi
 
-RUN if [ "$SIM" = "0" ] ; then cd .$WS/ && rosdep install --from-paths src --ignore-src  -y --skip-keys depthai ; fi
+RUN apt update && rosdep update
+
+COPY ./ .$WS/src/rae
+RUN cd .$WS/ && rosdep install --from-paths src --ignore-src  -y --skip-keys depthai
 RUN if [ "$SIM" = "0" ] ; then cd .$WS/ && . /opt/ros/${ROS_DISTRO}/setup.sh && colcon build --symlink-install ; fi
 
 FROM builder AS final
