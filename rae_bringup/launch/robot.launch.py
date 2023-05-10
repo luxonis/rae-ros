@@ -10,7 +10,6 @@ def generate_launch_description():
     camera_prefix = get_package_share_path('rae_camera')
     hw_prefix = get_package_share_path('rae_hw')
     return launch.LaunchDescription([
-<<<<<<< HEAD
         Node(
             package='depthimage_to_laserscan',
             executable='depthimage_to_laserscan_node',
@@ -21,8 +20,6 @@ def generate_launch_description():
                         'range_max': 20.0,
                         'scan_row': 250}]
         ),
-=======
->>>>>>> 4426c67e0bb2cb3bc6888ca1ced2a8102e19fd3c
         IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(camera_prefix, 'launch', 'camera.launch.py'))),

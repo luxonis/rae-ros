@@ -24,14 +24,15 @@ RUN mkdir -p $WS/src
 RUN apt update && rosdep update
 
 COPY ./ .$WS/src/rae
+RUN  cd .$WS/src && git clone --branch rae_pipeline_humble https://github.com/luxonis/depthai-ros.git
 RUN cd .$WS/ && rosdep install --from-paths src --ignore-src  -y --skip-keys depthai
-
+RUN cd .$WS/ && . /opt/ros/${ROS_DISTRO}/setup.sh  && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
 FROM builder AS final
 COPY ./ .$WS/src/rae
-RUN if [ "$SIM" = "0" ] ; then cd .$WS/ && apt update && rosdep update && rosdep install --from-paths src --ignore-src  -y --skip-keys depthai ros_gz_bridge ros_gz_sim ros_ign_gazebo nav2_bringup ; fi
+RUN if [ "$SIM" = "0" ] ; then cd .$WS/ && apt update && rosdep update && rosdep install --from-paths src --ignore-src  -y --skip-keys depthai --skip-keys ros_gz_bridge --skip-keys ros_gz_sim --skip-keys ros_ign_gazebo --skip-keys nav2_bringup ; fi
 RUN if [ "$SIM" = "1" ] ; then cd .$WS/ && apt update && rosdep update && rosdep install --from-paths src --ignore-src  -y --skip-keys depthai ; fi
 
-RUN cd .$WS/ && . /opt/ros/${ROS_DISTRO}/setup.sh && colcon build --symlink-install --packages-ignore depthai-ros depthai_ros_driver depthai_examples depthai_filters depthai_bridge depthai_descriptions depthai_ros_msgs --cmake-args -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
+RUN cd .$WS/ && . /opt/ros/${ROS_DISTRO}/setup.sh && . install/setup.sh && colcon build --symlink-install --packages-ignore depthai-ros depthai_ros_driver depthai_examples depthai_filters depthai_bridge depthai_descriptions depthai_ros_msgs --cmake-args -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
 
 RUN echo "if [ -f ${WS}/install/setup.zsh ]; then source ${WS}/install/setup.zsh; fi" >> $HOME/.zshrc
 RUN echo 'eval "$(register-python-argcomplete3 ros2)"' >> $HOME/.zshrc

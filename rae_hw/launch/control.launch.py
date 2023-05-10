@@ -3,6 +3,7 @@ import os
 from ament_index_python.packages import get_package_share_directory
 
 from launch import LaunchDescription
+from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, OpaqueFunction
 from launch_ros.actions import Node
 
@@ -17,6 +18,11 @@ def generate_launch_description():
     test_controller = os.path.join(get_package_share_directory('rae_hw'), 'config', 'controller.yaml')
 
     return LaunchDescription([
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(
+                os.path.join(get_package_share_directory('rae_description'), 'launch', 'rae_gazebo_desc_launch.py')),
+            launch_arguments={"sim": "false"}.items()
+        ),
         Node(
             package='controller_manager',
             executable='ros2_control_node',

@@ -2,8 +2,8 @@
 <robot name="rae"
   xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:include filename="inertial_moment_calc.xacro"/>
-  <xacro:include filename="rae_gazebo.xacro"/>
-  <xacro:include filename="rae_control.xacro"/>
+  <!-- <xacro:include filename="rae_gazebo.xacro"/> -->
+  <xacro:include filename="rae_ros2_control.urdf.xacro"/>
   <xacro:property name="deg_to_rad" value="0.01745329251994329577" />
   <link name="base_footprint"/>
   <joint name="dummy" type="fixed">
@@ -337,7 +337,8 @@
     <parent link="rgb_camera_link"/>
     <child link="depth_camera_link_optical_frame"/>
   </joint>
-  <link name="rae_right_camera_optical_frame">
+
+  <link name="rae_right_front_camera_optical_frame">
     <xacro:body mass="0.00001" d="0.0000010" h="0.000003" w="0.00003">
       <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
     </xacro:body>
@@ -347,7 +348,7 @@
   <joint name="rae_right_camera_optical_frame_joint" type="fixed">
     <origin xyz="0.051 0.064 0.01" rpy="-1.0472 0 -1.57"/>
     <parent link="base_link"/>
-    <child link="rae_right_camera_optical_frame"/>
+    <child link="rae_right_front_camera_optical_frame"/>
   </joint>
 
 </robot>
