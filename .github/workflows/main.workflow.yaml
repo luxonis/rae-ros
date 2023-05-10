@@ -67,7 +67,7 @@ jobs:
           push: ${{ env.PUSH }}
           no-cache: true
           tags: | 
-            luxonis/rae-ros-sim:${{ github.ref_name }}
+            luxonis/rae-ros-sim:${{ github.head_ref }}
       
       - name: Build Robot
         uses: docker/build-push-action@v3
@@ -94,4 +94,4 @@ jobs:
           push: ${{ env.PUSH }}
           no-cache: true
           tags: | 
-            luxonis/rae-ros-robot:${{ github.ref_name }}
+            luxonis/rae-ros-robot:${{ github.head_ref }}
