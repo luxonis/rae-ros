@@ -6,7 +6,6 @@
 #include "camera_info_manager/camera_info_manager.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/image.hpp"
-#include "stereo_msgs/msg/disparity_image.hpp"
 #include "vision_msgs/msg/detection3_d_array.hpp"
 
 // Inludes common necessary includes for development using depthai library

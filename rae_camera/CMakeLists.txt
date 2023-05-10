@@ -16,7 +16,7 @@ find_package(sensor_msgs REQUIRED)
 find_package(stereo_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(vision_msgs REQUIRED)
-
+find_package(OpenCV 4 REQUIRED COMPONENTS imgproc highgui)
 set(dependencies
   camera_info_manager
   cv_bridge
@@ -26,6 +26,8 @@ set(dependencies
   stereo_msgs
   std_msgs
   vision_msgs
+  depthai
+  OpenCV
 )
 
 include_directories(
@@ -34,12 +36,21 @@ include_directories(
 )
 
 add_executable(camera src/camera.cpp)
+add_executable(stereo_depth src/stereo_depth)
 
 
 ament_target_dependencies(camera
 ${dependencies})
+
 install(TARGETS
 camera
+DESTINATION lib/${PROJECT_NAME})
+
+ament_target_dependencies(stereo_depth
+${dependencies})
+
+install(TARGETS
+stereo_depth
 DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})

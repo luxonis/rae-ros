@@ -351,4 +351,17 @@
     <child link="rae_right_front_camera_optical_frame"/>
   </joint>
 
+    <link name="rae_left_front_camera_optical_frame">
+    <xacro:body mass="0.00001" d="0.0000010" h="0.000003" w="0.00003">
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+    </xacro:body>
+
+  </link>
+
+  <joint name="rae_left_camera_optical_frame_joint" type="fixed">
+    <origin xyz="-0.051 0.064 0.01" rpy="-1.0472 0 -1.57"/>
+    <parent link="base_link"/>
+    <child link="rae_left_front_camera_optical_frame"/>
+  </joint>
+
 </robot>
