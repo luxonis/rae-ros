@@ -9,6 +9,25 @@ from launch_ros.actions import Node
 def launch_setup(context, *args, **kwargs):
     params_file = LaunchConfiguration("params_file")
     return [
+        # Node(
+        #     package='depthimage_to_laserscan',
+        #     executable='depthimage_to_laserscan_node',
+        #     name='depthimage_to_laserscan_node',
+        #     remappings=[('depth', '/rae/stereo_front/image_raw'),
+        #                 ('depth_camera_info', '/rae/stereo_front/camera_info')],
+        #     parameters=[{'output_frame': 'base_link',
+        #                 'range_max': 20.0,
+        #                 'scan_row': 250}]
+        # ),
+        # Node(
+        #     package='laserscan_kinect',
+        #     executable='laserscan_kinect_exe',
+        #     parameters=[params_file],
+        #     remappings=[
+        #         ('/image', '/rae/stereo_front/image_raw'),
+        #         ('/camera_info', '/rae/stereo_front/camera_info'),
+        #     ]
+        # ),
         Node(
         parameters=[
           params_file,

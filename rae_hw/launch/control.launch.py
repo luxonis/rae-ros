@@ -20,7 +20,7 @@ def generate_launch_description():
     return LaunchDescription([
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
-                os.path.join(get_package_share_directory('rae_description'), 'launch', 'rae_gazebo_desc_launch.py')),
+                os.path.join(get_package_share_directory('rae_description'), 'launch', 'rsp.launch.py')),
             launch_arguments={"sim": "false"}.items()
         ),
         Node(
@@ -49,8 +49,5 @@ def generate_launch_description():
         Node(
             package="rae_hw",
             executable="battery",
-        ),
-        IncludeLaunchDescription(
-            (os.path.join(get_package_share_directory('rosbridge_server'), 'launch', 'rosbridge_websocket_launch.xml'))
         ),
     ])

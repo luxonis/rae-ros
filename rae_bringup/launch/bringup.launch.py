@@ -8,7 +8,6 @@ from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
 
-
 def launch_setup(context, *args, **kwargs):
     LaunchConfiguration('sim')
     bringup_prefix = get_package_share_path('rae_bringup')
@@ -30,25 +29,32 @@ def launch_setup(context, *args, **kwargs):
         ),
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
-                os.path.join(get_package_share_path('rae_gazebo'), 'launch', 'rae_simulation.launch.py')),
+                os.path.join(get_package_share_path('rae_gazebo'), 'launch', 'gazebo.launch.py')),
             condition=IfCondition(LaunchConfiguration("sim").perform(context))
         ),
-        IncludeLaunchDescription(
-            (os.path.join(get_package_share_path('rosbridge_server'), 'launch', 'rosbridge_websocket_launch.xml'))
-        ),
+        # IncludeLaunchDescription(
+        #     (os.path.join(get_package_share_path('rosbridge_server'),
+        #      'launch', 'rosbridge_websocket_launch.xml'))
+        # ),
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
                 os.path.join(get_package_share_path('rae_bringup'), 'launch', 'robot.launch.py')),
-            condition=UnlessCondition(LaunchConfiguration("sim").perform(context))
+            condition=UnlessCondition(
+                LaunchConfiguration("sim").perform(context))
         ),
 
         IncludeLaunchDescription(os.path.join(bringup_prefix, 'launch', 'slam.launch.py'),
                                  launch_arguments={
-            'params_file': params}.items()),
+            'params_file': params}.items(),
+            condition=IfCondition(LaunchConfiguration('use_slam_toolbox'))),
+        IncludeLaunchDescription(os.path.join(bringup_prefix, 'launch', 'rtabmap.launch.py'),
+                                 launch_arguments={
+            'params_file': params}.items(),
+            condition=IfCondition(LaunchConfiguration('use_rtabmap'))),
 
-        IncludeLaunchDescription(os.path.join(bringup_prefix, 'launch', 'nav.launch.py'),
-                                 launch_arguments={'use_sim_time': LaunchConfiguration("sim").perform(context),
-            'params_file': params}.items())
+        # IncludeLaunchDescription(os.path.join(bringup_prefix, 'launch', 'nav.launch.py'),
+        #                          launch_arguments={'use_sim_time': LaunchConfiguration("sim").perform(context),
+        #                                            'params_file': params}.items())
     ]
 
 
@@ -56,9 +62,11 @@ def generate_launch_description():
     bringup_prefix = get_package_share_path('rae_bringup')
     rviz_config = os.path.join(bringup_prefix, "config", "sim.rviz")
     declared_arguments = [
-        DeclareLaunchArgument('sim', default_value='True'),
+        DeclareLaunchArgument('sim', default_value='False'),
         DeclareLaunchArgument('use_rviz', default_value='False'),
         DeclareLaunchArgument('rviz_config', default_value=rviz_config),
+        DeclareLaunchArgument('use_slam_toolbox', default_value='False'),
+        DeclareLaunchArgument('use_rtabmap', default_value='False')
     ]
 
     return LaunchDescription(
