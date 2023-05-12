@@ -15,5 +15,5 @@ def generate_launch_description():
             os.path.join(camera_prefix, 'launch', 'camera.launch.py'))),
             IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            os.path.join(hw_prefix, 'launch', 'rae_control.launch.py'))),
+            os.path.join(hw_prefix, 'launch', 'control.launch.py'))),
     ])
