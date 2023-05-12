@@ -43,7 +43,7 @@ jobs:
         id: vars
         run: echo ::set-output name=short_ref::${GITHUB_REF#refs/*/}
 
-      - name: Build and Push
+      - name: Build and Push 
         uses: docker/build-push-action@v3
         if: env.PUSH == 'true'
         with:
@@ -52,7 +52,9 @@ jobs:
             USE_RVIZ=1
           platforms: |
             amd64
+            arm64
           push: ${{ env.PUSH }}
           no-cache: true
           tags: | 
             luxonis/depthai-ros-rae
+      
