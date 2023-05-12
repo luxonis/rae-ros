@@ -11,11 +11,9 @@ RUN apt-get update \
 ENV WS=/ws
 RUN mkdir -p $WS/src
 
-RUN apt update && rosdep update
-
 COPY ./ .$WS/src/rae
 
-RUN cd  .$WS/ && apt update && rosdep update && rosdep install --from-paths src --ignore-src  -y --skip-keys depthai
+RUN cd  .$WS/ && apt update && rosdep update && rosdep install --from-paths src --ignore-src  -y --skip-keys depthai --skip-keys depthai_bridge
 
 RUN cd .$WS/ && . /opt/ros/${ROS_DISTRO}/setup.sh && . $DEPTHAI_WS/install/setup.sh && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
 
