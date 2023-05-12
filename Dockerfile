@@ -21,12 +21,12 @@ RUN cd /tmp \
    && rm -r depthai-core
 
 ENV DEPTHAI_WS=/depthai_ws
-RUN mkdir -p $WS/src
-RUN cd .$WS/src && git clone --branch rae_pipeline_humble https://github.com/luxonis/depthai-ros.git
+RUN mkdir -p $DEPTHAI_WS/src
+RUN cd .$DEPTHAI_WS/src && git clone --branch rae_pipeline_humble https://github.com/luxonis/depthai-ros.git
 
 RUN apt update && rosdep update
 
 COPY ./ .$WS/src/rae
-RUN cd .$WS/ && rosdep install --from-paths src --ignore-src  -y --skip-keys depthai
+RUN cd .$DEPTHAI_WS/ && rosdep install --from-paths src --ignore-src  -y --skip-keys depthai
 
-RUN cd .$WS/ && . /opt/ros/${ROS_DISTRO}/setup.sh && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
+RUN cd .$DEPTHAI_WS/ && . /opt/ros/${ROS_DISTRO}/setup.sh && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
