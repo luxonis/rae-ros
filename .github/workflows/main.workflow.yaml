@@ -43,19 +43,7 @@ jobs:
         id: vars
         run: echo ::set-output name=short_ref::${GITHUB_REF#refs/*/}
 
-      - name: Build Sim
-        uses: docker/build-push-action@v3
-        if: env.PUSH == 'false'
-        with:
-          build-args: |
-            ROS_DISTRO=${{ env.ROS_DISTRO }}
-            USE_RVIZ=1
-            SIM=1
-          platforms: |
-            amd64
-          no-cache: true
-
-      - name: Build and Push Sim
+      - name: Build and Push
         uses: docker/build-push-action@v3
         if: env.PUSH == 'true'
         with:
@@ -64,33 +52,6 @@ jobs:
             USE_RVIZ=1
           platforms: |
             amd64
-          push: ${{ env.PUSH }}
-          no-cache: true
-          tags: | 
-            luxonis/depthai-ros-rae
-      
-      - name: Build Robot
-        uses: docker/build-push-action@v3
-        if: env.PUSH == 'false'
-        with:
-          build-args: |
-            ROS_DISTRO=${{ env.ROS_DISTRO }}
-            USE_RVIZ=0
-            SIM=0
-          platforms: |
-            arm64
-          no-cache: true
-
-      - name: Build and Push Robot
-        uses: docker/build-push-action@v3
-        if: env.PUSH == 'true'
-        with:
-          build-args: |
-            ROS_DISTRO=${{ env.ROS_DISTRO }}
-            USE_RVIZ=0
-            SIM=0
-          platforms: |
-            arm64
           push: ${{ env.PUSH }}
           no-cache: true
           tags: | 
