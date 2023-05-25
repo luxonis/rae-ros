@@ -1,4 +1,4 @@
-# RAE
+# RAE-ROS
 (Will be moved to public later)
 
 Welcome to official RAE ROS repository.
@@ -14,7 +14,7 @@ Make sure you have [IGN (Gazebo) Fortress](https://gazebosim.org/docs/fortress/i
 3. Currently date resets after each startup to set current - ssh root@192.168.11.1 sudo date -s @`( date -u +"%s" )`
 
 #### Generating docker image
-1. Clone repository `git clone git@github.com:luxonis/rae.git`
+1. Clone repository `git clone git@github.com:luxonis/rae-ros.git`
 2. Build docker image `cd rae && docker buildx build --platform arm64 --build-arg USE_RVIZ=0 --build-arg SIM=0 --build-arg ROS_DISTRO=humble --build-arg CORE_NUM=10 -f Dockerfile --squash -t rae_full --load .
 `
 3. Upload docker image to robot. Note that currently space on the robot is limited, so you need to have 7-8 GB of free space in `/data` directory - `docker save rae_full | ssh -C root@192.168.11.1 docker load`
