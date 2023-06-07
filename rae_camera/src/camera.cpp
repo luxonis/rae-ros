@@ -43,11 +43,11 @@ dai::Pipeline createPipeline(bool enable_rgb, bool enable_depth)
         // MonoCamera
         left->setResolution(dai::node::ColorCamera::Properties::SensorResolution::THE_800_P);
         left->setVideoSize(640, 400);
-        left->setBoardSocket(dai::CameraBoardSocket::LEFT);
+        left->setBoardSocket(dai::CameraBoardSocket::CAM_B);
         left->setFps(30.0);
         right->setResolution(dai::node::ColorCamera::Properties::SensorResolution::THE_800_P);
         right->setVideoSize(640, 400);
-        right->setBoardSocket(dai::CameraBoardSocket::RIGHT);
+        right->setBoardSocket(dai::CameraBoardSocket::CAM_C);
         right->setFps(30.0);
 
         // StereoDepth

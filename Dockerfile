@@ -11,6 +11,8 @@ RUN apt-get update \
 ENV WS=/ws
 RUN mkdir -p $WS/src
 
+RUN cd ./$WS/src && git clone https://github.com/BrettRD/ros-gst-bridge.git
+
 COPY ./ .$WS/src/rae
 
 RUN cd  .$WS/ && apt update && rosdep update && rosdep install --from-paths src --ignore-src  -y --skip-keys depthai --skip-keys depthai_bridge
