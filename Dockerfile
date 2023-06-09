@@ -13,7 +13,7 @@ RUN mkdir -p $WS/src
 
 RUN cd ./$WS/src && git clone https://github.com/BrettRD/ros-gst-bridge.git
 
-COPY ./ .$WS/src/rae
+COPY ./ .$WS/src/rae-ros
 
 RUN cd  .$WS/ && apt update && rosdep update && rosdep install --from-paths src --ignore-src  -y --skip-keys depthai --skip-keys depthai_bridge
 
