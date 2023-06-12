@@ -1,0 +1,201 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <xacro:include filename="inertial_moment_calc.xacro" />
+
+    <!-- BASE LINK -->
+    <link name="base_link">
+        <xacro:body mass="0.00001" d="0.0000010" h="0.000003" w="0.00003">
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+        </xacro:body>
+    </link>
+
+    <gazebo reference="base_link">
+        <sensor name="imu_sensor" type="imu">
+            <always_on>1</always_on>
+            <update_rate>1</update_rate>
+            <visualize>true</visualize>
+            <topic>imu</topic>
+        </sensor>
+    </gazebo>
+
+    <link name="base_footprint">
+    </link>    
+
+     <joint name="base_footprint_joint" type="fixed">
+        <parent link="base_link" />
+        <child link="base_footprint" />
+        <origin rpy="0 0.0 0" xyz="0 0.0 0.0" />
+    </joint>
+
+    <!-- CHASSIS -->
+    <link name="chassis">
+        <xacro:body mass="0.360" d="0.125" h="0.028" w="0.1256">
+            <origin xyz="0 0.014 0.0" rpy="0.0 0.0 0.0" />
+        </xacro:body>
+        <collision>
+            <origin rpy="0.0 0.0 0.0" xyz="0 0.018 0" />
+            <geometry>
+                <box size="0.1 0.015 0.1" />
+            </geometry>
+        </collision>
+        <visual>
+            <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0" />
+            <geometry>
+                <mesh filename="file://$(find rae_description)/urdf/models/rae.stl" scale="1.0 1.0 1.0" />
+            </geometry>
+            <material name="mat">
+                <lighting>1</lighting>
+                <color rgba="0.1 0.1 0.1 1.0" />
+                <shader type='pixel' />
+                <emissive>0 0 0 1</emissive>
+            </material>
+            <transparency>0</transparency>
+            <cast_shadows>1</cast_shadows>
+        </visual>
+    </link>
+
+    <joint name="base_chassis_joint" type="fixed">
+        <parent link="base_link" />
+        <child link="chassis" />
+        <origin rpy="1.57 0.0 1.57" xyz="0.0307 0.0 0.0" />
+    </joint>
+
+    <!-- LEFT WHEEL -->
+    <link name="left_wheel">
+        <xacro:wheels mass="0.008" h="0.011" r="0.0119">
+            <origin xyz="0.0 0.0 -0.0055" rpy="0.0 0.0 0.0" />
+        </xacro:wheels>
+        <collision>
+            <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 -0.0055" />
+            <geometry>
+                <cylinder length="0.011" radius="0.0119" />
+            </geometry>
+        </collision>
+        <visual>
+            <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 -0.0055" />
+            <geometry>
+                <cylinder length="0.011" radius="0.0119" />
+            </geometry>
+        </visual>
+    </link>
+
+    <joint name="left_wheel_joint" type="continuous">
+        <origin rpy="1.57 0.0 0.00 " xyz="0.0 0.042 0.0052" />
+        <parent link="base_link" />
+        <child link="left_wheel" />
+        <axis rpy="0 0 0" xyz="0 0 -1" />
+    </joint>
+
+    <gazebo reference="left_wheel">
+        <mu1>100.0</mu1>
+        <mu2>100.0</mu2>
+    </gazebo>
+
+    <!-- RIGHT WHEEL -->
+    <link name="right_wheel">
+        <xacro:wheels mass="0.008" h="0.011" r="0.0119">
+            <origin xyz="0.0 0.0 -0.0055" rpy="0.0 0.0 0.0" />
+        </xacro:wheels>
+        <collision>
+            <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 -0.0055" />
+            <geometry>
+                <cylinder length="0.011" radius="0.0119" />
+            </geometry>
+        </collision>
+        <visual>
+            <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 -0.0055" />
+            <geometry>
+                <cylinder length="0.011" radius="0.0119" />
+            </geometry>
+        </visual>
+    </link>
+
+    <joint name='right_wheel_joint' type='continuous'>
+        <origin rpy="-1.57 0.0 0.0 " xyz="0.0 -0.042 0.0052" />
+        <parent link="base_link" />
+        <child link="right_wheel" />
+        <axis rpy="0 0 0" xyz="0 0 1" />
+    </joint>
+
+    <gazebo reference="right_wheel">
+        <mu1>100.0</mu1>
+        <mu2>100.0</mu2>
+    </gazebo>
+
+    <!-- LEFT CASTER WHEEL -->
+    <link name="left_caster_wheel">
+        <xacro:caster_wheels mass="0.008" r="0.005">
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+        </xacro:caster_wheels>
+        <collision>
+            <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0" />
+            <geometry>
+                <sphere radius="0.006" />
+            </geometry>
+        </collision>
+        <visual>
+            <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0" />
+            <geometry>
+                <mesh filename="file://$(find rae_description)/urdf/models/caster-wheel.stl" scale="1.0 1.0 1.0" />
+            </geometry>
+            <material name="mat">
+                <lighting>1</lighting>
+                <color rgba="1.0 1.0 1.0 1.0" />
+                <shader type='pixel' />
+                <emissive>0 0 0 1</emissive>
+            </material>
+            <transparency>0</transparency>
+            <cast_shadows>1</cast_shadows>
+        </visual>
+    </link>
+
+    <joint name="left_caster_wheel_joint" type="fixed">
+        <parent link="base_link" />
+        <child link="left_caster_wheel" />
+        <origin rpy="0.0 0.0 0.0" xyz="0.0735 0.0445 -0.001" />
+    </joint>
+
+    <gazebo reference="left_caster_wheel">
+        <mu1>0.001</mu1>
+        <mu2>0.001</mu2>
+    </gazebo>
+
+    <!-- RIGHT CASTER WHEEL -->
+    <link name="right_caster_wheel">
+        <xacro:caster_wheels mass="0.008" r="0.005">
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+        </xacro:caster_wheels>
+        <collision>
+            <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0" />
+            <geometry>
+                <sphere radius="0.006" />
+            </geometry>
+        </collision>
+        <visual>
+            <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0" />
+            <geometry>
+                <mesh filename="file://$(find rae_description)/urdf/models/caster-wheel.stl" scale="1.0 1.0 1.0" />
+            </geometry>
+            <material name="mat">
+                <lighting>1</lighting>
+                <color rgba="1.0 1.0 1.0 1.0" />
+                <shader type='pixel' />
+                <emissive>0 0 0 1</emissive>
+            </material>
+            <transparency>0</transparency>
+            <cast_shadows>1</cast_shadows>
+        </visual>
+    </link>
+
+    <joint name="right_caster_wheel_joint" type="fixed">
+        <parent link="base_link" />
+        <child link="right_caster_wheel" />
+        <origin rpy="0.0 0.0 0.0" xyz="0.0735 -0.0445 -0.001" />
+    </joint>
+
+    <gazebo reference="right_caster_wheel">
+        <mu1>0.001</mu1>
+        <mu2>0.001</mu2>
+    </gazebo>
+</robot>

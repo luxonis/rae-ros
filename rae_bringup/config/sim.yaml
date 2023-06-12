@@ -342,7 +342,7 @@ velocity_smoother:
     min_velocity: [-0.26, 0.0, -1.0]
     max_accel: [2.5, 0.0, 3.2]
     max_decel: [-2.5, 0.0, -3.2]
-    odom_topic: "odom"
+    odom_topic: "/diff_controller/odom"
     odom_duration: 0.1
     deadband_velocity: [0.0, 0.0, 0.0]
     velocity_timeout: 1.0
@@ -419,23 +419,7 @@ slam_toolbox:
     minimum_angle_penalty: 0.9
     minimum_distance_penalty: 0.5
     use_response_expansion: true
-cliff_detector:
-  ros__parameters:
-    output_frame_id: chassis
-    rate: 10
-    range_min: 0.01
-    range_max: 20.0
-    sensor_mount_height: 0.05
-    sensor_tilt_angle: -2.0
 
-    publish_depth: true
-    cam_model_update: false
-    used_depth_height: 240
-    block_size: 2
-    block_points_thresh: 3
-    depth_img_step_row: 8
-    depth_img_step_col: 8
-    ground_margin: 0.01
 depth_sensor_pose:
   ros__parameters:
     range_min: 0.5
@@ -484,3 +468,4 @@ laserscan_kinect:
     publish_dbg_info: true
     threads_num: 1
     use_sim_time: true
+

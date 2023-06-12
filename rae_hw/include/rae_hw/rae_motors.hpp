@@ -33,16 +33,33 @@ namespace rae_hw
             return (A != rhs.A || B != rhs.B);
         }
     };
+    struct PID
+    {
+        float P;
+        float I;
+        float D;
+    };
     /// @brief Class responsible for motor control and encoder readout.
     /// PWM generation and encoder readout are happening in separate threads.
     class RaeMotor
     {
     public:
-        RaeMotor(const std::string &name, const std::string &chipName, int pwmPinNum, int phPinNum, int enA, int enB, float encTicsPerRev, float maxVel, bool reversePhPinLogic);
+        RaeMotor(const std::string &name, 
+                 const std::string &chipName, 
+                 int pwmPinNum, 
+                 int phPinNum, 
+                 int enA, 
+                 int enB, 
+                 float encTicsPerRev, 
+                 float maxVel, 
+                 bool reversePhPinLogic, 
+                 bool closedLoop = false, 
+                 PID pid = {0.6,0.4,0.0});
         ~RaeMotor();
         /// @brief Get current motor position.
         /// @return Position in rads.
         float getPos();
+        float getSpeed();
         /// @brief Set motor speed.
         /// @param speed rads/s.
         void motorSet(float speed);
@@ -64,8 +81,15 @@ namespace rae_hw
         /// @param speed in rads/s
         /// @return PWM target in range [0:1000]us
         uint32_t speedToPWM(float speed);
+        void calcSpeed();
+        void controlSpeed();
         volatile uint32_t dutyTarget = 0;
         volatile uint32_t dutyTrue = 0;
+        float targetSpeed;
+        float currentSpeed;
+        float prevPos;
+        float prevError;
+        float errSum;
         std::atomic<bool> _running{true};
         gpiod::line pwmPin;
         gpiod::line phPin;
@@ -75,16 +99,20 @@ namespace rae_hw
         float velLim;
         bool motDirection = 0;
         bool encDirection;
-        std::thread motorThread, encoderThread;
+        std::thread motorThread, encoderThread, calcSpeedThread, speedControlThread;
         bool reversePhPinLogic_ = false;
+        bool closedLoop_ = true;
         int prevCount;
         float rads;
-        std::mutex encMtx;
+        std::mutex posMtx, speedMtx;
         const State Rest{0, 0};
         const State Clockwise{0, 1};
         const State Halfway{1, 1};
         const State Counter{1, 0};
         State prevState;
+        PID currPID;
+        std::chrono::high_resolution_clock::time_point prevVelTime;
+        std::chrono::high_resolution_clock::time_point prevErrorTime;
     };
 
 }

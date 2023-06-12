@@ -13,6 +13,7 @@ find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_lifecycle REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
 
 find_library(GPIOD_LIBRARY NAMES libgpiodcxx.so)
 if(NOT GPIOD_LIBRARY)
@@ -47,7 +48,6 @@ pluginlib_export_plugin_description_file(
   hardware_interface rae_hw.xml)
 
 
-
 install(
   TARGETS
   rae_hw
@@ -68,10 +68,15 @@ target_link_libraries(test_encoders ${GPIOD_LIBRARY})
 add_executable(test_max_speed test/test_max_speed.cpp src/rae_motors.cpp)
 target_link_libraries(test_max_speed ${GPIOD_LIBRARY})
 
+add_executable(test_speed test/test_speed.cpp src/rae_motors.cpp)
+target_link_libraries(test_speed ${GPIOD_LIBRARY})
+ament_target_dependencies(test_speed rclcpp geometry_msgs)
+
 ament_target_dependencies(battery rclcpp sensor_msgs)
 
 install(TARGETS
-  battery test_motors test_encoders test_max_speed
+  battery test_motors test_encoders test_max_speed test_speed
+
   DESTINATION lib/${PROJECT_NAME})
 
 install(

@@ -3,25 +3,16 @@
 <package format="3">
   <name>rae_gazebo</name>
   <version>0.0.0</version>
-  <description>RAE Gazebo package.</description>
-  <maintainer email="danilo.pejovic@luxonis.com">Danilo Pejovic</maintainer>
-  <license>MIT</license>
+  <description>TODO: Package description</description>
+  <maintainer email="matej.hladky@luxonis.com">mateo</maintainer>
+  <license>TODO: License declaration</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
-  <depend>tf2</depend>
-  <depend>geometry_msgs</depend>
-  <depend>ros_gz_bridge</depend>
-  <depend>ros_gz_sim</depend>
-  <depend>ros_ign_gazebo</depend>
-  <depend>joint_state_publisher</depend>
-
-  <!-- Adding dependency here to make docker image smaller for the robot -->
-  <exec_depend>nav2_bringup</exec_depend>
-  <exec_depend>teleop_twist_keyboard</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
-
+  <depend>ros_gz_bridge</depend>
+  <depend>ros_gz_sim</depend>
   <export>
     <build_type>ament_cmake</build_type>
   </export>

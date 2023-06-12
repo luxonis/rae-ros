@@ -21,11 +21,11 @@ Make sure you have [IGN (Gazebo) Fortress](https://gazebosim.org/docs/fortress/i
 4. SSH into robot and run docker image - `docker run -it --restart=unless-stopped -v /dev/:/dev/  --privileged  --net=host rae_full`
 5. Search for docker container name with `docker ps`
 6. Attach to the shell - `docker attach <container_name>`, or if you want to create separate session `docker exec -it <container_name> zsh
-6. To launch robot hardware - `ros2 launch rae_bringup robot.launch.py`. This launches:
+7. To launch robot hardware - `ros2 launch rae_bringup robot.launch.py`. This launches:
    - Motor drivers and differential controller
    - Camera driver, currently set up to provide Depth and streams from left & right camera. Note here that you have to calibrate cameras (see steps below). Currently a default calibration file is loaded. It's located in `rae_bringup/config/cal.json`. To use one on the device or from other path, change `i_external_calibration_path` parameter in  `rae_bringup/config/camera.yaml`
    - Depth image -> LaserScan conversion node used for SLAM
-7. Launching navigation stack - on host run `ros2 launch rae_bringup bringup.launch.py sim:=false use_rviz:=true`
+9. Launching navigation stack  first connect RAE to WIFI with internet access, then install slam_toolbox - `sudo apt install ros-humble-slam-toolbox` then run `ros2 launch rae_bringup bringup.launch.py sim:=false use_rviz:=true`
 
 #### Calibration
 Steps to use it in basic docker image:

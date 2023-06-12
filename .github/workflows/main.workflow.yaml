@@ -21,7 +21,7 @@ jobs:
     strategy:
       fail-fast: false
     env: 
-      PUSH: ${{ (github.event_name != 'pull_request') && (github.repository == 'luxonis/rae') }}
+      PUSH: ${{ (github.repository == 'luxonis/rae-ros') }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -67,8 +67,7 @@ jobs:
           push: ${{ env.PUSH }}
           no-cache: true
           tags: | 
-            luxonis/rae-ros-sim:${{ steps.vars.outputs.short_ref }}
-            luxonis/rae-ros-sim:${{ env.ROS_DISTRO }}-latest
+            luxonis/rae-ros-sim:${{ github.head_ref }}
       
       - name: Build Robot
         uses: docker/build-push-action@v3
@@ -95,5 +94,4 @@ jobs:
           push: ${{ env.PUSH }}
           no-cache: true
           tags: | 
-            luxonis/rae-ros-robot:${{ steps.vars.outputs.short_ref }}
-            luxonis/rae-ros-robot:${{ env.ROS_DISTRO }}-latest
+            luxonis/rae-ros-robot:${{ github.head_ref }}
