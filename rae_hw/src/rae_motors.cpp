@@ -7,6 +7,7 @@ namespace rae_hw
     using namespace std::chrono_literals;
     RaeMotor::RaeMotor(const std::string &name,
                        const std::string &chipName,
+                       const std::string &pwmName,
                        int pwmPinNum,
                        int phPinNum,
                        int enA,
@@ -18,11 +19,11 @@ namespace rae_hw
                        PID pid)
     {
         gpiod::chip chip(chipName);
-        pwmPin = chip.get_line(pwmPinNum);
+        pwmPin = pwmPinNum;
+        pwmName_ = pwmName;
         phPin = chip.get_line(phPinNum);
         enAPin = chip.get_line(enA);
         enBPin = chip.get_line(enB);
-        pwmPin.request({name + "_pwm", gpiod::line_request::DIRECTION_OUTPUT, 0}, 0);
         phPin.request({name + "_ph", gpiod::line_request::DIRECTION_OUTPUT, 0}, 0);
         enAPin.request({name + "_en_a", gpiod::line_request::DIRECTION_INPUT, 0});
         enBPin.request({name + "_en_b", gpiod::line_request::DIRECTION_INPUT, 0});
@@ -122,20 +123,35 @@ namespace rae_hw
             std::this_thread::sleep_for(5ms);
         }
     }
-    void RaeMotor::pwmMotor()
+
+    void RaeMotor::setPWM(int period, int duty_cycle)
     {
-        while (_running)
-        {
-            if (dutyTrue)
-            {
-                pwmPin.set_value(1);
-            }
-            usleep(dutyTrue);
-            pwmPin.set_value(0);
-            usleep((1000 - dutyTrue));
-            dutyTrue = dutyTarget;
-        }
+        std::string periodPath = pwmName_ + "/pwm" + std::to_string(pwmPin) + "/period";
+        std::ofstream periodFile(periodPath);
+        periodFile << period;
+        periodFile.close();
+        std::string dutyCyclePath = pwmName_ + "/pwm" + std::to_string(pwmPin) + "/duty_cycle";
+        std::ofstream dutyCycleFile(dutyCyclePath);
+        dutyCycleFile << duty_cycle;
+        dutyCycleFile.close();
+
+        std::string enablePath = pwmName_ + "/pwm" + std::to_string(pwmPin) + "/enable";
+        std::ofstream enableFile(enablePath);
+        enableFile << 1;  // Enable PWM
+        enableFile.close();
     }
+
+    void RaeMotor::disablePWM()
+    {
+        std::string enablePath = pwmName_ + "/pwm" + std::to_string(pwmPin) + "/enable";
+        std::ofstream enableFile(enablePath);
+        enableFile << 0;  // Disable PWM
+        enableFile.close();
+    }
+
+    
+
+   
     void RaeMotor::readEncoders()
     {
         while (_running)
@@ -215,7 +231,7 @@ namespace rae_hw
     void RaeMotor::run()
     {
         _running = true;
-        motorThread = std::thread(&RaeMotor::pwmMotor, this);
+        
         encoderThread = std::thread(&RaeMotor::readEncoders, this);
         calcSpeedThread = std::thread(&RaeMotor::calcSpeed, this);
         speedControlThread = std::thread(&RaeMotor::controlSpeed, this);
@@ -236,8 +252,6 @@ namespace rae_hw
         encoderThread.join();
         calcSpeedThread.join();
         speedControlThread.join();
-        pwmPin.set_value(0);
-        pwmPin.release();
         phPin.set_value(0);
         phPin.release();
         enAPin.release();
