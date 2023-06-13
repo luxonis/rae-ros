@@ -1,4 +1,4 @@
-# RAE
+# RAE-ROS
 (Will be moved to public later)
 
 Welcome to official RAE ROS repository.
@@ -14,7 +14,7 @@ Make sure you have [IGN (Gazebo) Fortress](https://gazebosim.org/docs/fortress/i
 3. Currently date resets after each startup to set current - ssh root@192.168.11.1 sudo date -s @`( date -u +"%s" )`
 
 #### Generating docker image
-1. Clone repository `git clone git@github.com:luxonis/rae.git`
+1. Clone repository `git clone git@github.com:luxonis/rae-ros.git`
 2. Build docker image `cd rae && docker buildx build --platform arm64 --build-arg USE_RVIZ=0 --build-arg SIM=0 --build-arg ROS_DISTRO=humble --build-arg CORE_NUM=10 -f Dockerfile --squash -t rae_full --load .
 `
 3. Upload docker image to robot. Note that currently space on the robot is limited, so you need to have 7-8 GB of free space in `/data` directory - `docker save rae_full | ssh -C root@192.168.11.1 docker load`
@@ -86,6 +86,22 @@ and raise epipolar error threshold, current max value is 0.6 and if you get more
 
 #### Some hardware notes:
 
+##### Peripherals:
+
+- LCD node - accepts BGR8 image (best if already resized to 160x80px) on /lcd Image topic
+- LED node - Subscribes to /led topic, message type is LEDControl (refer to rae_msgs/msg/LEDControl)
+- Mic node - Publishes audio_msgs/msg/Audio (from gst_bridge package) on /audio_in, configuration is S32_LE, 48kHz, 2 channel interleaved
+- Speakers node - Subscibes to audio_out to same type as Mic node, configuration is S16_LE, 41kHz, 2 channel interleaved
+
+##### GST-ROS bridge
+You can use gst-bridge for testing, for example to play audio on a ros topic:
+- `gst-launch-1.0 --gst-plugin-path=install/gst_bridge/lib/gst_bridge/ filesrc location=mrowrae.wav ! decodebin ! audioconvert ! rosaudiosink ros-topic="/audio_out"`
+
+- `gst-launch-1.0 --gst-plugin-path=install/gst_bridge/lib/gst_bridge/ rosaudiosrc ros-topic="audio_out" ! audioconvert ! wavenc ! filesink location=mic1.wav`
+
+- `gst-launch-1.0 --gst-plugin-path=install/gst_bridge/lib/gst_bridge/ rosimagesrc ros-topic="/rae/right_front/image_raw" ! videoconvert ! videoscale ! video/x-raw,width=160,height=80 ! fbdevsink`
+
+- `gst-launch-1.0 alsasrc device="hw:0,1" ! audio/x-raw,rate=48000,format=S32LE ! audioconvert ! spectrascope ! videoconvert ! video/x-raw,width=160,height=80 ! fbdevsink`
 ##### Sensors and sockets
 Socket 1 - OV9782
 Socket 0 - IMX214

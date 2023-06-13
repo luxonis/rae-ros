@@ -3,7 +3,7 @@
 namespace rae_hw
 {
     Leds::Leds()
-        : Node("led_control")
+        : Node("led_node")
     {
         int ret = 0;
         memset(ws2812b_buffer, 0, WS2812B_BUFFER_SIZE);
@@ -35,9 +35,9 @@ namespace rae_hw
 
         subscription_ = this->create_subscription<rae_msgs::msg::LEDControl>(
             "leds", 10, std::bind(&Leds::topic_callback, this, std::placeholders::_1));
-        setAllPixels(150, 50, 50);
+        setAllPixels(150, 10, 150);
         transmitSPI();
-        RCLCPP_INFO(this->get_logger(), "LED node ready!");
+        RCLCPP_INFO(this->get_logger(), "LED node running!");
     }
     void Leds::topic_callback(const rae_msgs::msg::LEDControl &msg)
     {
@@ -46,7 +46,6 @@ namespace rae_hw
             uint8_t r = convertColor(msg.data[0].r);
             uint8_t g = convertColor(msg.data[0].g);
             uint8_t b = convertColor(msg.data[0].b);
-            RCLCPP_INFO(this->get_logger(), "Setting all pixels! %d %d %d", r, g, b);
             setAllPixels(r, g, b);
         }
         else if (msg.control_type == msg.CTRL_TYPE_SINGLE)
@@ -54,7 +53,6 @@ namespace rae_hw
             uint8_t r = convertColor(msg.data[0].r);
             uint8_t g = convertColor(msg.data[0].g);
             uint8_t b = convertColor(msg.data[0].b);
-            RCLCPP_INFO(this->get_logger(), "Setting single pixel! %d %d %d", r, g, b);
             setSinglePixel(msg.single_led_n, r, g, b);
         }
         else
@@ -64,7 +62,6 @@ namespace rae_hw
                 uint8_t r = convertColor(msg.data[i].r);
                 uint8_t g = convertColor(msg.data[i].g);
                 uint8_t b = convertColor(msg.data[i].b);
-                RCLCPP_INFO(this->get_logger(), "Setting  %d %d %d %d", i, r, g, b);
                 setSinglePixel(i, r, g, b);
             }
         }
