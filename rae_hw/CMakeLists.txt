@@ -65,8 +65,8 @@ target_link_libraries(test_motors ${GPIOD_LIBRARY})
 add_executable(test_encoders test/test_encoders.cpp src/rae_motors.cpp)
 target_link_libraries(test_encoders ${GPIOD_LIBRARY})
 
-# add_executable(test_max_speed test/test_max_speed.cpp src/rae_motors.cpp)
-# target_link_libraries(test_max_speed ${GPIOD_LIBRARY})
+add_executable(test_max_speed test/test_max_speed.cpp src/rae_motors.cpp)
+target_link_libraries(test_max_speed ${GPIOD_LIBRARY})
 
 # add_executable(test_speed test/test_speed.cpp src/rae_motors.cpp)
 # target_link_libraries(test_speed ${GPIOD_LIBRARY})
@@ -75,7 +75,7 @@ target_link_libraries(test_encoders ${GPIOD_LIBRARY})
 # ament_target_dependencies(battery rclcpp sensor_msgs)
 
 install(TARGETS
-  test_motors test_encoders 
+  test_motors test_encoders test_max_speed
   DESTINATION lib/${PROJECT_NAME})
 
 install(
@@ -120,3 +120,4 @@ ament_export_dependencies(
 )
 
 ament_package()
+

@@ -49,8 +49,8 @@ int main(int argc, char *argv[]){
     bool timePassed = false;
     while(!timePassed){
         
-        motorL->setPWM(1000, 100);
-        motorR->setPWM(1000, 100);
+        motorL->setPWM(150000, 100000);
+        motorR->setPWM(150000, 100000);
         auto currTime = std::chrono::high_resolution_clock::now();
         float timeDiff = std::chrono::duration<float>(currTime - startTime).count();
         if (timeDiff > duration){
@@ -68,3 +68,4 @@ int main(int argc, char *argv[]){
 
     return 0;
 }
+
