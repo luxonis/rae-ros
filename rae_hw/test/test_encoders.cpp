@@ -29,14 +29,17 @@ int main(int argc, char *argv[]){
     std::cout << "Starting test procedure.\n";
     std::cout << "Enc ratios - L: " << encRatioL << " R: " << encRatioR << " counts/rev." << std::endl;
     auto motorR = std::make_unique<rae_hw::RaeMotor>("right_wheel_name",
-                                        "gpiochip0", "/sys/class/pwm/pwmchip0", 2, 45, 46, 47, encRatioR, 32, false);
+                                        "gpiochip0", "/sys/class/pwm/pwmchip0", 2, 45, 46, 47, encRatioR, 32, false, 0);
     auto motorL = std::make_unique<rae_hw::RaeMotor>("left_wheel_name",
-                                        "gpiochip0", "/sys/class/pwm/pwmchip0", 1, 41, 42, 43, encRatioL, 32, true);
+                                        "gpiochip0", "/sys/class/pwm/pwmchip0", 1, 41, 42, 43, encRatioL, 32, false, 0);
     motorL->run();
     motorR->run();
     float prevPosL = 0.0;
     float prevPosR = 0.0;
-    while(true){
+    float duration = 6.0;
+    auto startTime = std::chrono::high_resolution_clock::now();
+    bool timePassed = false;
+    while(!timePassed){
         auto leftPos = motorL->getPos();
         auto rightPos = motorR->getPos();
         if (leftPos!=prevPosL || rightPos != prevPosR){
@@ -45,7 +48,13 @@ int main(int argc, char *argv[]){
         }
         prevPosL = leftPos;
         prevPosR = rightPos;
+        auto currTime = std::chrono::high_resolution_clock::now();
+        float timeDiff = std::chrono::duration<float>(currTime - startTime).count();
+        if (timeDiff > duration){
+            timePassed = true;
+        }
     }
-
+    std::cout << "Left speed: " << (prevPosL/duration) << " rad.\n";
+    std::cout <<  "Right speed: " << (prevPosR/duration) << " rad." << std::endl;
     return 0;
 }

@@ -70,15 +70,15 @@ hardware_interface::CallbackReturn RaeHW::on_activate(const rclcpp_lifecycle::St
 }
 
 hardware_interface::CallbackReturn RaeHW::on_deactivate(const rclcpp_lifecycle::State & /*previous_state*/) {
-    motorL->disablePWM();
-    motorR->disablePWM();
+    motorL->stop();
+    motorR->stop();
 
     return CallbackReturn::SUCCESS;
 }
 
 hardware_interface::CallbackReturn RaeHW::on_shutdown(const rclcpp_lifecycle::State & /*previous_state*/) {
-    motorL->disablePWM();
-    motorR->disablePWM();
+    motorL->stop();
+    motorR->stop();
 
     return CallbackReturn::SUCCESS;
 }

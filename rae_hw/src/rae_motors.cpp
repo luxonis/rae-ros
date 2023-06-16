@@ -45,7 +45,7 @@ namespace rae_hw
         prevErrorTime = std::chrono::high_resolution_clock::now();
         std::string periodPath = pwmName_ + "/pwm" + std::to_string(pwmPin) + "/period";
         std::ofstream periodFile(periodPath);
-        periodFile << 150000;
+        periodFile << 120000;
         periodFile.close();
 
     }
@@ -71,25 +71,55 @@ namespace rae_hw
         }
     }
 
-void RaeMotor::controlSpeed()
+    void RaeMotor::controlSpeed()
 {
     while (_running)
-    {
-        // Calculate the duty cycle based on the target speed
-
-        uint32_t dutyCycle = speedToPWM(targetSpeed);
-        
+    {   
         std::string dutyCyclePath = pwmName_ + "/pwm" + std::to_string(pwmPin) + "/duty_cycle";
         std::ofstream dutyCycleFile(dutyCyclePath);
+        bool dir;
+        if (closedLoop_)
+            {
+                auto currTime = std::chrono::high_resolution_clock::now();
+                float timeDiff = std::chrono::duration<float>(currTime - prevErrorTime).count();
 
-        if (dutyCycleFile.is_open())
+                float currSpeed = getSpeed();
+                std::cout << "Current Speed " << pwmPin <<":" << currSpeed << std::endl;
+                float error = targetSpeed - currSpeed;
+                std::cout << "Target Speed: " << pwmPin <<":"  << targetSpeed << std::endl;
+                std::cout << "Error: " << pwmPin <<":" << error << std::endl;
+                float eP = error * currPID.P;
+                errSum += (error * timeDiff);
+                float eI = errSum * currPID.I;
+                float eD = (error - prevError) / timeDiff * currPID.D;
+                float outSpeed = targetSpeed + eP + eI + eD;
+                std::cout << "Out Speed: " << pwmPin <<":" << outSpeed << std::endl;
+                std::cout << "eI: " << pwmPin <<":"<< eI << std::endl;
+                std::cout << "eD: " << pwmPin <<":"<< eD << std::endl;
+                std::cout << "eP: " << pwmPin <<":"<< eP << std::endl;
+                uint32_t dutyCycle = speedToPWM(outSpeed);
+                dir = (outSpeed >= 0) ^ reversePhPinLogic_;
+                prevErrorTime = currTime;
+                prevError = error;
+                if (dutyCycleFile.is_open())
         {
             dutyCycleFile << dutyCycle;
             dutyCycleFile.close();
         }
+            }
+            else {
 
-        // Set the direction pin based on the target speed
-        bool dir = (targetSpeed >= 0) ^ reversePhPinLogic_;
+        uint32_t dutyCycle = speedToPWM(targetSpeed);
+        dir = (targetSpeed >= 0) ^ reversePhPinLogic_;
+        if (dutyCycleFile.is_open())
+        {
+            dutyCycleFile << dutyCycle;
+            dutyCycleFile.close();
+        }}
+
+        
+
+
         if (dir == motDirection)
         {
             // Same direction, no need to switch
@@ -115,9 +145,6 @@ void RaeMotor::controlSpeed()
             {
                 phPin.set_value(0);
             }
-            // std::cout << "Direction: " << (dir ? "Forward" : "Reverse") << std::endl;
-            // std::cout << "MotDirection: " << (motDirection ? "Forward" : "Reverse") << std::endl;
-            // Enable the PWM again
             enablePath = pwmName_ + "/pwm" + std::to_string(pwmPin) + "/enable"; // Change the variable name to avoid redeclaration
             std::ofstream enableFile2(enablePath);
             if (enableFile2.is_open())
@@ -133,6 +160,7 @@ void RaeMotor::controlSpeed()
         std::this_thread::sleep_for(5ms);
     }
 }
+
     void RaeMotor::setPWM(int period, int duty_cycle)
     {
         std::string dutyCyclePath = pwmName_ + "/pwm" + std::to_string(pwmPin) + "/duty_cycle";
@@ -205,6 +233,8 @@ void RaeMotor::controlSpeed()
                 {
                     std::lock_guard<std::mutex> lck(posMtx);
                     rads = count * encRatio;
+                  //  std::cout << "Speed rads: " << rads << std::endl;
+
                 }
                 prevCount = count;
             }
@@ -224,17 +254,14 @@ void RaeMotor::controlSpeed()
 
     uint32_t RaeMotor::speedToPWM(float speed)
 {
-    // Calculate the duty cycle as a percentage of the maximum period
-    std::cout << "Speed: " << speed << std::endl;
+     // Calculate the duty cycle as a percentage of the maximum period
     float normSpeed = speed / velLim;  // Normalize speed to the range [-1.0, 1.0]
     float clSpeedNorm = std::clamp(normSpeed, -1.0f, 1.0f);
-    std::cout << "clSpeedNorm: " << clSpeedNorm << std::endl;
-    uint32_t normduty = static_cast<uint32_t>(clSpeedNorm * 150000.0f);
-    std::cout << "normduty: " << normduty << std::endl;
+    uint32_t normduty = static_cast<uint32_t>(std::abs(clSpeedNorm * 120000.0f));
     return normduty;
 }
     void RaeMotor::motorSet(float speed)
-    {
+    { 
           std::string enablePath = pwmName_ + "/pwm" + std::to_string(pwmPin) + "/enable";
           std::ofstream enableFile(enablePath);
           enableFile << 1;  // Enable PWM
@@ -265,7 +292,7 @@ void RaeMotor::controlSpeed()
     void RaeMotor::stop()
     {
         _running = false;
-        
+        disablePWM();
         encoderThread.join();
         calcSpeedThread.join();
         speedControlThread.join();
