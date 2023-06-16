@@ -12,32 +12,53 @@ static std::atomic<bool> subpixel{false};
 // Better handling for occlusions:
 static std::atomic<bool> lr_check{true};
 
-int main() {
+int main()
+{
     // Create pipeline
     dai::Pipeline pipeline;
 
     // Define sources and outputs
-    auto monoLeft = pipeline.create<dai::node::ColorCamera>();
-    auto monoRight = pipeline.create<dai::node::ColorCamera>();
-    auto depth = pipeline.create<dai::node::StereoDepth>();
-    auto xout = pipeline.create<dai::node::XLinkOut>();
+    auto camRgb = pipeline.create<dai::node::ColorCamera>();
+    auto xoutRgb = pipeline.create<dai::node::XLinkOut>();
+    xoutRgb->setStreamName("rgb");
+    auto monoLeftFront = pipeline.create<dai::node::ColorCamera>();
+    auto monoRightFront = pipeline.create<dai::node::ColorCamera>();
+    auto monoLeftBack = pipeline.create<dai::node::ColorCamera>();
+    auto monoRightBack = pipeline.create<dai::node::ColorCamera>();
+    auto depthFront = pipeline.create<dai::node::StereoDepth>();
+    auto depthBack = pipeline.create<dai::node::StereoDepth>();
+    auto xoutFront = pipeline.create<dai::node::XLinkOut>();
+    auto xoutBack = pipeline.create<dai::node::XLinkOut>();
 
-    xout->setStreamName("depth");
+
+    xoutFront->setStreamName("depth_front");
+    xoutBack->setStreamName("depth_back");
 
     // Properties
-    monoLeft->setResolution(dai::node::ColorCamera::Properties::SensorResolution::THE_800_P);
-    monoLeft->setBoardSocket(dai::CameraBoardSocket::LEFT);
-    monoRight->setResolution(dai::node::ColorCamera::Properties::SensorResolution::THE_800_P);
-    monoRight->setBoardSocket(dai::CameraBoardSocket::RIGHT);
+    monoLeftFront->setResolution(dai::node::ColorCamera::Properties::SensorResolution::THE_800_P);
+    monoLeftFront->setBoardSocket(dai::CameraBoardSocket::LEFT);
+    monoRightFront->setResolution(dai::node::ColorCamera::Properties::SensorResolution::THE_800_P);
+    monoRightFront->setBoardSocket(dai::CameraBoardSocket::RIGHT);
+
+    monoLeftBack->setResolution(dai::node::ColorCamera::Properties::SensorResolution::THE_800_P);
+    monoLeftBack->setBoardSocket(dai::CameraBoardSocket::CAM_D);
+    monoRightBack->setResolution(dai::node::ColorCamera::Properties::SensorResolution::THE_800_P);
+    monoRightBack->setBoardSocket(dai::CameraBoardSocket::CAM_E);
+
+    camRgb->setPreviewSize(416, 416);
+    camRgb->setFps(15.0);
+    camRgb->setResolution(dai::ColorCameraProperties::SensorResolution::THE_1080_P);
+    camRgb->setInterleaved(false);
+    camRgb->setColorOrder(dai::ColorCameraProperties::ColorOrder::BGR);
+    camRgb->setBoardSocket(dai::CameraBoardSocket::CAM_A);
 
     // Create a node that will produce the depth map (using disparity output as it's easier to visualize depth this way)
-    depth->setDefaultProfilePreset(dai::node::StereoDepth::PresetMode::HIGH_DENSITY);
-    // Options: MEDIAN_OFF, KERNEL_3x3, KERNEL_5x5, KERNEL_7x7 (default)
-    depth->initialConfig.setMedianFilter(dai::MedianFilter::KERNEL_7x7);
-    depth->setLeftRightCheck(lr_check);
-    depth->setExtendedDisparity(extended_disparity);
-    depth->setSubpixel(subpixel);
-    auto config = depth->initialConfig.get();
+    depthFront->setDefaultProfilePreset(dai::node::StereoDepth::PresetMode::HIGH_DENSITY);
+    depthFront->initialConfig.setMedianFilter(dai::MedianFilter::KERNEL_7x7);
+    depthFront->setLeftRightCheck(lr_check);
+    depthFront->setExtendedDisparity(extended_disparity);
+    depthFront->setSubpixel(subpixel);
+    auto config = depthFront->initialConfig.get();
     config.postProcessing.speckleFilter.enable = false;
     config.postProcessing.speckleFilter.speckleRange = 50;
     config.postProcessing.temporalFilter.enable = true;
@@ -47,33 +68,67 @@ int main() {
     config.postProcessing.thresholdFilter.minRange = 400;
     config.postProcessing.thresholdFilter.maxRange = 15000;
     config.postProcessing.decimationFilter.decimationFactor = 1;
-    depth->initialConfig.set(config);
+    depthFront->initialConfig.set(config);
+
+    depthBack->setDefaultProfilePreset(dai::node::StereoDepth::PresetMode::HIGH_DENSITY);
+    depthBack->initialConfig.setMedianFilter(dai::MedianFilter::KERNEL_7x7);
+    depthBack->setLeftRightCheck(lr_check);
+    depthBack->setExtendedDisparity(extended_disparity);
+    depthBack->setSubpixel(subpixel);
+    depthBack->initialConfig.set(config);
 
     // Linking
-    monoLeft->video.link(depth->left);
-    monoRight->video.link(depth->right);
-    depth->depth.link(xout->input);
+    monoLeftFront->video.link(depthFront->left);
+    monoRightFront->video.link(depthFront->right);
+    depthFront->depth.link(xoutFront->input);
+
+    monoLeftBack->video.link(depthBack->left);
+    monoRightBack->video.link(depthBack->right);
+    depthBack->depth.link(xoutBack->input);
+
+    camRgb->preview.link(xoutRgb->input);
 
     // Connect to device and start pipeline
     dai::Device device(pipeline);
 
     // Output queue will be used to get the disparity frames from the outputs defined above
-    auto q = device.getOutputQueue("depth", 4, false);
+    auto q_f = device.getOutputQueue("depth_front", 4, false);
+    auto q_b = device.getOutputQueue("depth_back", 4, false);
+    auto previewQueue = device.getOutputQueue("rgb", 4, false);
 
-    while(true) {
-        auto inDepth = q->get<dai::ImgFrame>();
-        // auto frame = inDepth->getData().data;
-        // Normalization for better visualization
-        // frame.convertTo(frame, CV_8UC1, 255 / depth->initialConfig.getMaxDisparity());
-        auto frame = cv::Mat(cv::Size(inDepth->getWidth(), inDepth->getHeight()), CV_16UC1, inDepth->getData().data());
-        cv::imshow("depth", frame);
+    while (true)
+    {
+        auto inDepthF = q_f->get<dai::ImgFrame>();
 
-        // Available color maps: https://docs.opencv.org/3.4/d3/d50/group__imgproc__colormap.html
-        // cv::applyColorMap(frame, frame, cv::COLORMAP_JET);
-        // cv::imshow("disparity_color", frame);
+        auto frameF = cv::Mat(cv::Size(inDepthF->getWidth(), inDepthF->getHeight()), CV_16UC1, inDepthF->getData().data());
+        cv::Mat depthFrameColorF;
+        cv::normalize(frameF, depthFrameColorF, 255, 0, cv::NORM_INF, CV_8UC1);
+        cv::equalizeHist(depthFrameColorF, depthFrameColorF);
+        cv::applyColorMap(depthFrameColorF, depthFrameColorF, cv::COLORMAP_JET);
 
+        auto inDepthB = q_b->get<dai::ImgFrame>();
+        auto frameB = cv::Mat(cv::Size(inDepthB->getWidth(), inDepthB->getHeight()), CV_16UC1, inDepthB->getData().data());
+        cv::Mat depthFrameColorB;
+        cv::normalize(frameB, depthFrameColorB, 255, 0, cv::NORM_INF, CV_8UC1);
+        cv::equalizeHist(depthFrameColorB, depthFrameColorB);
+        cv::applyColorMap(depthFrameColorB, depthFrameColorB, cv::COLORMAP_JET);
+
+        // auto imgFrame = previewQueue->get<dai::ImgFrame>();
+        // cv::Mat frame;
+        // cv::Size s(imgFrame->getWidth(), imgFrame->getHeight());
+        // std::vector<cv::Mat> channels;
+        // // BGR
+        // channels.push_back(cv::Mat(s, CV_8UC1, imgFrame->getData().data() + s.area() * 0));
+        // channels.push_back(cv::Mat(s, CV_8UC1, imgFrame->getData().data() + s.area() * 1));
+        // channels.push_back(cv::Mat(s, CV_8UC1, imgFrame->getData().data() + s.area() * 2));
+        // cv::merge(channels, frame);
+        // cv::imshow("rgb", frame);
+
+        cv::imshow("depth_f", depthFrameColorF);
+        cv::imshow("depth_b", depthFrameColorB);
         int key = cv::waitKey(1);
-        if(key == 'q' || key == 'Q') {
+        if (key == 'q' || key == 'Q')
+        {
             return 0;
         }
     }

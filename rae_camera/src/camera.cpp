@@ -24,12 +24,14 @@ dai::Pipeline createPipeline(bool enable_rgb, bool enable_depth)
     if (enable_rgb)
     {
         auto camRgb = pipeline.create<dai::node::ColorCamera>();
-        // camRgb->setResolution(dai::node::ColorCamera::Properties::SensorResolution::THE_1080_P);
+        camRgb->setResolution(dai::node::ColorCamera::Properties::SensorResolution::THE_1080_P);
         auto xoutRgb = pipeline.create<dai::node::XLinkOut>();
         camRgb->setBoardSocket(dai::CameraBoardSocket::RGB);
         camRgb->setColorOrder(dai::ColorCameraProperties::ColorOrder::BGR);
         camRgb->setInterleaved(false);
         camRgb->setVideoSize(1280,800);
+        camRgb->initialControl.setMisc("stride-align", 1);
+        camRgb->initialControl.setMisc("scanline-align", 1);
         xoutRgb->setStreamName("rgb");
         camRgb->video.link(xoutRgb->input);
     }

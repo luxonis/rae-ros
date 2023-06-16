@@ -95,7 +95,7 @@ and raise epipolar error threshold, current max value is 0.6 and if you get more
 
 ##### GST-ROS bridge
 You can use gst-bridge for testing, for example to play audio on a ros topic:
-- `gst-launch-1.0 --gst-plugin-path=install/gst_bridge/lib/gst_bridge/ filesrc location=mrowrae.wav ! decodebin ! audioconvert ! rosaudiosink ros-topic="/audio_out"`
+- `gst-launch-1.0 --gst-plugin-path=install/gst_bridge/lib/gst_bridge/ filesrc location=sample.mp3 ! decodebin ! audioconvert ! rosaudiosink ros-topic="/audio_out"`
 
 - `gst-launch-1.0 --gst-plugin-path=install/gst_bridge/lib/gst_bridge/ rosaudiosrc ros-topic="audio_out" ! audioconvert ! wavenc ! filesink location=mic1.wav`
 

@@ -2,10 +2,42 @@
   ros__parameters:
     camera:
       i_nn_type: none
-      i_pipeline_type: RAE
+      i_pipeline_type: rae
       i_enable_ir: false
-      i_enable_imu: false
-      # i_external_calibration_path: '/ws/src/rae/rae_bringup/config/cal.json'
+      i_enable_imu: true
+      i_calibration_dump: true
+      i_pipeline_dump: true
+    nn:
+      i_nn_config_path: /workspaces/rae_ws/src/rae-ros/rae_bringup/config/yolo.json
+      i_disable_resize: true
+      i_enable_passthrough: true
+    rgb:
+      i_output_isp: false
+      i_set_isp_scale: false
+      i_fps: 15.0
+      i_preview_size: 416
+      i_board_socket_id: 0
+
+    # For rgbd mode
+    left:
+      i_resolution: '800'
+      i_publish_topic: false
+      i_output_isp: false
+      i_board_socket_id: 1
+      i_set_isp_scale: false
+      i_width: 640
+      i_height: 400
+    right:
+      i_publish_topic: true
+      i_output_isp: false
+      i_board_socket_id: 2
+      i_resolution: '800'
+      i_set_isp_scale: false
+      i_width: 640
+      i_height: 400
+    stereo:
+      i_align_depth: false
+    # For RAE mode
     left_front:
       i_resolution: '800'
       i_publish_topic: false
@@ -15,7 +47,7 @@
       i_width: 640
       i_height: 400
     right_front:
-      i_publish_topic: true
+      i_publish_topic: false
       i_output_isp: false
       i_board_socket_id: 2
       i_resolution: '800'
@@ -24,33 +56,63 @@
       i_height: 400
     stereo_front:
       i_align_depth: false
-    rgb:
+      i_publish_right_rect: true
+    stereo_back:
+      i_align_depth: false
+      i_publish_right_rect: true
+    left_back:
+      i_resolution: '800'
+      i_publish_topic: false
       i_output_isp: false
-laserscan_kinect:
-  ros__parameters:
-    # Frame id for the output laserscan.
-    output_frame_id: rae_right_front_camera_optical_frame
-    # Minimum sensor range (m).
-    range_min: 0.4
-    # Maximum sensor range (m).
-    range_max: 10.0
-    # Height of used part of depth img (px).
-    scan_height: 50
-    # Row step in depth image processing (px).
-    depth_img_row_step: 1
-    # If continously camera data update.
-    cam_model_update: false
+      i_board_socket_id: 3
+      i_set_isp_scale: false
+      i_width: 640
+      i_height: 400
+    right_back:
+      i_publish_topic: false
+      i_output_isp: false
+      i_board_socket_id: 4
+      i_resolution: '800'
+      i_set_isp_scale: false
+      i_width: 640
+      i_height: 400
 
-    # Height of sensor optical center mount (m).
-    sensor_mount_height: 0.8
-    # Sensor tilt angle compensation.
-    sensor_tilt_angle: -30.0
-    # Remove ground from scan.
-    ground_remove_en: true
-    # Ground margin (m).
-    ground_margin: 0.05
-    # Sensor tilt angle compensation.
-    tilt_compensation_en: true
-
-    publish_dbg_info: true
-    threads_num: 1
+    # For CamArray
+    a:
+      i_output_isp: false
+      i_fps: 15.0
+      i_preview_size: 416
+      i_board_socket_id: 0
+    b:
+      i_publish_topic: true
+      i_output_isp: false
+      i_board_socket_id: 1
+      i_resolution: '800'
+      i_set_isp_scale: false
+      i_width: 640
+      i_height: 400
+    c:
+      i_publish_topic: true
+      i_output_isp: false
+      i_board_socket_id: 2
+      i_resolution: '800'
+      i_set_isp_scale: false
+      i_width: 640
+      i_height: 400
+    d:
+      i_publish_topic: true
+      i_output_isp: false
+      i_board_socket_id: 3
+      i_resolution: '800'
+      i_set_isp_scale: false
+      i_width: 640
+      i_height: 400
+    e:
+      i_publish_topic: true
+      i_output_isp: false
+      i_board_socket_id: 4
+      i_resolution: '800'
+      i_set_isp_scale: false
+      i_width: 640
+      i_height: 400
+    
