@@ -89,7 +89,7 @@ auto currentTime = std::chrono::high_resolution_clock::now();
     auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime.time_since_epoch()).count();
 
     // Print the current time with milliseconds precision
-//    std::cout << "Current Time (milliseconds): " << milliseconds << std::endl;
+                std::cout << "Current Time (milliseconds) "  << pwmPin <<":"  << milliseconds << std::endl;
                 std::cout << "Current Speed " << pwmPin <<":" << currSpeed << std::endl;
                 float error = targetSpeed - currSpeed;
     //            std::cout << "Target Speed: " << pwmPin <<":"  << targetSpeed << std::endl;

@@ -47,9 +47,9 @@ int main(int argc, char *argv[]){
     std::cout << "Starting test procedure. Duration: " <<  duration  << "s.\n";
     std::cout << "Enc ratios - L: " << encRatioL << " R: " << encRatioR << " counts/rev." << std::endl;
     auto motorL = std::make_unique<rae_hw::RaeMotor>("left_wheel_name",
-                                        "gpiochip0", "/sys/class/pwm/pwmchip0", 2, 41, 46, 47, encRatioL, 32, true, true, pid);
+                                        "gpiochip0", "/sys/class/pwm/pwmchip0", 2, 41, 42, 43, encRatioL, 32, true, true, pid);
     auto motorR = std::make_unique<rae_hw::RaeMotor>("right_wheel_name",
-                                        "gpiochip0", "/sys/class/pwm/pwmchip0", 1, 45, 42, 43, encRatioR, 32, false, true, pid);
+                                        "gpiochip0", "/sys/class/pwm/pwmchip0", 1, 45, 46, 47, encRatioR, 32, false, true, pid);
     motorL->run();
     motorR->run();
     float leftPos = 0.0;
