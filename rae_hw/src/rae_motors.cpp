@@ -82,21 +82,27 @@ namespace rae_hw
             {
                 auto currTime = std::chrono::high_resolution_clock::now();
                 float timeDiff = std::chrono::duration<float>(currTime - prevErrorTime).count();
-
                 float currSpeed = getSpeed();
+auto currentTime = std::chrono::high_resolution_clock::now();
+
+    // Convert the current time to milliseconds since epoch
+    auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime.time_since_epoch()).count();
+
+    // Print the current time with milliseconds precision
+//    std::cout << "Current Time (milliseconds): " << milliseconds << std::endl;
                 std::cout << "Current Speed " << pwmPin <<":" << currSpeed << std::endl;
                 float error = targetSpeed - currSpeed;
-                std::cout << "Target Speed: " << pwmPin <<":"  << targetSpeed << std::endl;
-                std::cout << "Error: " << pwmPin <<":" << error << std::endl;
+    //            std::cout << "Target Speed: " << pwmPin <<":"  << targetSpeed << std::endl;
+      //          std::cout << "Error: " << pwmPin <<":" << error << std::endl;
                 float eP = error * currPID.P;
                 errSum += (error * timeDiff);
                 float eI = errSum * currPID.I;
                 float eD = (error - prevError) / timeDiff * currPID.D;
                 float outSpeed = targetSpeed + eP + eI + eD;
-                std::cout << "Out Speed: " << pwmPin <<":" << outSpeed << std::endl;
-                std::cout << "eI: " << pwmPin <<":"<< eI << std::endl;
-                std::cout << "eD: " << pwmPin <<":"<< eD << std::endl;
-                std::cout << "eP: " << pwmPin <<":"<< eP << std::endl;
+                 std::cout << "Out Speed " << pwmPin <<":" << outSpeed << std::endl;
+          //      std::cout << "eI: " << pwmPin <<":"<< eI << std::endl;
+          //      std::cout << "eD: " << pwmPin <<":"<< eD << std::endl;
+           //     std::cout << "eP: " << pwmPin <<":"<< eP << std::endl;
                 uint32_t dutyCycle = speedToPWM(outSpeed);
                 dir = (outSpeed >= 0) ^ reversePhPinLogic_;
                 prevErrorTime = currTime;
