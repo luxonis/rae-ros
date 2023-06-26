@@ -75,7 +75,9 @@ int main(int argc, char *argv[]){
         rightVelMsg.linear.z = rightPos;
 
         float startTimeDiff = std::chrono::duration<float>(currTime - startTime).count();
-        if (startTimeDiff > duration){
+        if (leftPos > (50.2654824574*2)){
+            std::cout << "Left pos: " << leftPos << " rad.\n";
+        std::cout <<  "Right pos: " << rightPos << " rad." << std::endl;
             timePassed = true;
         }
         std::this_thread::sleep_for(10ms);
