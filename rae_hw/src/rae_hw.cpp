@@ -1,6 +1,6 @@
 #include <limits>
 #include <vector>
-
+#include <fstream>
 #include "rae_hw/rae_hw.hpp"
 #include "hardware_interface/types/hardware_interface_type_values.hpp"
 #include "rclcpp/rclcpp.hpp"
@@ -14,7 +14,7 @@ hardware_interface::CallbackReturn RaeHW::on_init(const hardware_interface::Hard
     leftWheelName = info_.hardware_parameters["left_wheel_name"];
     rightWheelName = info_.hardware_parameters["right_wheel_name"];
     auto chipName = info_.hardware_parameters["chip_name"];
-    
+    auto pwmName = info_.hardware_parameters["pwmName"];
     int pwmL = std::stoi(info_.hardware_parameters["pwmL"]);
     int phL = std::stoi(info_.hardware_parameters["phL"]);
     int enLA = std::stoi(info_.hardware_parameters["enLA"]);
@@ -23,7 +23,7 @@ hardware_interface::CallbackReturn RaeHW::on_init(const hardware_interface::Hard
     float maxVelL = std::stof(info_.hardware_parameters["maxVelL"]);
     bool closedLoopL = static_cast<bool>(std::stoi(info_.hardware_parameters["closed_loopL"]));
     PID pidL{std::stof(info_.hardware_parameters["PID_P_L"]), std::stof(info_.hardware_parameters["PID_I_L"]), std::stof(info_.hardware_parameters["PID_D_L"])};
-    motorL = std::make_unique<RaeMotor>(leftWheelName, chipName, pwmL, phL, enLA, enLB, encTicsPerRevL, maxVelL, true, closedLoopL, pidL);
+    motorL = std::make_unique<RaeMotor>(leftWheelName, chipName,pwmName, pwmL, phL, enLA, enLB, encTicsPerRevL, maxVelL, true, closedLoopL, pidL);
 
     int pwmR = std::stoi(info_.hardware_parameters["pwmR"]);
     int phR = std::stoi(info_.hardware_parameters["phR"]);
@@ -33,7 +33,7 @@ hardware_interface::CallbackReturn RaeHW::on_init(const hardware_interface::Hard
     float maxVelR = std::stof(info_.hardware_parameters["maxVelR"]);
     bool closedLoopR = static_cast<bool>(std::stoi(info_.hardware_parameters["closed_loopR"]));
     PID pidR{std::stof(info_.hardware_parameters["PID_P_R"]), std::stof(info_.hardware_parameters["PID_I_R"]), std::stof(info_.hardware_parameters["PID_D_R"])};
-    motorR = std::make_unique<RaeMotor>(rightWheelName, chipName, pwmR, phR, enRA, enRB, encTicsPerRevR, maxVelR, false, closedLoopR, pidR);
+    motorR = std::make_unique<RaeMotor>(rightWheelName, chipName,pwmName, pwmR, phR, enRA, enRB, encTicsPerRevR, maxVelR, false, closedLoopR, pidR);
 
     return CallbackReturn::SUCCESS;
 }
