@@ -2,7 +2,7 @@
 
 #include <fcntl.h>
 #include <unistd.h>
-
+#include <fstream>
 #include <algorithm>
 #include <atomic>
 #include <chrono>
@@ -46,6 +46,7 @@ namespace rae_hw
     public:
         RaeMotor(const std::string &name, 
                  const std::string &chipName, 
+                 const std::string &pwmName,
                  int pwmPinNum, 
                  int phPinNum, 
                  int enA, 
@@ -67,6 +68,8 @@ namespace rae_hw
         void run();
         /// @brief Stops motors, joins threads and frees GPIO pins.
         void stop();
+        void setPWM(int period, int duty_cycle);
+        void disablePWM();
 
     private:
         /// @brief Thread function generating PWM based on dutyTarget.
@@ -91,7 +94,7 @@ namespace rae_hw
         float prevError;
         float errSum;
         std::atomic<bool> _running{true};
-        gpiod::line pwmPin;
+        int pwmPin;
         gpiod::line phPin;
         gpiod::line enAPin;
         gpiod::line enBPin;
@@ -101,6 +104,7 @@ namespace rae_hw
         bool encDirection;
         std::thread motorThread, encoderThread, calcSpeedThread, speedControlThread;
         bool reversePhPinLogic_ = false;
+        std::string pwmName_="/sys/class/pwm/pwmchip0";
         bool closedLoop_ = true;
         int prevCount;
         float rads;
@@ -111,6 +115,7 @@ namespace rae_hw
         const State Counter{1, 0};
         State prevState;
         PID currPID;
+        
         std::chrono::high_resolution_clock::time_point prevVelTime;
         std::chrono::high_resolution_clock::time_point prevErrorTime;
     };

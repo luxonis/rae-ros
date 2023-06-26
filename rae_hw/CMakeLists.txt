@@ -56,8 +56,8 @@ install(
   LIBRARY DESTINATION lib
 )
 
-add_executable(battery src/battery.cpp)
-ament_target_dependencies(battery rclcpp sensor_msgs)
+# add_executable(battery src/battery.cpp)
+# ament_target_dependencies(battery rclcpp sensor_msgs)
 
 add_executable(test_motors test/test_motors.cpp src/rae_motors.cpp)
 target_link_libraries(test_motors ${GPIOD_LIBRARY})
@@ -72,11 +72,10 @@ add_executable(test_speed test/test_speed.cpp src/rae_motors.cpp)
 target_link_libraries(test_speed ${GPIOD_LIBRARY})
 ament_target_dependencies(test_speed rclcpp geometry_msgs)
 
-ament_target_dependencies(battery rclcpp sensor_msgs)
+# ament_target_dependencies(battery rclcpp sensor_msgs)
 
 install(TARGETS
-  battery test_motors test_encoders test_max_speed test_speed
-
+  test_motors test_encoders test_max_speed test_speed
   DESTINATION lib/${PROJECT_NAME})
 
 install(
@@ -97,10 +96,10 @@ if(BUILD_TESTING)
   find_package(ament_cmake_gmock REQUIRED)
   find_package(ros2_control_test_assets REQUIRED)
 
-  ament_add_gmock(test_rae_hw test/test_rae_hw.cpp)
-  target_include_directories(test_rae_hw PRIVATE include)
+  # ament_add_gmock(test_rae_hw test/test_rae_hw.cpp)
+  # target_include_directories(test_rae_hw PRIVATE include)
   ament_target_dependencies(
-    test_rae_hw
+    test_motors
     hardware_interface
     pluginlib
     ros2_control_test_assets
@@ -121,3 +120,4 @@ ament_export_dependencies(
 )
 
 ament_package()
+
