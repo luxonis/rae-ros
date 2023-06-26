@@ -60,8 +60,8 @@ install(
   LIBRARY DESTINATION lib
 )
 
-# add_executable(battery src/battery.cpp)
-# ament_target_dependencies(battery rclcpp sensor_msgs)
+add_executable(battery src/battery.cpp)
+ament_target_dependencies(battery rclcpp sensor_msgs)
 
 add_executable(led src/led.cpp)
 ament_target_dependencies(led rclcpp rae_msgs)
