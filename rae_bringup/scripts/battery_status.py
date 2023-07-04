@@ -24,7 +24,7 @@ class BatteryStatusNode(Node):
             10)
         self.subscription  # prevent unused variable warning
 
-        self.publisher_image = self.create_publisher(Image, 'battery_image', 10)
+        self.publisher_image = self.create_publisher(Image, 'lcd', 10)
         self.publisher_led = self.create_publisher(LEDControl, 'leds', 10)
 
         self.bridge = CvBridge()
