@@ -26,6 +26,7 @@ namespace rae_hw
     {
     public:
         Leds();
+        ~Leds(); 
 
     private:
         void transmitSPI();
