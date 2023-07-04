@@ -14,11 +14,11 @@ class AudioVisualizer(Node):
         super().__init__('audio_visualizer')
         self.subscriber = self.create_subscription(
             Audio,
-            'audio_data',  # Assuming the topic name is "audio_data"
+            'audio_in',  # Assuming the topic name is "audio_data"
             self.listener_callback,
             10
         )
-        self.publisher = self.create_publisher(Image, 'battery_image', 10)
+        self.publisher = self.create_publisher(Image, 'lcd', 10)
         self.bridge = CvBridge()
 
         self.led_publisher = self.create_publisher(LEDControl, '/leds', 10)  # Add LEDControl publisher
