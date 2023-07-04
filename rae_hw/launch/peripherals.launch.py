@@ -6,7 +6,8 @@ from launch import LaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, OpaqueFunction
 from launch_ros.actions import Node
-
+from launch.conditions import IfCondition
+from launch.substitutions import LaunchConfiguration
 import xacro
 
 
@@ -31,5 +32,10 @@ def generate_launch_description():
         Node(
             package="rae_hw",
             executable="speakers",
+        ),
+        Node(
+            package="rae_bringup",
+            executable="battery_status.py",
+            condition=IfCondition(LaunchConfiguration("enable_battery_status", default=True))
         ),
     ])

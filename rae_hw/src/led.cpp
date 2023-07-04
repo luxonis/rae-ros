@@ -39,6 +39,10 @@ namespace rae_hw
         transmitSPI();
         RCLCPP_INFO(this->get_logger(), "LED node running!");
     }
+    Leds::~Leds(){
+        setAllPixels(0, 0, 0);
+        transmitSPI();
+    }
     void Leds::topic_callback(const rae_msgs::msg::LEDControl &msg)
     {
         if (msg.control_type == msg.CTRL_TYPE_ALL)
