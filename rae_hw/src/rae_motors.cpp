@@ -7,6 +7,7 @@ namespace rae_hw
     using namespace std::chrono_literals;
     RaeMotor::RaeMotor(const std::string &name,
                        const std::string &chipName,
+                       const std::string &pwmName,
                        int pwmPinNum,
                        int phPinNum,
                        int enA,
@@ -18,11 +19,11 @@ namespace rae_hw
                        PID pid)
     {
         gpiod::chip chip(chipName);
-        pwmPin = chip.get_line(pwmPinNum);
+        pwmPin = pwmPinNum;
+        pwmName_ = pwmName;
         phPin = chip.get_line(phPinNum);
         enAPin = chip.get_line(enA);
         enBPin = chip.get_line(enB);
-        pwmPin.request({name + "_pwm", gpiod::line_request::DIRECTION_OUTPUT, 0}, 0);
         phPin.request({name + "_ph", gpiod::line_request::DIRECTION_OUTPUT, 0}, 0);
         enAPin.request({name + "_en_a", gpiod::line_request::DIRECTION_INPUT, 0});
         enBPin.request({name + "_en_b", gpiod::line_request::DIRECTION_INPUT, 0});
@@ -42,6 +43,11 @@ namespace rae_hw
         prevPos = 0.0;
         prevVelTime = std::chrono::high_resolution_clock::now();
         prevErrorTime = std::chrono::high_resolution_clock::now();
+        std::string periodPath = pwmName_ + "/pwm" + std::to_string(pwmPin) + "/period";
+        std::ofstream periodFile(periodPath);
+        periodFile << 120000;
+        periodFile.close();
+
     }
     RaeMotor::~RaeMotor()
     {
@@ -61,21 +67,21 @@ namespace rae_hw
             }
             prevVelTime = currTime;
             prevPos = currPos;
-            std::this_thread::sleep_for(15ms);
+            std::this_thread::sleep_for(70ms);
         }
     }
 
     void RaeMotor::controlSpeed()
-    {
-        while (_running)
-        {
-            uint32_t speedMil;
-            bool dir;
-            if (closedLoop_)
+{
+    while (_running)
+    {   
+        std::string dutyCyclePath = pwmName_ + "/pwm" + std::to_string(pwmPin) + "/duty_cycle";
+        std::ofstream dutyCycleFile(dutyCyclePath);
+        bool dir;
+        if (closedLoop_)
             {
                 auto currTime = std::chrono::high_resolution_clock::now();
                 float timeDiff = std::chrono::duration<float>(currTime - prevErrorTime).count();
-
                 float currSpeed = getSpeed();
                 float error = targetSpeed - currSpeed;
                 float eP = error * currPID.P;
@@ -83,59 +89,96 @@ namespace rae_hw
                 float eI = errSum * currPID.I;
                 float eD = (error - prevError) / timeDiff * currPID.D;
                 float outSpeed = targetSpeed + eP + eI + eD;
+                uint32_t dutyCycle = speedToPWM(outSpeed);
                 dir = (outSpeed >= 0) ^ reversePhPinLogic_;
-                speedMil = speedToPWM(outSpeed);
                 prevErrorTime = currTime;
                 prevError = error;
-            }
-            else
-            {
-                speedMil = speedToPWM(targetSpeed);
-                dir = (targetSpeed >= 0) ^ reversePhPinLogic_;
-            }
-            if (dir == motDirection)
-            {
-                dutyTarget = speedMil;
-            }
-            else
-            {
-                // Switch direction
-                // First stop
-                dutyTarget = 0;
-                while (dutyTrue != 0)
-                {
-                    usleep(100);
-                }
-                motDirection = dir;
-                if (motDirection)
-                {
-                    phPin.set_value(1);
-                }
-                else
-                {
-                    phPin.set_value(0);
-                }
-
-                // Set speed
-                dutyTarget = speedMil;
-            }
-            std::this_thread::sleep_for(5ms);
-        }
-    }
-    void RaeMotor::pwmMotor()
-    {
-        while (_running)
+                if (dutyCycleFile.is_open())
         {
-            if (dutyTrue)
-            {
-                pwmPin.set_value(1);
-            }
-            usleep(dutyTrue);
-            pwmPin.set_value(0);
-            usleep((1000 - dutyTrue));
-            dutyTrue = dutyTarget;
+            dutyCycleFile << dutyCycle;
+            dutyCycleFile.close();
         }
+            usleep(100000);
+            }
+            else {
+
+        uint32_t dutyCycle = speedToPWM(targetSpeed);
+        dir = (targetSpeed >= 0) ^ reversePhPinLogic_;
+        if (dutyCycleFile.is_open())
+        {
+            dutyCycleFile << dutyCycle;
+            dutyCycleFile.close();
+        }}
+
+        
+
+
+        if (dir == motDirection)
+        {
+            // Same direction, no need to switch
+        }
+        else
+        {
+            // Switch direction
+            // First stop
+            std::string enablePath = pwmName_ + "/pwm" + std::to_string(pwmPin) + "/enable";
+            std::ofstream enableFile(enablePath);
+            if (enableFile.is_open())
+            {
+                enableFile << "0";
+                enableFile.close();
+            }
+            motDirection=dir;
+            // Set the direction pin
+            if (motDirection)
+            {
+                phPin.set_value(1);
+            }
+            else
+            {
+                phPin.set_value(0);
+            }
+            enablePath = pwmName_ + "/pwm" + std::to_string(pwmPin) + "/enable"; 
+           std::ofstream enableFile2(enablePath);
+            if (enableFile2.is_open())
+            {
+                enableFile2 << "1";
+                enableFile2.close();
+            }
+        }
+
+        // Print the speed information
+       // std::cout << "Target Speed: " << targetSpeed << std::endl;
+       // std::cout << "Duty Cycle: " << dutyCycle << std::endl;
+        std::this_thread::sleep_for(5ms);
     }
+}
+
+    void RaeMotor::setPWM(int period, int duty_cycle)
+    {
+        std::string dutyCyclePath = pwmName_ + "/pwm" + std::to_string(pwmPin) + "/duty_cycle";
+        std::ofstream dutyCycleFile(dutyCyclePath);
+        dutyCycleFile << duty_cycle;
+        dutyCycleFile.close();
+
+        std::string enablePath = pwmName_ + "/pwm" + std::to_string(pwmPin) + "/enable";
+        std::ofstream enableFile(enablePath);
+        enableFile << 1;  // Enable PWM
+        enableFile.close();
+    }
+
+    void RaeMotor::disablePWM()
+    {   
+
+        std::string enablePath = pwmName_ + "/pwm" + std::to_string(pwmPin) + "/enable";
+        std::ofstream enableFile(enablePath);
+        enableFile << 0;  // Disable PWM
+        enableFile.close();
+    }
+
+    
+
+   
     void RaeMotor::readEncoders()
     {
         while (_running)
@@ -183,6 +226,8 @@ namespace rae_hw
                 {
                     std::lock_guard<std::mutex> lck(posMtx);
                     rads = count * encRatio;
+                  //  std::cout << "Speed rads: " << rads << std::endl;
+
                 }
                 prevCount = count;
             }
@@ -201,21 +246,29 @@ namespace rae_hw
     }
 
     uint32_t RaeMotor::speedToPWM(float speed)
-    {
-        float normSpeed = speed / velLim * 100;
-        float clSpeedNorm = std::clamp(normSpeed, -100.0f, 100.0f);
-        uint32_t normduty = static_cast<uint32_t>(std::abs(clSpeedNorm) * 10.0);
-        return normduty;
-    }
+{
+     // Calculate the duty cycle as a percentage of the maximum period
+    float normSpeed = speed / velLim;  // Normalize speed to the range [-1.0, 1.0]
+    float clSpeedNorm = std::clamp(normSpeed, -1.0f, 1.0f);
+    uint32_t normduty = static_cast<uint32_t>(std::abs(clSpeedNorm * 120000.0f));
+    return normduty;
+}
     void RaeMotor::motorSet(float speed)
-    {
-        targetSpeed = speed;
+    { 
+          std::string enablePath = pwmName_ + "/pwm" + std::to_string(pwmPin) + "/enable";
+          std::ofstream enableFile(enablePath);
+          enableFile << 1;  // Enable PWM
+          enableFile.close();
+          targetSpeed = speed;
     }
 
-    void RaeMotor::run()
+     void RaeMotor::run()
     {
         _running = true;
-        motorThread = std::thread(&RaeMotor::pwmMotor, this);
+        std::string enablePath = pwmName_ + "/pwm" + std::to_string(pwmPin) + "/enable";
+        std::ofstream enableFile(enablePath);
+        enableFile << 1;  // Enable PWM
+        enableFile.close();
         encoderThread = std::thread(&RaeMotor::readEncoders, this);
         calcSpeedThread = std::thread(&RaeMotor::calcSpeed, this);
         speedControlThread = std::thread(&RaeMotor::controlSpeed, this);
@@ -232,12 +285,10 @@ namespace rae_hw
     void RaeMotor::stop()
     {
         _running = false;
-        motorThread.join();
+        disablePWM();
         encoderThread.join();
         calcSpeedThread.join();
         speedControlThread.join();
-        pwmPin.set_value(0);
-        pwmPin.release();
         phPin.set_value(0);
         phPin.release();
         enAPin.release();
