@@ -6,7 +6,6 @@
 #include "camera_info_manager/camera_info_manager.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/image.hpp"
-#include "stereo_msgs/msg/disparity_image.hpp"
 #include "vision_msgs/msg/detection3_d_array.hpp"
 
 // Inludes common necessary includes for development using depthai library
@@ -44,11 +43,11 @@ dai::Pipeline createPipeline(bool enable_rgb, bool enable_depth)
         // MonoCamera
         left->setResolution(dai::node::ColorCamera::Properties::SensorResolution::THE_800_P);
         left->setVideoSize(640, 400);
-        left->setBoardSocket(dai::CameraBoardSocket::LEFT);
+        left->setBoardSocket(dai::CameraBoardSocket::CAM_B);
         left->setFps(30.0);
         right->setResolution(dai::node::ColorCamera::Properties::SensorResolution::THE_800_P);
         right->setVideoSize(640, 400);
-        right->setBoardSocket(dai::CameraBoardSocket::RIGHT);
+        right->setBoardSocket(dai::CameraBoardSocket::CAM_C);
         right->setFps(30.0);
 
         // StereoDepth

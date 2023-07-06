@@ -67,7 +67,6 @@ target_link_libraries(test_encoders ${GPIOD_LIBRARY})
 add_executable(test_max_speed test/test_max_speed.cpp src/rae_motors.cpp)
 target_link_libraries(test_max_speed ${GPIOD_LIBRARY})
 
-
 add_executable(test_speed test/test_speed.cpp src/rae_motors.cpp)
 target_link_libraries(test_speed ${GPIOD_LIBRARY})
 ament_target_dependencies(test_speed rclcpp geometry_msgs)
