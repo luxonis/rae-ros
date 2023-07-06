@@ -42,7 +42,9 @@ include_directories(
 )
 
 add_executable(camera src/camera.cpp)
-add_executable(stereo_depth src/stereo_depth)
+add_executable(stereo_depth src/stereo_depth.cpp)
+add_executable(yolo src/yolo.cpp)
+add_executable(stereo_pair src/stereo_pair.cpp)
 
 
 ament_target_dependencies(camera
@@ -57,6 +59,26 @@ ${dependencies})
 
 install(TARGETS
 stereo_depth
+DESTINATION lib/${PROJECT_NAME})
+
+
+ament_target_dependencies(stereo_pair
+${dependencies})
+
+install(TARGETS
+stereo_pair
+DESTINATION lib/${PROJECT_NAME})
+
+ament_target_dependencies(yolo
+${dependencies})
+
+# target_link_libraries(yolo
+# depthai::core
+# opencv_imgproc
+# opencv_highgui)
+
+install(TARGETS
+yolo
 DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})

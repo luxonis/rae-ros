@@ -15,7 +15,7 @@ def launch_setup(context, *args, **kwargs):
              package='depthimage_to_laserscan',
              executable='depthimage_to_laserscan_node',
              name='depthimage_to_laserscan_node',
-             remappings=[('depth', '/rae/stereo_front/image_raw'),
+             remappings=[('depth', '/rae/stereo_front/image_rect'),
                          ('depth_camera_info', '/rae/stereo_front/camera_info')],
              parameters=[{'output_frame': 'base_link',
                          'range_max': 20.0,

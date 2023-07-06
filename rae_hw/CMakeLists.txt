@@ -14,6 +14,10 @@ find_package(rclcpp REQUIRED)
 find_package(rclcpp_lifecycle REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(rae_msgs REQUIRED)
+find_package(cv_bridge REQUIRED)
+find_package(audio_msgs REQUIRED)
+find_package(ALSA REQUIRED)
 
 find_library(GPIOD_LIBRARY NAMES libgpiodcxx.so)
 if(NOT GPIOD_LIBRARY)
@@ -59,6 +63,18 @@ install(
 add_executable(battery src/battery.cpp)
 ament_target_dependencies(battery rclcpp sensor_msgs)
 
+add_executable(led src/led.cpp)
+ament_target_dependencies(led rclcpp rae_msgs)
+
+add_executable(lcd src/lcd.cpp)
+ament_target_dependencies(lcd rclcpp cv_bridge sensor_msgs)
+
+add_executable(speakers src/speakers.cpp)
+ament_target_dependencies(speakers rclcpp audio_msgs ALSA)
+
+add_executable(mic src/mic.cpp)
+ament_target_dependencies(mic rclcpp audio_msgs ALSA)
+
 add_executable(test_motors test/test_motors.cpp src/rae_motors.cpp)
 target_link_libraries(test_motors ${GPIOD_LIBRARY})
 
@@ -72,10 +88,12 @@ add_executable(test_speed test/test_speed.cpp src/rae_motors.cpp)
 target_link_libraries(test_speed ${GPIOD_LIBRARY})
 ament_target_dependencies(test_speed rclcpp geometry_msgs)
 
-ament_target_dependencies(battery rclcpp sensor_msgs)
+# ament_target_dependencies(battery rclcpp sensor_msgs)
 
 install(TARGETS
-  test_motors test_encoders test_max_speed test_speed battery
+
+  battery led lcd speakers mic test_motors test_encoders test_max_speed test_speed
+
   DESTINATION lib/${PROJECT_NAME})
 
 install(
