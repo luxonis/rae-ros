@@ -44,8 +44,8 @@
       i_output_isp: false
       i_board_socket_id: 1
       i_set_isp_scale: false
-      i_width: 640
-      i_height: 480
+      # i_width: 640
+      # i_height: 480
       i_preview_size: 416
     right_front:
       i_publish_topic: false
@@ -53,8 +53,8 @@
       i_board_socket_id: 2
       i_resolution: '800'
       i_set_isp_scale: false
-      i_width: 640
-      i_height: 480
+      # i_width: 640
+      # i_height: 480
       i_preview_size: 416
     stereo_front:
       i_align_depth: false
