@@ -91,6 +91,7 @@ ament_target_dependencies(test_speed rclcpp geometry_msgs)
 # ament_target_dependencies(battery rclcpp sensor_msgs)
 
 install(TARGETS
+
   battery led lcd speakers mic test_motors test_encoders test_max_speed test_speed
 
   DESTINATION lib/${PROJECT_NAME})
