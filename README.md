@@ -134,7 +134,6 @@ Scipt arguments - `[encRatioL encRatioR]`. Full arg version `ros2 run rae_hw tes
 
 ### Setting up procedure - Simulation
 
-
 1. `mkdir -p rae_ws/src`
 2. `cd rae_ws/src`
 3. `git clone git@github.com:luxonis/rae.git` 
