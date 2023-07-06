@@ -45,7 +45,6 @@ int main()
         // Instead of get (blocking), we use tryGet (non-blocking) which will return the available data or None otherwise
         auto inLeft = qLeft->get<dai::ImgFrame>();
         auto inRight = qRight->get<dai::ImgFrame>();
-        std::cout << "test" << std::endl;
             cv::Mat leftFrame;
             cv::Size s(inLeft->getWidth(), inLeft->getHeight());
             std::vector<cv::Mat> channelsL;

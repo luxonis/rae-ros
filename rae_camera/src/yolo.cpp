@@ -42,7 +42,6 @@ int main(int argc, char **argv)
     dai::Pipeline pipeline;
 
     // Define sources and outputs
-    auto camRgb = pipeline.create<dai::node::ColorCamera>();
     auto spatialDetectionNetwork = pipeline.create<dai::node::YoloSpatialDetectionNetwork>();
     auto monoLeft = pipeline.create<dai::node::ColorCamera>();
     auto monoRight = pipeline.create<dai::node::ColorCamera>();
@@ -59,21 +58,22 @@ int main(int argc, char **argv)
     nnNetworkOut->setStreamName("nnNetwork");
 
     // Properties
-    camRgb->setPreviewSize(416, 416);
-    camRgb->setFps(15.0);
-    camRgb->setResolution(dai::ColorCameraProperties::SensorResolution::THE_1080_P);
-    camRgb->setInterleaved(false);
-    camRgb->setColorOrder(dai::ColorCameraProperties::ColorOrder::BGR);
+    monoLeft->setPreviewSize(416, 416);
+    monoLeft->setVideoSize(640, 480);
+    monoRight->setVideoSize(640, 480);
+
+    monoLeft->setInterleaved(false);
 
     monoLeft->setResolution(dai::ColorCameraProperties::SensorResolution::THE_800_P);
-    monoLeft->setCamera("left");
+    monoLeft->setBoardSocket(dai::CameraBoardSocket::LEFT);
     monoRight->setResolution(dai::ColorCameraProperties::SensorResolution::THE_800_P);
-    monoRight->setCamera("right");
+    monoRight->setBoardSocket(dai::CameraBoardSocket::RIGHT);
+
 
     // setting node configs
     stereo->setDefaultProfilePreset(dai::node::StereoDepth::PresetMode::HIGH_DENSITY);
     // Align depth map to the perspective of RGB camera, on which inference is done
-    stereo->setDepthAlign(dai::CameraBoardSocket::CAM_A);
+    // stereo->setDepthAlign(dai::CameraBoardSocket::CAM_A);
     stereo->setOutputSize(monoLeft->getResolutionWidth(), monoLeft->getResolutionHeight());
 
     stereo->initialConfig.setMedianFilter(dai::MedianFilter::KERNEL_7x7);
@@ -113,11 +113,14 @@ int main(int argc, char **argv)
     monoLeft->video.link(stereo->left);
     monoRight->video.link(stereo->right);
 
-    camRgb->preview.link(spatialDetectionNetwork->input);
+    // manipL->out.link(stereo->left);
+    // manipR->out.link(stereo->right);
+
+    monoLeft->preview.link(spatialDetectionNetwork->input);
     if(syncNN) {
         spatialDetectionNetwork->passthrough.link(xoutRgb->input);
     } else {
-        camRgb->preview.link(xoutRgb->input);
+        monoLeft->preview.link(xoutRgb->input);
     }
 
     spatialDetectionNetwork->out.link(xoutNN->input);

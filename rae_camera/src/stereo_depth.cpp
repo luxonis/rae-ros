@@ -18,9 +18,6 @@ int main()
     dai::Pipeline pipeline;
 
     // Define sources and outputs
-    auto camRgb = pipeline.create<dai::node::ColorCamera>();
-    auto xoutRgb = pipeline.create<dai::node::XLinkOut>();
-    xoutRgb->setStreamName("rgb");
     auto monoLeftFront = pipeline.create<dai::node::ColorCamera>();
     auto monoRightFront = pipeline.create<dai::node::ColorCamera>();
     auto monoLeftBack = pipeline.create<dai::node::ColorCamera>();
@@ -44,13 +41,6 @@ int main()
     monoLeftBack->setBoardSocket(dai::CameraBoardSocket::CAM_D);
     monoRightBack->setResolution(dai::node::ColorCamera::Properties::SensorResolution::THE_800_P);
     monoRightBack->setBoardSocket(dai::CameraBoardSocket::CAM_E);
-
-    camRgb->setPreviewSize(416, 416);
-    camRgb->setFps(15.0);
-    camRgb->setResolution(dai::ColorCameraProperties::SensorResolution::THE_1080_P);
-    camRgb->setInterleaved(false);
-    camRgb->setColorOrder(dai::ColorCameraProperties::ColorOrder::BGR);
-    camRgb->setBoardSocket(dai::CameraBoardSocket::CAM_A);
 
     // Create a node that will produce the depth map (using disparity output as it's easier to visualize depth this way)
     depthFront->setDefaultProfilePreset(dai::node::StereoDepth::PresetMode::HIGH_DENSITY);
@@ -86,7 +76,6 @@ int main()
     monoRightBack->video.link(depthBack->right);
     depthBack->depth.link(xoutBack->input);
 
-    camRgb->preview.link(xoutRgb->input);
 
     // Connect to device and start pipeline
     dai::Device device(pipeline);
@@ -94,7 +83,6 @@ int main()
     // Output queue will be used to get the disparity frames from the outputs defined above
     auto q_f = device.getOutputQueue("depth_front", 4, false);
     auto q_b = device.getOutputQueue("depth_back", 4, false);
-    auto previewQueue = device.getOutputQueue("rgb", 4, false);
 
     while (true)
     {
