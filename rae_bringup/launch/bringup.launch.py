@@ -11,11 +11,14 @@ from launch.conditions import IfCondition
 def generate_launch_description():
     bringup_prefix = get_package_share_path('rae_bringup')
     hw_prefix = get_package_share_path('rae_hw')
+    foxglove_prefix = get_package_share_path('foxglove_bridge')
     return launch.LaunchDescription([
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
                 os.path.join(bringup_prefix, 'launch', 'robot.launch.py'))),
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
-                os.path.join(bringup_prefix, 'launch', 'slam.launch.py')))
+                os.path.join(bringup_prefix, 'launch', 'slam.launch.py'))),
+        IncludeLaunchDescription(
+            os.path.join(foxglove_prefix, 'foxglove_bridge_launch.xml'))
     ])

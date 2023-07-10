@@ -29,6 +29,7 @@
   <exec_depend>rtabmap_slam</exec_depend>
   <depend>rclpy</depend>
   <exec_depend>rosbridge_server</exec_depend>
+  <exec_depend>foxglove_bridge</exec_depend>
 
   <export>
     <build_type>ament_cmake</build_type>
