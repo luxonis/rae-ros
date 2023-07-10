@@ -14,5 +14,8 @@ def generate_launch_description():
     return launch.LaunchDescription([
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
-                os.path.join(bringup_prefix, 'launch', 'robot.launch.py')))
+                os.path.join(bringup_prefix, 'launch', 'robot.launch.py'))),
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(
+                os.path.join(bringup_prefix, 'launch', 'slam.launch.py')))
     ])
