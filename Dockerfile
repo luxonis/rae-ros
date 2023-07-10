@@ -26,7 +26,6 @@ RUN cd .$DEPTHAI_WS/src && git clone --branch rae_pipeline_humble https://github
 
 RUN apt update && rosdep update
 
-COPY ./ .$WS/src/rae
 RUN cd .$DEPTHAI_WS/ && rosdep install --from-paths src --ignore-src  -y --skip-keys depthai
 
 RUN cd .$DEPTHAI_WS/ && . /opt/ros/${ROS_DISTRO}/setup.sh && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
