@@ -15,8 +15,21 @@ def launch_setup(context, *args, **kwargs):
         log_level = 'debug'
     params_file = LaunchConfiguration("params_file")
     name = LaunchConfiguration('name').perform(context)
-
+    config = os.path.join(
+        get_package_share_directory('laserscan_kinect'),
+        'config',
+        'params.yaml'
+    )
     return [
+        Node(
+            package='laserscan_kinect',
+            executable='laserscan_kinect_exe',
+            parameters=[config],
+            remappings=[
+                ('/image', '/rae/stereo_front/image_raw'),
+                ('/camera_info', '/rae/stereo_front/camera_info'),
+            ]
+        ),
         ComposableNodeContainer(
             name=name+"_container",
             namespace="",
@@ -37,16 +50,16 @@ def launch_setup(context, *args, **kwargs):
                                     ('nn/spatial_detections', name+'/nn/spatial_detections'),
                                     ('rgb/preview/image_raw', name+'/nn/passthrough/image_raw')]
                     ),
-                    ComposableNode(
-                        package='depthimage_to_laserscan',
-                        plugin='depthimage_to_laserscan::DepthImageToLaserScanROS',
-                        name='depthimage_to_laserscan_node',
-                        remappings=[('depth', name+'/stereo_front/image_raw'),
-                                    ('depth_camera_info', name+'/stereo_front/camera_info')],
-                        parameters=[{'output_frame': 'base_link',
-                                    'range_max': 20.0,
-                                    'scan_row': 250}]
-         ),
+        #             ComposableNode(
+        #                 package='depthimage_to_laserscan',
+        #                 plugin='depthimage_to_laserscan::DepthImageToLaserScanROS',
+        #                 name='depthimage_to_laserscan_node',
+        #                 remappings=[('depth', name+'/stereo_front/image_raw'),
+        #                             ('depth_camera_info', name+'/stereo_front/camera_info')],
+        #                 parameters=[{'output_frame': 'base_link',
+        #                             'range_max': 20.0,
+        #                             'scan_row': 250}]
+        #  ),
             ],
             arguments=['--ros-args', '--log-level', log_level],
             output="both",

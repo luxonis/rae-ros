@@ -88,7 +88,7 @@ sensor_msgs::msg::LaserScan::SharedPtr LaserScanKinect::getLaserScanMsg(
       throw std::runtime_error(ss.str());
     }
 
-    image_vertical_offset_ = static_cast<int>(cam_cy - scan_height_ / 2.0);
+    // image_vertical_offset_ = static_cast<int>(cam_cy - scan_height_ / 2.0);
 
     is_scan_msg_configured_ = true;
   }

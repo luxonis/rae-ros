@@ -11,7 +11,7 @@ from launch.conditions import IfCondition
 def generate_launch_description():
     bringup_prefix = get_package_share_path('rae_bringup')
     hw_prefix = get_package_share_path('rae_hw')
-    foxglove_prefix = get_package_share_path('foxglove_bridge')
+    bridge_prefix = get_package_share_path('rosbridge_server')
     return launch.LaunchDescription([
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
@@ -20,5 +20,5 @@ def generate_launch_description():
             PythonLaunchDescriptionSource(
                 os.path.join(bringup_prefix, 'launch', 'slam.launch.py'))),
         IncludeLaunchDescription(
-            os.path.join(foxglove_prefix, 'foxglove_bridge_launch.xml'))
+            os.path.join(bridge_prefix, 'launch', 'rosbridge_websocket_launch.xml'))
     ])
