@@ -127,7 +127,7 @@ public:
 
   void setThreadsNum(unsigned threads_num);
 
-  void setVerticalOffset(int offset) {image_vertical_offset_ = offset};
+  void setVerticalOffset(int offset) {image_vertical_offset_ = offset;}
 
   bool getPublishDbgImgEnable() const;
 
