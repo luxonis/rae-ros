@@ -420,8 +420,8 @@ sensor_msgs::msg::Image::SharedPtr LaserScanKinect::prepareDbgImage(
   // Add line which is the border of the detection area
   std::list<std::pair<unsigned, unsigned>> pts;
   for (unsigned i = 0; i < img->width; ++i) {
-    const auto line1_row = cam_model_.cy() - scan_height_ / 2.0;
-    const auto line2_row = cam_model_.cy() + scan_height_ / 2.0;
+    const auto line1_row = image_vertical_offset_;
+    const auto line2_row = image_vertical_offset_ + scan_height_;
 
     if (line1_row >= 0 && line1_row < img->height && line2_row >= 0 && line2_row < img->height) {
       pts.push_back({line1_row, i});
