@@ -25,7 +25,12 @@ Make sure you have [IGN (Gazebo) Fortress](https://gazebosim.org/docs/fortress/i
    - Motor drivers and differential controller
    - Camera driver, currently set up to provide Depth and streams from left & right camera. Note here that you have to calibrate cameras (see steps below). Currently a default calibration file is loaded. It's located in `rae_camera/config/cal.json`. To use one on the device or from other path, change `i_external_calibration_path` parameter in  `rae_camera/config/camera.yaml`
    - Depth image -> LaserScan conversion node used for SLAM
-8. Launching whole stack
+8. Launching whole stack - `ros2 launch rae_bringup bringup.launch.py`. It has following arguments used for enabling parts of the stack:
+   - `enable_slam_toolbox` (true)
+   - `enable_rosbridge` (false)
+   - `enable_rtabmap` (false)
+   - `enable_nav` (true)
+Example launch with an argument - `ros2 launch rae_bringup bringup.launch.py enable_nav:=false`
 
 
 #### Calibration
