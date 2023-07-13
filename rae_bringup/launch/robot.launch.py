@@ -8,7 +8,7 @@ from launch.substitutions import LaunchConfiguration
 
 
 def generate_launch_description():
-    camera_prefix = get_package_share_path('rae_bringup')
+    camera_prefix = get_package_share_path('rae_camera')
     hw_prefix = get_package_share_path('rae_hw')
     return launch.LaunchDescription([
         IncludeLaunchDescription(
