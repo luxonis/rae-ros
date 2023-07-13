@@ -21,6 +21,7 @@
   <depend>vision_msgs</depend>
   <depend>libopencv-dev</depend>
   <depend>depthai</depend>
+  <depend>imu_filter_madgwick</depend>
 
   <export>
     <build_type>ament_cmake</build_type>

@@ -34,7 +34,7 @@ public:
   /**
    * @brief LaserScanKinectNode constructor
    */
-  LaserScanKinectNode();
+  LaserScanKinectNode(const rclcpp::NodeOptions& options = rclcpp::NodeOptions());
   ~LaserScanKinectNode();
 
 private:

@@ -21,8 +21,8 @@
 namespace laserscan_kinect
 {
 
-LaserScanKinectNode::LaserScanKinectNode()
-: Node("laserscan_kinect")
+LaserScanKinectNode::LaserScanKinectNode(const rclcpp::NodeOptions& options)
+: Node("laserscan_kinect", options)
 {
   params_callback_handle_ = add_on_set_parameters_callback(
     std::bind(&LaserScanKinectNode::parametersCallback, this, std::placeholders::_1));
@@ -41,6 +41,7 @@ LaserScanKinectNode::LaserScanKinectNode()
   declare_parameter("tilt_compensation_en", false);
   declare_parameter("publish_dbg_info", false);
   declare_parameter("threads_num", 1);
+  declare_parameter("vertical_offset", 0);
 
   // Subscription to depth image topic
   publisher_ = this->create_publisher<sensor_msgs::msg::LaserScan>("scan", 10);
@@ -116,6 +117,8 @@ rcl_interfaces::msg::SetParametersResult LaserScanKinectNode::parametersCallback
         converter_.setPublishDbgImgEnable(parameter.as_bool());
       } else if (parameter.get_name() == "threads_num") {
         converter_.setThreadsNum(parameter.as_int());
+      } else if (parameter.get_name() == "vertical_offset") {
+        converter_.setVerticalOffset(parameter.as_int());
       }
     }
   } catch (const std::exception & e) {
@@ -126,3 +129,5 @@ rcl_interfaces::msg::SetParametersResult LaserScanKinectNode::parametersCallback
 }
 
 }  // namespace laserscan_kinect
+#include "rclcpp_components/register_node_macro.hpp"
+RCLCPP_COMPONENTS_REGISTER_NODE(laserscan_kinect::LaserScanKinectNode);

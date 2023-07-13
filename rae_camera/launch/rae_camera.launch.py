@@ -2,11 +2,12 @@ import os
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, OpaqueFunction
+from launch.actions import DeclareLaunchArgument, OpaqueFunction, ExecuteProcess, RegisterEventHandler, TimerAction, LogInfo
+from launch.event_handlers import  OnProcessStart
 from launch.substitutions import LaunchConfiguration
-from launch_ros.actions import ComposableNodeContainer, Node, LoadComposableNodes
+from launch_ros.actions import ComposableNodeContainer
 from launch_ros.descriptions import ComposableNode
-from launch.launch_description_sources import PythonLaunchDescriptionSource
+
 
 
 def launch_setup(context, *args, **kwargs):
@@ -16,8 +17,12 @@ def launch_setup(context, *args, **kwargs):
     params_file = LaunchConfiguration("params_file")
     name = LaunchConfiguration('name').perform(context)
 
-    return [
-        ComposableNodeContainer(
+    reset_pwm = ExecuteProcess(
+        cmd=[['busybox devmem 0x20320180 32 0x00000000']],
+        shell=True
+    )
+    
+    perception = ComposableNodeContainer(
             name=name+"_container",
             namespace="",
             package="rclcpp_components",
@@ -29,28 +34,34 @@ def launch_setup(context, *args, **kwargs):
                         name=name,
                         parameters=[params_file],
                     ),
-                    ComposableNode(
-                        package="depthai_filters",
-                        plugin="depthai_filters::SpatialBB",
-                        remappings=[
-                                    ('stereo/camera_info', name+'/stereo_front/camera_info'),
-                                    ('nn/spatial_detections', name+'/nn/spatial_detections'),
-                                    ('rgb/preview/image_raw', name+'/nn/passthrough/image_raw')]
-                    ),
             ],
             arguments=['--ros-args', '--log-level', log_level],
             output="both",
+        )
+
+    return [
+        perception,
+        RegisterEventHandler(
+            OnProcessStart(
+                target_action=perception,
+                on_start=[
+                    TimerAction(
+                        period=15.0,
+                        actions=[reset_pwm, LogInfo(msg='Resetting PWM.'),],
+                    )
+                ]
+            )
         ),
 
     ]
 
 
 def generate_launch_description():
-    rae_prefix = get_package_share_directory("rae_bringup")
+    camera_prefix = get_package_share_directory("rae_camera")
     declared_arguments = [
         DeclareLaunchArgument("name", default_value="rae"),
         DeclareLaunchArgument("params_file", default_value=os.path.join(
-            rae_prefix, 'config', 'camera.yaml')),
+            camera_prefix, 'config', 'camera.yaml')),
     ]
 
     return LaunchDescription(

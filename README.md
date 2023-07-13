@@ -23,9 +23,15 @@ Make sure you have [IGN (Gazebo) Fortress](https://gazebosim.org/docs/fortress/i
 6. Attach to the shell - `docker attach <container_name>`, or if you want to create separate session `docker exec -it <container_name> zsh
 7. To launch robot hardware - `ros2 launch rae_bringup robot.launch.py`. This launches:
    - Motor drivers and differential controller
-   - Camera driver, currently set up to provide Depth and streams from left & right camera. Note here that you have to calibrate cameras (see steps below). Currently a default calibration file is loaded. It's located in `rae_bringup/config/cal.json`. To use one on the device or from other path, change `i_external_calibration_path` parameter in  `rae_bringup/config/camera.yaml`
+   - Camera driver, currently set up to provide Depth and streams from left & right camera. Note here that you have to calibrate cameras (see steps below). Currently a default calibration file is loaded. It's located in `rae_camera/config/cal.json`. To use one on the device or from other path, change `i_external_calibration_path` parameter in  `rae_camera/config/camera.yaml`
    - Depth image -> LaserScan conversion node used for SLAM
-9. Launching navigation stack  first connect RAE to WIFI with internet access, then install slam_toolbox - `sudo apt install ros-humble-slam-toolbox` then run `ros2 launch rae_bringup bringup.launch.py sim:=false use_rviz:=true`
+8. Launching whole stack - `ros2 launch rae_bringup bringup.launch.py`. It has following arguments used for enabling parts of the stack:
+   - `enable_slam_toolbox` (true)
+   - `enable_rosbridge` (false)
+   - `enable_rtabmap` (false)
+   - `enable_nav` (false)
+Example launch with an argument - `ros2 launch rae_bringup bringup.launch.py enable_nav:=false`
+
 
 #### Calibration
 Steps to use it in basic docker image:
