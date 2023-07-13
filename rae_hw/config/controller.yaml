@@ -21,7 +21,7 @@ diff_controller:
     left_wheel_radius_multiplier: 1.0
     right_wheel_radius_multiplier: 1.0
 
-    publish_rate: 50.0
+    publish_rate: 20.0
     odom_frame_id: odom
     base_frame_id: base_footprint
     pose_covariance_diagonal: [0.001, 0.001, 0.001, 0.001, 0.001, 0.01]
@@ -30,7 +30,7 @@ diff_controller:
     velocity_rolling_window_size: 1
 
     open_loop: false
-    enable_odom_tf: false
+    enable_odom_tf: true
 
     cmd_vel_timeout: 0.5
     use_stamped_vel: false

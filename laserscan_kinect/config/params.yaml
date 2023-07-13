@@ -20,7 +20,7 @@ laserscan_kinect_front:
     # Sensor tilt angle compensation.
     sensor_tilt_angle: -30.0
     # Remove ground from scan.
-    ground_remove_en: true
+    ground_remove_en: false
     # Ground margin (m).
     ground_margin: 0.05
     # Sensor tilt angle compensation.
@@ -50,7 +50,7 @@ laserscan_kinect_back:
     # Sensor tilt angle compensation.
     sensor_tilt_angle: -30.0
     # Remove ground from scan.
-    ground_remove_en: true
+    ground_remove_en: false
     # Ground margin (m).
     ground_margin: 0.05
     # Sensor tilt angle compensation.

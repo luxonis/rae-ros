@@ -14,6 +14,10 @@ def generate_launch_description():
     enable_slam_toolbox = LaunchConfiguration('enable_slam_toolbox', default='true')
     enable_rosbridge = LaunchConfiguration('enable_rosbridge', default='false')
     enable_rtabmap = LaunchConfiguration('enable_rtabmap', default='false')
+    enable_nav = LaunchConfiguration('enable_nav', default='true')
+    nav_prefix = os.path.join(get_package_share_path('nav2_bringup'), 'launch')
+    params = os.path.join(bringup_prefix, 'config', 'slam_param.yaml')
+
     return launch.LaunchDescription([
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
@@ -31,5 +35,13 @@ def generate_launch_description():
     IncludeLaunchDescription(
             os.path.join(bridge_prefix, 'launch', 'rosbridge_websocket_launch.xml'),
             condition=IfCondition(enable_rosbridge)
-            )
+            ),
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(os.path.join(nav_prefix, 'navigation_launch.py')),
+            launch_arguments={
+                              'use_sim_time': 'false',
+                              'params_file': params,
+                              'container_name': 'rae_container'}.items(),
+            condition=IfCondition(enable_nav)
+            ),
             ])
