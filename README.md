@@ -29,7 +29,7 @@ Make sure you have [IGN (Gazebo) Fortress](https://gazebosim.org/docs/fortress/i
    - `enable_slam_toolbox` (true)
    - `enable_rosbridge` (false)
    - `enable_rtabmap` (false)
-   - `enable_nav` (true)
+   - `enable_nav` (false)
 Example launch with an argument - `ros2 launch rae_bringup bringup.launch.py enable_nav:=false`
 
 

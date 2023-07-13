@@ -14,7 +14,7 @@ def generate_launch_description():
     enable_slam_toolbox = LaunchConfiguration('enable_slam_toolbox', default='true')
     enable_rosbridge = LaunchConfiguration('enable_rosbridge', default='false')
     enable_rtabmap = LaunchConfiguration('enable_rtabmap', default='false')
-    enable_nav = LaunchConfiguration('enable_nav', default='true')
+    enable_nav = LaunchConfiguration('enable_nav', default='false')
     nav_prefix = os.path.join(get_package_share_path('nav2_bringup'), 'launch')
     params = os.path.join(bringup_prefix, 'config', 'slam_param.yaml')
 
