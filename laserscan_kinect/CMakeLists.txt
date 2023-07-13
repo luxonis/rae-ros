@@ -14,7 +14,7 @@ find_package(cv_bridge REQUIRED)
 ament_auto_find_build_dependencies()
 
 ### Build
-ament_auto_add_library(${PROJECT_NAME}
+ament_auto_add_library(${PROJECT_NAME} SHARED
   src/laserscan_kinect.cpp
   src/laserscan_kinect_node.cpp
 )
@@ -45,6 +45,7 @@ target_include_directories(${PROJECT_NAME}
 )
 
 ament_export_dependencies(${PROJECT_NAME} PUBLIC image_geometry image_transport sensor_msgs cv_bridge)
+rclcpp_components_register_nodes(${PROJECT_NAME} "${PROJECT_NAME}::LaserScanKinectNode")
 
 ### Install
 ament_auto_package(INSTALL_TO_SHARE

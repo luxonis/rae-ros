@@ -21,8 +21,8 @@
 namespace laserscan_kinect
 {
 
-LaserScanKinectNode::LaserScanKinectNode()
-: Node("laserscan_kinect")
+LaserScanKinectNode::LaserScanKinectNode(const rclcpp::NodeOptions& options)
+: Node("laserscan_kinect", options)
 {
   params_callback_handle_ = add_on_set_parameters_callback(
     std::bind(&LaserScanKinectNode::parametersCallback, this, std::placeholders::_1));
@@ -129,3 +129,5 @@ rcl_interfaces::msg::SetParametersResult LaserScanKinectNode::parametersCallback
 }
 
 }  // namespace laserscan_kinect
+#include "rclcpp_components/register_node_macro.hpp"
+RCLCPP_COMPONENTS_REGISTER_NODE(laserscan_kinect::LaserScanKinectNode);
