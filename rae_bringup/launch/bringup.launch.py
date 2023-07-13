@@ -13,6 +13,7 @@ def generate_launch_description():
     bridge_prefix = get_package_share_path('rosbridge_server')
     enable_slam_toolbox = LaunchConfiguration('enable_slam_toolbox', default='true')
     enable_rosbridge = LaunchConfiguration('enable_rosbridge', default='false')
+    enable_rtabmap = LaunchConfiguration('enable_rtabmap', default='false')
     return launch.LaunchDescription([
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
@@ -21,6 +22,11 @@ def generate_launch_description():
             PythonLaunchDescriptionSource(
                 os.path.join(bringup_prefix, 'launch', 'slam.launch.py')),
             condition=IfCondition(enable_slam_toolbox)
+            ),
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(
+                os.path.join(bringup_prefix, 'launch', 'rtabmap.launch.py')),
+            condition=IfCondition(enable_rtabmap)
             ),
     IncludeLaunchDescription(
             os.path.join(bridge_prefix, 'launch', 'rosbridge_websocket_launch.xml'),
