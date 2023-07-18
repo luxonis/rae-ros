@@ -183,42 +183,65 @@ namespace rae_hw
     {
         while (_running)
         {
-            usleep(1);
+            
             int currA = enAPin.get_value();
             int currB = enBPin.get_value();
             State currS{currA, currB};
             int count = prevCount;
-            if (currS == Clockwise)
+            if (currS == Clockwise && currS != prevState)
             {
                 if (prevState == Rest)
                 {
-                    encDirection = true;
+                    count++;
                 }
-                else
+                else if (prevState == Halfway)
                 {
-                    encDirection = false;
+                    count--;
+                }
+                else{
+                    std::cout << "We are missing ticks! on motor:" << pwmPin << std::endl;
                 }
             }
-            else if (currS == Counter)
+            else if (currS == Halfway && currS != prevState)
             {
-                if (prevState == Rest)
+                if (prevState == Clockwise)
                 {
-                    encDirection = false;
+                    count++;
                 }
-                else
+                else if (prevState == Counter)
                 {
-                    encDirection = true;
+                    count--;
+                }
+                else{
+                    std::cout << "We are missing ticks!!!!!" << pwmPin << std::endl;
+                }
+            }
+            else if (currS == Counter && currS != prevState)
+            {
+                if (prevState == Halfway)
+                {
+                    count++;
+                }
+                else if (prevState == Rest)
+                {
+                    count--;
+                }
+                else{
+                    std::cout << "We are missing ticks!!!!!" << pwmPin << std::endl;
                 }
             }
             else if (currS == Rest && currS != prevState)
             {
-                if (encDirection)
+                if (prevState == Counter)
                 {
                     count++;
                 }
-                else
+                else if (prevState == Clockwise)
                 {
                     count--;
+                }
+                else{
+                    std::cout << "We are missing ticks!!!!!" << pwmPin << std::endl;
                 }
             }
             if (count != prevCount)
@@ -226,7 +249,7 @@ namespace rae_hw
                 {
                     std::lock_guard<std::mutex> lck(posMtx);
                     rads = count * encRatio;
-                  //  std::cout << "Speed rads: " << rads << std::endl;
+                    std::cout <<"Motor:" << pwmPin << "Count: " << count << std::endl;
 
                 }
                 prevCount = count;
@@ -234,6 +257,7 @@ namespace rae_hw
             prevState = currS;
         }
     }
+
     float RaeMotor::getPos()
     {
         std::lock_guard<std::mutex> lck(posMtx);
