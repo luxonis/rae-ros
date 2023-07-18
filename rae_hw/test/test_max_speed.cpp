@@ -9,8 +9,8 @@ using namespace std::chrono_literals;
 
 int main(int argc, char *argv[]){
     float duration = 5.0;
-    int encRatioL = 187;
-    int encRatioR = 187;
+    int encRatioL = 756;
+    int encRatioR = 756;
 
     if(argc == 2 && std::strcmp( argv[1], "-h" ) == 0 ){
         std::cout << "Help:\n";

@@ -10,8 +10,8 @@ int main(int argc, char *argv[]){
     float duration = 5.0;
     float speedL = 16.0;
     float speedR = 16.0;
-    int encRatioL = 187;
-    int encRatioR = 187;
+    int encRatioL = 756;
+    int encRatioR = 756;
     int maxVelL = 32;
     int maxVelR = 32;
 

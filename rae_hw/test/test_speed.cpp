@@ -16,8 +16,8 @@ int main(int argc, char *argv[]){
     auto pubL = node->create_publisher<geometry_msgs::msg::Twist>("left_vel",10);
     auto pubR = node->create_publisher<geometry_msgs::msg::Twist>("right_vel",10);
     float duration = 5.0;
-    int encRatioL = 187;
-    int encRatioR = 187;
+    int encRatioL = 756;
+    int encRatioR = 756;
     float speedL = 16.0;
     float speedR = 16.0;
     rae_hw::PID pid;
