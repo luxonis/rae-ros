@@ -45,7 +45,7 @@ namespace rae_hw
         prevErrorTime = std::chrono::high_resolution_clock::now();
         std::string periodPath = pwmName_ + "/pwm" + std::to_string(pwmPin) + "/period";
         std::ofstream periodFile(periodPath);
-        periodFile << 120000;
+        periodFile << 100000;
         periodFile.close();
 
     }
@@ -67,7 +67,7 @@ namespace rae_hw
             }
             prevVelTime = currTime;
             prevPos = currPos;
-            std::this_thread::sleep_for(70ms);
+            std::this_thread::sleep_for(40ms);
         }
     }
 
@@ -98,7 +98,7 @@ namespace rae_hw
             dutyCycleFile << dutyCycle;
             dutyCycleFile.close();
         }
-            usleep(100000);
+            
             }
             else {
 
@@ -150,7 +150,7 @@ namespace rae_hw
         // Print the speed information
        // std::cout << "Target Speed: " << targetSpeed << std::endl;
        // std::cout << "Duty Cycle: " << dutyCycle << std::endl;
-        std::this_thread::sleep_for(5ms);
+        std::this_thread::sleep_for(40ms);
     }
 }
 
@@ -274,7 +274,7 @@ namespace rae_hw
      // Calculate the duty cycle as a percentage of the maximum period
     float normSpeed = speed / velLim;  // Normalize speed to the range [-1.0, 1.0]
     float clSpeedNorm = std::clamp(normSpeed, -1.0f, 1.0f);
-    uint32_t normduty = static_cast<uint32_t>(std::abs(clSpeedNorm * 120000.0f));
+    uint32_t normduty = static_cast<uint32_t>(std::abs(clSpeedNorm * 100000.0f));
     return normduty;
 }
     void RaeMotor::motorSet(float speed)
