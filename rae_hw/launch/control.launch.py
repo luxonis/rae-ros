@@ -46,8 +46,8 @@ def generate_launch_description():
             arguments=["joint_state_broadcaster",
                        "--controller-manager", "/controller_manager"],
         ),
-        Node(
-            package="rae_hw",
-            executable="battery",
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(
+                os.path.join(get_package_share_directory('rae_hw'), 'launch', 'peripherals.launch.py'))
         ),
     ])

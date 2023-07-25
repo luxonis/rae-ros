@@ -47,9 +47,9 @@ int main(int argc, char *argv[]){
     std::cout << "Starting test procedure. Duration: " <<  duration  << "s.\n";
     std::cout << "Enc ratios - L: " << encRatioL << " R: " << encRatioR << " counts/rev." << std::endl;
     auto motorL = std::make_unique<rae_hw::RaeMotor>("left_wheel_name",
-                                        "gpiochip0", 19, 41, 42, 43, encRatioL, 32, true, true, pid);
+                                        "gpiochip0", "/sys/class/pwm/pwmchip0", 2, 41, 42, 43, encRatioL, 32, true, true, pid);
     auto motorR = std::make_unique<rae_hw::RaeMotor>("right_wheel_name",
-                                        "gpiochip0", 20, 45, 46, 47, encRatioR, 32, false, true, pid);
+                                        "gpiochip0", "/sys/class/pwm/pwmchip0", 1, 45, 46, 47, encRatioR, 32, false, true, pid);
     motorL->run();
     motorR->run();
     float leftPos = 0.0;
@@ -75,7 +75,9 @@ int main(int argc, char *argv[]){
         rightVelMsg.linear.z = rightPos;
 
         float startTimeDiff = std::chrono::duration<float>(currTime - startTime).count();
-        if (startTimeDiff > duration){
+        if (leftPos > (50.2654824574*2)){
+            std::cout << "Left pos: " << leftPos << " rad.\n";
+        std::cout <<  "Right pos: " << rightPos << " rad." << std::endl;
             timePassed = true;
         }
         std::this_thread::sleep_for(10ms);
@@ -85,33 +87,6 @@ int main(int argc, char *argv[]){
     }
     startTime = std::chrono::high_resolution_clock::now();
     timePassed = false;
-    while(!timePassed){
-        geometry_msgs::msg::Twist leftVelMsg;
-        geometry_msgs::msg::Twist rightVelMsg;
-        motorL->motorSet(-speedL);
-        motorR->motorSet(-speedR);
-        leftVelMsg.linear.x = -speedL;
-        rightVelMsg.linear.x = -speedR;
-        auto currTime = std::chrono::high_resolution_clock::now();
-        leftPos = motorL->getPos();
-        rightPos = motorR->getPos();
-        float currLeftVel = motorL->getSpeed();
-        float currRightVel = motorR->getSpeed();
-
-        leftVelMsg.linear.y = currLeftVel;
-        leftVelMsg.linear.z = leftPos;
-        rightVelMsg.linear.y = currRightVel;
-        rightVelMsg.linear.z = rightPos;
-
-        float startTimeDiff = std::chrono::duration<float>(currTime - startTime).count();
-        if (startTimeDiff > duration){
-            timePassed = true;
-        }
-        std::this_thread::sleep_for(10ms);
-        pubL->publish(leftVelMsg);
-        pubR->publish(rightVelMsg);
-        rclcpp::spin_some(node);
-    }
 
     rclcpp::shutdown();
     return 0;

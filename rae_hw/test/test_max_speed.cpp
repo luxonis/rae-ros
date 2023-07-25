@@ -1,5 +1,5 @@
 #include "rae_hw/rae_motors.hpp"
-
+#include <thread>
 #include <chrono>
 #include <iostream>
 #include <memory>
@@ -31,10 +31,10 @@ int main(int argc, char *argv[]){
     }
     std::cout << "Starting test procedure. Duration: " <<  duration  << "s.\n";
     std::cout << "Enc ratios - L: " << encRatioL << " R: " << encRatioR << " counts/rev." << std::endl;
-    auto motorL = std::make_unique<rae_hw::RaeMotor>("left_wheel_name",
-                                        "gpiochip0", 19, 41, 42, 43, encRatioL, 1, true);
     auto motorR = std::make_unique<rae_hw::RaeMotor>("right_wheel_name",
-                                        "gpiochip0", 20, 45, 46, 47, encRatioR, 1, false);
+                                        "gpiochip0", "/sys/class/pwm/pwmchip0", 2, 45, 46, 47, encRatioR, 32, false);
+    auto motorL = std::make_unique<rae_hw::RaeMotor>("left_wheel_name",
+                                        "gpiochip0", "/sys/class/pwm/pwmchip0", 1, 41, 42, 43, encRatioL, 32, true);
     motorL->run();
     motorR->run();
     float prevMaxVelL = 0.0;
@@ -44,14 +44,14 @@ int main(int argc, char *argv[]){
     auto startTime = std::chrono::high_resolution_clock::now();
     auto prevTime = startTime;
     bool timePassed = false;
-    
     while(!timePassed){
-        motorL->motorSet(1.0);
-        motorR->motorSet(1.0);
+        motorL->setPWM(150000, 100000);
+        motorR->setPWM(150000, 100000);
         auto currTime = std::chrono::high_resolution_clock::now();
         float currLeftPos = motorL->getPos();
         float currRightPos = motorR->getPos();
         float timeDiff = std::chrono::duration<float>(currTime - prevTime).count();
+        std::cout << "Test finished. \n Max speed L: " << currRightPos << " rads/s.\n Max speed R: " << currLeftPos << " rads/s." << std::endl;
         float leftVel = (currLeftPos - leftPos) / timeDiff;
         float rightVel = (currRightPos - rightPos) / timeDiff;
         prevTime = currTime;
@@ -70,6 +70,8 @@ int main(int argc, char *argv[]){
         }
         std::this_thread::sleep_for(20ms);
     }
+    motorL->disablePWM();
+    motorR->disablePWM();
 
     std::cout << "Test finished. \n Max speed L: " << prevMaxVelL << " rads/s.\n Max speed R: " << prevMaxVelR << " rads/s." << std::endl;
 

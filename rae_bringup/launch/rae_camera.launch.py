@@ -29,6 +29,14 @@ def launch_setup(context, *args, **kwargs):
                         name=name,
                         parameters=[params_file],
                     ),
+                    ComposableNode(
+                        package="depthai_filters",
+                        plugin="depthai_filters::SpatialBB",
+                        remappings=[
+                                    ('stereo/camera_info', name+'/stereo_front/camera_info'),
+                                    ('nn/spatial_detections', name+'/nn/spatial_detections'),
+                                    ('rgb/preview/image_raw', name+'/nn/passthrough/image_raw')]
+                    ),
             ],
             arguments=['--ros-args', '--log-level', log_level],
             output="both",

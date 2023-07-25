@@ -30,6 +30,9 @@ ament_python_install_package(${PROJECT_NAME})
 install(
   PROGRAMS
   scripts/scan_repub.py
+  scripts/battery_status.py
+  scripts/audio_spectrum.py
+  scripts/sound_test.py
   DESTINATION lib/${PROJECT_NAME}
 )
 install(DIRECTORY launch config DESTINATION share/${PROJECT_NAME})

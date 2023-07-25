@@ -1,12 +1,12 @@
 ARG ROS_DISTRO=humble
 FROM ros:${ROS_DISTRO}-ros-core AS builder
 ARG SIM=0
-ARG CORE_NUM=1
+ARG CORE_NUM=4
 ARG BUILD_TYPE="RelWithDebInfo"
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
-   && apt-get -y install --no-install-recommends software-properties-common git libusb-1.0-0-dev wget zsh python3-colcon-common-extensions python3-rosdep build-essential neovim tmux htop net-tools iputils-ping gpiod
+   && apt-get -y install --no-install-recommends software-properties-common git libusb-1.0-0-dev wget zsh python3-colcon-common-extensions python3-rosdep build-essential neovim tmux htop net-tools iputils-ping gpiod gstreamer1.0-plugins-bad gstreamer1.0-alsa libasound2-dev
 
 RUN rosdep init
 

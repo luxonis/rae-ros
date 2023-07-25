@@ -23,14 +23,6 @@ def generate_launch_description():
         }]
     )
 
-    jsp_node = Node(
-        package='joint_state_publisher',
-        executable='joint_state_publisher',
-        name='joint_state_publisher',
-        parameters=[{
-            'use_sim_time': use_sim_time
-        }]
-    )
 
     return LaunchDescription([
         DeclareLaunchArgument(
@@ -39,5 +31,4 @@ def generate_launch_description():
             description='Use sim time'
         ),
         rsp_node,
-        jsp_node
     ])

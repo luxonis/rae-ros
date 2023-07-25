@@ -41,16 +41,16 @@ int main(int argc, char *argv[]){
     std::cout << "Enc ratios - L: " << encRatioL << " R: " << encRatioR << " counts/rev.\n";
     std::cout << "Max speeds - L: " << maxVelL << " R: " << maxVelR << " rads/s." << std::endl;
     auto motorL = std::make_unique<rae_hw::RaeMotor>("left_wheel_name",
-                                        "gpiochip0", 19, 41, 42, 43, encRatioL, maxVelL, true);
+                                        "gpiochip0", "/sys/class/pwm/pwmchip0", 1, 41, 42, 43, encRatioL, maxVelL, true);
     auto motorR = std::make_unique<rae_hw::RaeMotor>("right_wheel_name",
-                                        "gpiochip0", 20, 45, 46, 47, encRatioR, maxVelR, false);
-    motorL->run();
-    motorR->run();
+                                        "gpiochip0", "/sys/class/pwm/pwmchip0", 2, 45, 46, 47, encRatioR, maxVelR, false);
+    
     auto startTime = std::chrono::high_resolution_clock::now();
     bool timePassed = false;
     while(!timePassed){
-        motorL->motorSet(speedL);
-        motorR->motorSet(speedR);
+        
+        motorL->setPWM(150000, 100000);
+        motorR->setPWM(150000, 100000);
         auto currTime = std::chrono::high_resolution_clock::now();
         float timeDiff = std::chrono::duration<float>(currTime - startTime).count();
         if (timeDiff > duration){
@@ -59,11 +59,13 @@ int main(int argc, char *argv[]){
     }
     auto leftPos = motorL->getPos();
     auto rightPos = motorR->getPos();
-
+    motorL->disablePWM();
+    motorR->disablePWM();
     std::cout << "Test complete after " << duration << "s.\n";
     std::cout << "Left pos: " << leftPos << " rad.\n";
     std::cout <<  "Right pos: " << rightPos << " rad." << std::endl;
-    
+        
 
     return 0;
 }
+
