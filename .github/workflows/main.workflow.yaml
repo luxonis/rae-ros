@@ -12,7 +12,7 @@ on:
     branches:
       - main
 env:
-  ROS_DISTRO: humble
+  ROS_DISTRO: iron
 
 jobs:
   docker-build:
@@ -56,5 +56,5 @@ jobs:
           push: ${{ env.PUSH }}
           no-cache: true
           tags: | 
-            luxonis/depthai-ros-rae
+            luxonis/depthai-ros-rae-iron
       

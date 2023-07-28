@@ -1,4 +1,4 @@
-ARG ROS_DISTRO=humble
+ARG ROS_DISTRO=iron
 FROM ros:${ROS_DISTRO}-ros-core AS builder
 ARG SIM=0
 ARG CORE_NUM=4
