@@ -1,0 +1,235 @@
+/rae:
+  ros__parameters:
+    camera:
+      i_nn_type: none
+      i_pipeline_type: rae
+      i_enable_ir: false
+      i_enable_imu: true
+      i_calibration_dump: false
+      i_pipeline_dump: false
+    nn:
+      i_nn_config_path: /workspaces/rae_ws/src/rae-ros/rae_camera/config/yolo.json
+      i_disable_resize: true
+      i_enable_passthrough: true
+    rgb:
+      i_output_isp: false
+      i_set_isp_scale: false
+      i_fps: 15.0
+      i_preview_size: 416
+      i_board_socket_id: 0
+    left_front:
+      i_resolution: '800'
+      i_publish_topic: false
+      i_output_isp: false
+      i_board_socket_id: 1
+      i_set_isp_scale: false
+      i_width: 640
+      i_height: 400
+      i_preview_size: 416
+    right_front:
+      i_publish_topic: true
+      i_output_isp: false
+      i_board_socket_id: 2
+      i_resolution: '800'
+      i_set_isp_scale: false
+      i_width: 640
+      i_height: 400
+      i_preview_size: 416
+    stereo_front:
+      i_align_depth: false
+      i_publish_right_rect: false
+      i_depth_preset: HIGH_ACCURACY
+      i_subpixel: true
+    stereo_back:
+      i_align_depth: false
+      i_publish_right_rect: false
+      i_depth_preset: HIGH_ACCURACY
+      i_subpixel: true
+    left_back:
+      i_resolution: '800'
+      i_publish_topic: false
+      i_output_isp: false
+      i_board_socket_id: 3
+      i_set_isp_scale: false
+      i_width: 640
+      i_height: 400
+    right_back:
+      i_publish_topic: false
+      i_output_isp: false
+      i_board_socket_id: 4
+      i_resolution: '800'
+      i_set_isp_scale: false
+      i_width: 640
+      i_height: 400
+laserscan_kinect_front:
+  ros__parameters:
+    # Frame id for the output laserscan.
+    output_frame_id: base_link
+    # Minimum sensor range (m).
+    range_min: 0.3
+    # Maximum sensor range (m).
+    range_max: 10.0
+    # Height of used part of depth img (px).
+    scan_height: 180
+    # Row step in depth image processing (px).
+    depth_img_row_step: 20
+    # If continously camera data update.
+    cam_model_update: false
+    # Offset in Y axis
+    vertical_offset: 180
+
+    # Height of sensor optical center mount (m).
+    sensor_mount_height: 0.8
+    # Sensor tilt angle compensation.
+    sensor_tilt_angle: -30.0
+    # Remove ground from scan.
+    ground_remove_en: false
+    # Ground margin (m).
+    ground_margin: 0.05
+    # Sensor tilt angle compensation.
+    tilt_compensation_en: true
+
+    publish_dbg_info: true
+    threads_num: 1
+laserscan_kinect_back:
+  ros__parameters:
+    # Frame id for the output laserscan.
+    output_frame_id: base_link_back
+    # Minimum sensor range (m).
+    range_min: 0.3
+    # Maximum sensor range (m).
+    range_max: 10.0
+    # Height of used part of depth img (px).
+    scan_height: 180
+    # Row step in depth image processing (px).
+    depth_img_row_step: 10
+    # If continously camera data update.
+    cam_model_update: false
+    # Offset in Y axis
+    vertical_offset: 180
+
+    # Height of sensor optical center mount (m).
+    sensor_mount_height: 0.8
+    # Sensor tilt angle compensation.
+    sensor_tilt_angle: -30.0
+    # Remove ground from scan.
+    ground_remove_en: false
+    # Ground margin (m).
+    ground_margin: 0.05
+    # Sensor tilt angle compensation.
+    tilt_compensation_en: true
+
+    publish_dbg_info: true
+    threads_num: 1
+
+laserscan_multi_merger:
+  ros__parameters:
+    laserscan_topics: /rae/scan_back /rae/scan_front
+    destination_frame: 'base_link'
+    scan_destination_topic: '/scan'
+rtabmap:
+  ros__parameters:
+    frame_id: "base_footprint"
+    subscribe_rgb: True
+    subscribe_depth: True
+    subscribe_scan: True
+    subscribe_odom_info: False
+    approx_sync: True
+    Grid/MaxGroundHeight: "0.1"
+    Grid/FromDepth: True
+    Grid/RangeMin: "0.4"
+    Grid/RangeMax: "8.0"
+    Kp/RoiRatio: "0 0 0 0.3"
+    # "Grid/3D": "false",
+    Grid/MaxGroundAngle: "60.0"
+    Grid/FootprintHeight: "0.1"
+    Reg/Force3DoF: "true"
+    Optimizer/Slam2D: True
+    Rtabmap/DetectionRate: "1.0"
+    Grid/RayTracing: "true"
+    RGBD/NeighborLinkRefining: 'True'
+    RGBD/LocalLoopDetectionTime: "false"
+    RGBD/OptimizeFromGraphEnd: "false"
+    RGBD/AngularUpdate: "0.01"
+    RGBD/LinearUpdate: "0.01"
+#            "Reg/Strategy": "1",
+    qos_scan: 2
+    qos_image: 2
+    qos_camera_info: 2
+    qos_odom: 2
+    qos_user_data: 2
+    latch: false
+slam_toolbox:
+  ros__parameters:
+
+    # Plugin params
+    solver_plugin: solver_plugins::CeresSolver
+    ceres_linear_solver: SPARSE_NORMAL_CHOLESKY
+    ceres_preconditioner: SCHUR_JACOBI
+    ceres_trust_strategy: LEVENBERG_MARQUARDT
+    ceres_dogleg_type: TRADITIONAL_DOGLEG
+    ceres_loss_function: None
+
+    # ROS Parameters
+    odom_frame: odom
+    map_frame: map
+    base_frame: base_footprint
+    scan_topic: /scan
+    mode: mapping #localization
+
+    # if you'd like to immediately start continuing a map at a given pose
+    # or at the dock, but they are mutually exclusive, if pose is given
+    # will use pose
+    #map_file_name: test_steve
+    # map_start_pose: [0.0, 0.0, 0.0]
+    #map_start_at_dock: true
+
+    debug_logging: false
+    throttle_scans: 1
+    transform_publish_period: 0.02 #if 0 never publishes odometry
+    map_update_interval: 1.0
+    resolution: 0.05
+    max_laser_range: 7.5 #for rastering images
+    minimum_time_interval: 0.1
+    transform_timeout: 0.2
+    tf_buffer_duration: 30.0
+    stack_size_to_use: 40000000 #// program needs a larger stack size to serialize large maps
+    enable_interactive_mode: true
+
+    # General Parameters
+    use_scan_matching: true
+    use_scan_barycenter: true
+    minimum_travel_distance: 0.0
+    minimum_travel_heading: 0.0
+    scan_buffer_size: 10
+    scan_buffer_maximum_scan_distance: 10.0
+    link_match_minimum_response_fine: 0.1  
+    link_scan_maximum_distance: 1.5
+    loop_search_maximum_distance: 3.0
+    do_loop_closing: true 
+    loop_match_minimum_chain_size: 10           
+    loop_match_maximum_variance_coarse: 3.0  
+    loop_match_minimum_response_coarse: 0.35    
+    loop_match_minimum_response_fine: 0.45
+
+    # Correlation Parameters - Correlation Parameters
+    correlation_search_space_dimension: 0.5
+    correlation_search_space_resolution: 0.01
+    correlation_search_space_smear_deviation: 0.1 
+
+    # Correlation Parameters - Loop Closure Parameters
+    loop_search_space_dimension: 8.0
+    loop_search_space_resolution: 0.05
+    loop_search_space_smear_deviation: 0.03
+
+    # Scan Matcher Parameters
+    distance_variance_penalty: 0.5      
+    angle_variance_penalty: 1.0    
+
+    fine_search_angle_offset: 0.00349     
+    coarse_search_angle_offset: 0.349   
+    coarse_angle_resolution: 0.0349        
+    minimum_angle_penalty: 0.9
+    minimum_distance_penalty: 0.5
+    use_response_expansion: true
+
