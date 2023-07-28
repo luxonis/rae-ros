@@ -30,8 +30,8 @@ dai::Pipeline createPipeline(bool enable_rgb, bool enable_depth)
         camRgb->setColorOrder(dai::ColorCameraProperties::ColorOrder::BGR);
         camRgb->setInterleaved(false);
         camRgb->setVideoSize(1280,800);
-        camRgb->initialControl.setMisc("stride-align", 1);
-        camRgb->initialControl.setMisc("scanline-align", 1);
+        // camRgb->initialControl.setMisc("stride-align", 1);
+        // camRgb->initialControl.setMisc("scanline-align", 1);
         xoutRgb->setStreamName("rgb");
         camRgb->video.link(xoutRgb->input);
     }
@@ -50,8 +50,8 @@ dai::Pipeline createPipeline(bool enable_rgb, bool enable_depth)
     xoutFront->setStreamName("depth_front");
     xoutRightFront->setStreamName("right_front");
     xoutBack->setStreamName("depth_back");
-    rightFront->initialControl.setMisc("stride-align", 1);
-    rightFront->initialControl.setMisc("scanline-align", 1);
+    // rightFront->initialControl.setMisc("stride-align", 1);
+    // rightFront->initialControl.setMisc("scanline-align", 1);
 
     // Properties
     leftFront->setResolution(dai::node::ColorCamera::Properties::SensorResolution::THE_800_P);
