@@ -151,6 +151,14 @@ protected:
   */
   void calcScanMsgIndexForImgCols(
     const sensor_msgs::msg::Image::ConstSharedPtr & depth_msg);
+
+  /**
+  * @brief getMedianValueInColumn finds median values in depth image columns
+    */
+  template<typename T>
+  float getMedianValueInColumn(
+    const sensor_msgs::msg::Image::ConstSharedPtr & depth_msg, int col);
+
   /**
   * @brief getSmallestValueInColumn finds smallest values in depth image columns
     */

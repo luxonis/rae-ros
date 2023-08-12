@@ -261,9 +261,100 @@ void LaserScanKinect::calcScanMsgIndexForImgCols(
 }
 
 template<typename T>
+float LaserScanKinect::getMedianValueInColumn(
+  const sensor_msgs::msg::Image::ConstSharedPtr & depth_msg, int col)
+{
+  // TODO(Saching13): Do we need minimum ? May be median is better
+  // The original did min because they needed to come to the min that is not ground. 
+  // This makes sense when the sensor is very accurate. 
+  // But in our case we don't want noise. So we need to first eliminate noise. 
+  // How can we do this ?
+  // Do median to remove the noise in ROI
+  // Use confidence map to remove the noise in ROI
+  // So do some outlier removal 
+
+  // float depth_min = std::numeric_limits<float>::max();
+  // int depth_min_row = -1;
+
+  const int row_size = depth_msg->width;
+  const T * data = reinterpret_cast<const T *>(&depth_msg->data[0]);
+  std::vector<std::pair<int, float> row_depth_vals;
+  // std::vector<int> depth_rows;
+  row_depth_vals.reserve(scan_height_);
+  // depth_rows.reserve(scan_height_);
+  
+  // Loop over pixels in column and calculate z_min in each column
+  for (size_t i = image_vertical_offset_; i < image_vertical_offset_ + scan_height_;
+    i += depth_img_row_step_)
+  {
+    float depth_raw = 0.0;
+    float depth_m = 0.0;
+
+    if (typeid(T) == typeid(uint16_t)) {
+      unsigned depth_raw_mm = static_cast<unsigned>(data[row_size * i + col]);
+      depth_raw = static_cast<float>(depth_raw_mm) / 1000.0;
+    } else if (typeid(T) == typeid(float)) {
+      depth_raw = static_cast<float>(data[row_size * i + col]);
+    }
+
+    if (tilt_compensation_enable_) {  // Check if tilt compensation is enabled
+      depth_m = depth_raw * tilt_compensation_factor_[i];
+    } else {
+      depth_m = depth_raw;
+    }
+
+    float curr_depth = 0;
+    int  curr_depth_index = i;
+    // Check if point is in ranges and find min value in column
+    if (depth_raw >= range_min_ && depth_raw <= range_max_) {
+      if (ground_remove_enable_) {
+        if (depth_raw < dist_to_ground_corrected[i]) {
+          curr_depth = depth_m;
+          curr_depth_index = i;
+        }
+      } else {
+          curr_depth = depth_m;
+          curr_depth_index = i;
+      }
+    }
+
+    if (curr_depth > 0) {
+      row_depth_vals.push_back({curr_depth_index, curr_depth});
+    }
+  }
+
+  auto m = row_depth_vals.begin() + row_depth_vals.size() / 2;
+  std::nth_element(row_depth_vals.begin(), m, row_depth_vals.end(), 
+            [](const std::pair<int, int>& a, const std::pair<int, int>& b) {
+                      return a.second < b.second;
+                  });
+  std::pair<int, float> depth_median = row_depth_vals[row_depth_vals.size() / 2];
+  {
+    std::lock_guard<std::mutex> guard(points_indices_mutex_);
+    min_dist_points_indices_.push_back({depth_median.first, col});
+  }
+  return depth_median.second;
+}
+
+
+template float LaserScanKinect::getMedianValueInColumn<uint16_t>(
+  const sensor_msgs::msg::Image::ConstSharedPtr &, int);
+template float LaserScanKinect::getMedianValueInColumn<float>(
+  const sensor_msgs::msg::Image::ConstSharedPtr &, int);
+
+template<typename T>
 float LaserScanKinect::getSmallestValueInColumn(
   const sensor_msgs::msg::Image::ConstSharedPtr & depth_msg, int col)
 {
+  // TODO(Saching13): Do we need minimum ? May be median is better
+  // The original did min because they needed to come to the min that is not ground. 
+  // This makes sense when the sensor is very accurate. 
+  // But in our case we don't want noise. So we need to first eleminate nose. 
+  // How can we do this ?
+  // Do median to remove the noise in ROI
+  // Use confidence map to remove the noise in ROI
+  // So do some outlier removal 
+
   float depth_min = std::numeric_limits<float>::max();
   int depth_min_row = -1;
 
@@ -337,7 +428,7 @@ void LaserScanKinect::convertDepthToPolarCoords(
   // Processing for specified columns from [left, right]
   auto process_columns = [&](size_t left, size_t right) {
       for (size_t i = left; i <= right; ++i) {
-        const auto depth_min = getSmallestValueInColumn<T>(depth_msg, i);
+        const auto depth_min = getMedianValueInColumn<T>(depth_msg, i);
         const auto range_in_polar = convert_to_polar(i, depth_min);
         {
           std::lock_guard<std::mutex> guard(scan_msg_mutex_);
