@@ -23,7 +23,6 @@
 #include <list>
 #include <utility>
 #include <chrono>
-#include <iostream>
 
 #include "sensor_msgs/image_encodings.hpp"
 
@@ -342,12 +341,12 @@ float LaserScanKinect::getMedianValueInColumn(
     min_dist_points_indices_.emplace_back(depth_median.first, col);
   }
 
-  if (depth_median.first > 1300){
-    std::cout << "Depth median size -> " << row_depth_vals.size() << std::endl;
-    std::cout << "depth_median row index: " << depth_median.first << std::endl;
-    std::cout << "depth_median col: " << col << std::endl;
-    std::cout << ":Depth median value -> " << depth_median.second << std::endl;
-  }
+  // if (depth_median.first > 1300){
+  //   std::cout << "Depth median size -> " << row_depth_vals.size() << std::endl;
+  //   std::cout << "depth_median row index: " << depth_median.first << std::endl;
+  //   std::cout << "depth_median col: " << col << std::endl;
+  //   std::cout << ":Depth median value -> " << depth_median.second << std::endl;
+  // }
 
   return depth_median.second;
 }
