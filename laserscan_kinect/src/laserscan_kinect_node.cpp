@@ -53,6 +53,7 @@ LaserScanKinectNode::LaserScanKinectNode()
   pub_dbg_img_ = image_transport::create_publisher(this, "debug_image");
 
   RCLCPP_INFO(this->get_logger(), "Node laserscan_kinect initialized.");
+  RCLCPP_INFO(this->get_logger(), "Node 2 initialized.");
 }
 
 LaserScanKinectNode::~LaserScanKinectNode()
@@ -64,6 +65,8 @@ void LaserScanKinectNode::depthCallback(
   const sensor_msgs::msg::Image::ConstSharedPtr & image,
   const sensor_msgs::msg::CameraInfo::ConstSharedPtr & info)
 {
+    RCLCPP_INFO(get_logger(), "In depthCallback.");
+
   try {
     auto laserscan_msg = converter_.getLaserScanMsg(image, info);
     publisher_->publish(*laserscan_msg);

@@ -30,11 +30,12 @@ def generate_launch_description():
 
     laserscan_node = Node(
         package='laserscan_kinect',
+        prefix=['xterm -e gdb -ex run --args'],
         executable='laserscan_kinect_exe',
         parameters=[config],
         remappings=[
-            ('/image', '/rae/stereo_front/image_raw'),
-            ('/camera_info', '/rae/stereo_front/camera_info'),
+            ('/image', '/oak/stereo/image_raw'),
+            ('/camera_info', '/oak/stereo/camera_info'),
         ]
     )
     ld.add_action(laserscan_node)
