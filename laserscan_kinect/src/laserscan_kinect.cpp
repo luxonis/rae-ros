@@ -101,7 +101,6 @@ sensor_msgs::msg::LaserScan::SharedPtr LaserScanKinect::getLaserScanMsg(
   }
 
   scan_msg_->ranges.assign(depth_msg->width, std::numeric_limits<float>::quiet_NaN());
-  std::cout << "starting convertDepthToPolarCoords" << std::endl;
 
   // Check if image encoding is correct
   if (depth_msg->encoding == sensor_msgs::image_encodings::TYPE_16UC1) {
@@ -283,8 +282,6 @@ float LaserScanKinect::getMedianValueInColumn(
   const T * data = reinterpret_cast<const T *>(&depth_msg->data[0]);
   std::vector<std::pair<int, float>> row_depth_vals;
   row_depth_vals.reserve(scan_height_);
-  std::cout << "Starting process image_vertical_offset_ -> " << image_vertical_offset_ << std::endl;
-  std::cout << "Starting process row_size -> " << row_size << std::endl;
   // Loop over pixels in column and calculate z_min in each column
   for (size_t i = image_vertical_offset_; i < image_vertical_offset_ + scan_height_;
     i += depth_img_row_step_)
@@ -295,7 +292,6 @@ float LaserScanKinect::getMedianValueInColumn(
     if (typeid(T) == typeid(uint16_t)) {
       unsigned depth_raw_mm = static_cast<unsigned>(data[row_size * i + col]);
       depth_raw = static_cast<float>(depth_raw_mm) / 1000.0;
-      // std::cout << "Depth raw meters -> " << depth_raw << std::endl;
     } else if (typeid(T) == typeid(float)) {
       depth_raw = static_cast<float>(data[row_size * i + col]);
     }
@@ -305,7 +301,6 @@ float LaserScanKinect::getMedianValueInColumn(
     } else {
       depth_m = depth_raw;
     }
-    // std::cout << "Row " << i << " Col " << col << std::endl;
 
     float curr_depth = 0.0;
     size_t curr_depth_index = i;
@@ -331,8 +326,6 @@ float LaserScanKinect::getMedianValueInColumn(
   if (row_depth_vals.size() == 0) {
     return 0.0;
   }
-  std::cout << "row_depth_vals size -> " << row_depth_vals.size() << std::endl;
-  std::cout << "Min dist_points size -> " << min_dist_points_indices_.size() << std::endl;
 
   auto m = row_depth_vals.begin() + row_depth_vals.size() / 2;
   std::nth_element(row_depth_vals.begin(), m, row_depth_vals.end(), 
@@ -340,21 +333,21 @@ float LaserScanKinect::getMedianValueInColumn(
                       return a.second < b.second;
                   });
   std::pair<int, float> depth_median = row_depth_vals[row_depth_vals.size() / 2];
-  // {
+  {
     // std::cout << "Depth median size -> " << row_depth_vals.size() << std::endl;
     // std::cout << "depth_median row index: " << depth_median.first << std::endl;
     // std::cout << "depth_median col: " << col << std::endl;
     // std::cout << "Min dist_points size -> " << min_dist_points_indices_.size() << std::endl;
-    // std::lock_guard<std::mutex> guard(points_indices_mutex_);
-    // min_dist_points_indices_.emplace_back(depth_median.first, col);
-  // }
+    std::lock_guard<std::mutex> guard(points_indices_mutex_);
+    min_dist_points_indices_.emplace_back(depth_median.first, col);
+  }
+
   if (depth_median.first > 1300){
     std::cout << "Depth median size -> " << row_depth_vals.size() << std::endl;
     std::cout << "depth_median row index: " << depth_median.first << std::endl;
     std::cout << "depth_median col: " << col << std::endl;
     std::cout << ":Depth median value -> " << depth_median.second << std::endl;
   }
-  // std::cout << "Min dist_points size updated-> " << min_dist_points_indices_.size() << std::endl;
 
   return depth_median.second;
 }
@@ -436,45 +429,34 @@ template<typename T>
 void LaserScanKinect::convertDepthToPolarCoords(
   const sensor_msgs::msg::Image::ConstSharedPtr & depth_msg)
 {
-  // std::cout << "convertDepthToPolarCoords" << std::endl;
 
   // Converts depth from specific column to polar coordinates
   auto convert_to_polar = [&](size_t col, float depth) -> float {
-      if (depth != std::numeric_limits<T>::max() or depth != 0.0) {
+      if (depth != std::numeric_limits<T>::max()) {
         // Calculate x in XZ ( z = depth )
         float x = (col - cam_model_.cx()) * depth / cam_model_.fx();
 
         // Calculate distance in polar coordinates
         return sqrt(x * x + depth * depth);
       }
-      // else{
-      //   std::cout << "Depth is zero or max" << std::endl;
-      // }
       return NAN;  // No information about distances in column
     };
 
   // Processing for specified columns from [left, right]
   auto process_columns = [&](size_t left, size_t right) {
-    std::cout << "Creating scan points " << std::endl;
       for (size_t i = left; i <= right; ++i) {
-        // std::cout << "Count ->  " << i << std::endl;
 
         // const auto depth_min = getMedianValueInColumn<T>(depth_msg, i);
         const auto depth_min = getSmallestValueInColumn<T>(depth_msg, i);
-
-        // std::cout << "Medina created Count ->  " << i << std::endl;
-
         const auto range_in_polar = convert_to_polar(i, depth_min);
         {
           std::lock_guard<std::mutex> guard(scan_msg_mutex_);
-          // std::cout <<" aDDING TO RANGES " << std::endl;
           scan_msg_->ranges[scan_msg_index_[i]] = range_in_polar;
         }
       }
     };
 
   if (threads_num_ <= 1) {
-    std::cout << "No threads to process" << std::endl;
     process_columns(0, static_cast<size_t>(depth_msg->width - 1));
   } else {
     std::vector<std::thread> workers;
@@ -534,11 +516,11 @@ sensor_msgs::msg::Image::SharedPtr LaserScanKinect::prepareDbgImage(
   }
 
   // Add ground points to debug image (as red points)
-  std::cout << "min_dist_points_indices size is " << min_dist_points_indices.size() << std::endl;
+  // std::cout << "min_dist_points_indices size is " << min_dist_points_indices.size() << std::endl;
   for (const auto & pt : min_dist_points_indices) {
     const auto row = pt.first;
     const auto col = pt.second;
-    std::cout << "in dbg image Row : " << row << " Col: " << col << std::endl;
+    // std::cout << "in dbg image Row : " << row << " Col: " << col << std::endl;
     if (row >= 0 && col >= 0) {
       rgb_data[row * img->width + col][0] = 255;
       rgb_data[row * img->width + col][1] = 0;

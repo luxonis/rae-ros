@@ -27,10 +27,10 @@ def generate_launch_description():
         'config',
         'params.yaml'
     )
+        # prefix=['xterm -e gdb -ex run --args'],
 
     laserscan_node = Node(
         package='laserscan_kinect',
-        prefix=['xterm -e gdb -ex run --args'],
         executable='laserscan_kinect_exe',
         parameters=[config],
         remappings=[

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 project(laserscan_kinect)
-add_compile_options(-g)
+# add_compile_options(-g)
 
 add_compile_options(-Wall -Wextra -Wpedantic)
 
