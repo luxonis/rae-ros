@@ -14,8 +14,6 @@ RUN mkdir -p $WS/src
 RUN cd ./$WS/src && git clone https://github.com/BrettRD/ros-gst-bridge.git
 RUN cd ./$WS/src && git clone https://github.com/Serafadam/ira_laser_tools.git
 
-# RUN cd ./$WS/src && git clone --branch humble-devel https://github.com/introlab/rtabmap.git
-# RUN cd ./$WS/src && git clone --branch humble-devel https://github.com/introlab/rtabmap_ros.git
 
 COPY ./ .$WS/src/rae-ros
 
