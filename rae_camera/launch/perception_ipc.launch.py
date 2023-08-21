@@ -26,12 +26,12 @@ def launch_setup(context, *args, **kwargs):
         # ('__camera', 'rae'),
         ('camera:__node', 'rae'),
         ('odom', '/diff_controller/odom'),
-        ("rgb/image", name+"/right_front/image_raw"),
-        ("rgb/camera_info", name+"/right_front/camera_info"),
+        ("rgb/image", name+"/right/image_raw"),
+        ("rgb/camera_info", name+"/right/camera_info"),
         ("depth/image", name+"/stereo_front/image_raw"),
-        ('image', name+'/right_front/image_raw'),
-        ('camera_info', name+'/right_front/camera_info'),
-        ('image_rect', name+'/right_front/image_rect')
+        ('image', name+'/right/image_raw'),
+        ('camera_info', name+'/right/camera_info'),
+        ('image_rect', name+'/righ/image_rect')
     ]
 
     perception = Node(
