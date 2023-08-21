@@ -219,56 +219,56 @@
     <origin xyz="-0.025 0.0101195 0.0517014" rpy="-0.523599 0 0"/>
   </joint>
 
-  <link name="rae_left_front_camera_frame">
+  <link name="rae_left_camera_frame">
     <xacro:body mass="0.001" d="0.010" h="0.03" w="0.03">
       <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
     </xacro:body>
 
   </link>
 
-  <joint name="rae_left_front_camera_joint" type="fixed">
+  <joint name="rae_left_camera_joint" type="fixed">
     <parent link="chassis"/>
-    <child link="rae_left_front_camera_frame"/>
+    <child link="rae_left_camera_frame"/>
     <origin xyz="0.0375 0.0100195 0.0515282" rpy="-0.523599 0 0"/>
   </joint>
 
-  <link name="rae_left_front_camera_optical_frame">
+  <link name="rae_left_camera_optical_frame">
     <xacro:body mass="0.00001" d="0.0000010" h="0.000003" w="0.00003">
       <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
     </xacro:body>
 
   </link>
 
-  <joint name="rae_left_front_camera_optical_frame_joint" type="fixed">
+  <joint name="rae_left_camera_optical_frame_joint" type="fixed">
     <origin xyz="0.0 0 0" rpy="3.14 3.14 0.0"/>
-    <parent link="rae_left_front_camera_frame"/>
-    <child link="rae_left_front_camera_optical_frame"/>
+    <parent link="rae_left_camera_frame"/>
+    <child link="rae_left_camera_optical_frame"/>
   </joint>
 
-  <link name="rae_right_front_camera_frame">
+  <link name="rae_right_camera_frame">
     <xacro:body mass="0.001" d="0.010" h="0.03" w="0.03">
       <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
     </xacro:body>
 
   </link>
 
-  <joint name="rae_right_front_camera_joint" type="fixed">
+  <joint name="rae_right_camera_joint" type="fixed">
     <parent link="chassis"/>
-    <child link="rae_right_front_camera_frame"/>
+    <child link="rae_right_camera_frame"/>
     <origin xyz="-0.0375 0.0100195 0.0515282" rpy="-0.523599 0 0"/>
   </joint>
 
-  <link name="rae_right_front_camera_optical_frame">
+  <link name="rae_right_camera_optical_frame">
     <xacro:body mass="0.00001" d="0.0000010" h="0.000003" w="0.00003">
       <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
     </xacro:body>
 
   </link>
 
-  <joint name="rae_right_front_camera_optical_frame_joint" type="fixed">
+  <joint name="rae_right_camera_optical_frame_joint" type="fixed">
     <origin xyz="0.000 0 0" rpy="3.14 3.14 0.0"/>
-    <parent link="rae_right_front_camera_frame"/>
-    <child link="rae_right_front_camera_optical_frame"/>
+    <parent link="rae_right_camera_frame"/>
+    <child link="rae_right_camera_optical_frame"/>
   </joint>
 
   <link name="rae_right_back_camera_frame">

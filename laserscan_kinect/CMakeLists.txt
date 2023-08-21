@@ -66,8 +66,8 @@ install(EXPORT ${PROJECT_NAME}Targets
 
 
 ## Mark other files for installation (e.g. launch and bag files, etc.)
-install(DIRECTORY launch/
-  DESTINATION share/${PROJECT_NAME}/launch
+install(DIRECTORY launch config
+  DESTINATION share/${PROJECT_NAME}
 )
 ament_export_libraries(${PROJECT_NAME})
 
