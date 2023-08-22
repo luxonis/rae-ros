@@ -16,7 +16,7 @@ def launch_setup(context, *args, **kwargs):
         log_level = 'debug'
     params_file = LaunchConfiguration("params_file")
     name = LaunchConfiguration('name').perform(context)
-
+    hw_prefix = get_package_share_directory('rae_hw')
     reset_pwm = ExecuteProcess(
         cmd=[['busybox devmem 0x20320180 32 0x00000000']],
         shell=True
@@ -44,6 +44,9 @@ def launch_setup(context, *args, **kwargs):
 
     return [
         perception,
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(
+                os.path.join(hw_prefix, 'launch', 'control.launch.py'))),
         RegisterEventHandler(
             OnProcessStart(
                 target_action=perception,
