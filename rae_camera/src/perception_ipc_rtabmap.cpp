@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
 
   rtabmap = std::make_unique<rtabmap_slam::CoreWrapper>(opts);
   
-  rclcpp::executors::StaticSingleThreadedExecutor executor;
+  rclcpp::experimental::executors::EventsExecutor executor;
   executor.add_node(camera->get_node_base_interface());
   executor.add_node(laserscanFront->get_node_base_interface());
   executor.add_node(laserscanBack->get_node_base_interface());
