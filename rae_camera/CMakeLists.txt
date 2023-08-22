@@ -29,9 +29,6 @@ find_package(depthai_ros_driver REQUIRED)
 find_package(ira_laser_tools REQUIRED)
 find_package(image_proc REQUIRED)
 find_package(laserscan_kinect REQUIRED)
-find_package(slam_toolbox REQUIRED)
-find_package(karto_sdk REQUIRED)
-
 
 find_package(OpenCV 4 REQUIRED COMPONENTS imgproc highgui)
 set(dependencies
@@ -45,15 +42,6 @@ set(dependencies
   vision_msgs
   depthai
   OpenCV
-)
-
-set(IPC_DEPS_ST
-rclcpp
-depthai_ros_driver
-ira_laser_tools
-laserscan_kinect
-slam_toolbox
-karto_sdk
 )
 
 set(IPC_DEPS_RTABMAP
@@ -74,7 +62,6 @@ add_executable(camera src/camera.cpp)
 add_executable(stereo_depth src/stereo_depth.cpp)
 add_executable(yolo src/yolo.cpp)
 add_executable(stereo_pair src/stereo_pair.cpp)
-add_executable(perception_ipc_st src/perception_ipc_st)
 add_executable(perception_ipc_rtabmap src/perception_ipc_rtabmap)
 
 
@@ -107,14 +94,12 @@ install(TARGETS
 yolo
 DESTINATION lib/${PROJECT_NAME})
 
-ament_target_dependencies(perception_ipc_st ${IPC_DEPS_ST})
 ament_target_dependencies(perception_ipc_rtabmap ${IPC_DEPS_RTABMAP})
-install(TARGETS perception_ipc_st perception_ipc_rtabmap
+install(TARGETS perception_ipc_rtabmap
 DESTINATION lib/${PROJECT_NAME})
 
 ament_export_include_directories(include)
-ament_export_dependencies(${IPC_DEPS_ST} ${IPC_DEPS_RTABMAP})
-target_link_libraries(perception_ipc_st ${slam_toolbox_LIBRARIES})
+ament_export_dependencies(${IPC_DEPS_RTABMAP})
 
 install(DIRECTORY launch config DESTINATION share/${PROJECT_NAME})
 ament_package()

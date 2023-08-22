@@ -28,7 +28,6 @@
   <depend>ira_laser_tools</depend>
   <depend>laserscan_kinect</depend>
   <depend>image_proc</depend>
-  <depend>slam_toolbox</depend>
   <depend>rtabmap_odom</depend>
 
   <export>
