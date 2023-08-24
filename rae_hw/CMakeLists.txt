@@ -7,73 +7,52 @@ endif()
 set(BUILD_SHARED_LIBS ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 # find dependencies
-find_package(ament_cmake REQUIRED)
-find_package(hardware_interface REQUIRED)
-find_package(pluginlib REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(rclcpp_lifecycle REQUIRED)
-find_package(sensor_msgs REQUIRED)
-find_package(geometry_msgs REQUIRED)
-find_package(rae_msgs REQUIRED)
-find_package(cv_bridge REQUIRED)
-find_package(audio_msgs REQUIRED)
+find_package(ament_cmake_auto REQUIRED)
+ament_auto_find_build_dependencies()
 find_package(ALSA REQUIRED)
-
-find_library(GPIOD_LIBRARY NAMES libgpiodcxx.so)
-if(NOT GPIOD_LIBRARY)
-  message(FATAL_ERROR "gpiod library not found. Install apt install libgpiod-dev")
-endif()
 
 include_directories(include)
 
-add_library(
-  rae_hw
+ament_auto_add_library(
+  ${PROJECT_NAME}
   SHARED
   src/rae_hw.cpp
   src/rae_motors.cpp
+  src/peripherals/battery.cpp
+  src/peripherals/lcd.cpp
+  src/peripherals/led.cpp
+  src/peripherals/mic.cpp
+  src/peripherals/speakers.cpp
 )
+ament_target_dependencies(${PROJECT_NAME} ${DEPENDENCIES} ALSA)
+
 target_include_directories(
-  rae_hw
+  ${PROJECT_NAME}
   PUBLIC
   include
 )
-ament_target_dependencies(
-  rae_hw
-  hardware_interface
-  rclcpp
-  rclcpp_lifecycle
-)
-target_link_libraries(rae_hw ${GPIOD_LIBRARY})
+target_link_libraries(${PROJECT_NAME} ${GPIOD_LIBRARY})
 
 # prevent pluginlib from using boost
-target_compile_definitions(rae_hw PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
+target_compile_definitions(${PROJECT_NAME} PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
+
+rclcpp_components_register_nodes(${PROJECT_NAME} "${PROJECT_NAME}::BatteryNode")
+rclcpp_components_register_nodes(${PROJECT_NAME} "${PROJECT_NAME}::LCDNode")
+rclcpp_components_register_nodes(${PROJECT_NAME} "${PROJECT_NAME}::LEDNode")
+rclcpp_components_register_nodes(${PROJECT_NAME} "${PROJECT_NAME}::MicNode")
+rclcpp_components_register_nodes(${PROJECT_NAME} "${PROJECT_NAME}::SpeakersNode")
 
 pluginlib_export_plugin_description_file(
   hardware_interface rae_hw.xml)
 
-
 install(
   TARGETS
-  rae_hw
+  ${PROJECT_NAME}
   RUNTIME DESTINATION bin
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
 )
 
-add_executable(battery src/battery.cpp)
-ament_target_dependencies(battery rclcpp sensor_msgs)
-
-add_executable(led src/led.cpp)
-ament_target_dependencies(led rclcpp rae_msgs)
-
-add_executable(lcd src/lcd.cpp)
-ament_target_dependencies(lcd rclcpp cv_bridge sensor_msgs)
-
-add_executable(speakers src/speakers.cpp)
-ament_target_dependencies(speakers rclcpp audio_msgs ALSA)
-
-add_executable(mic src/mic.cpp)
-ament_target_dependencies(mic rclcpp audio_msgs ALSA)
 
 add_executable(test_motors test/test_motors.cpp src/rae_motors.cpp)
 target_link_libraries(test_motors ${GPIOD_LIBRARY})
@@ -92,7 +71,7 @@ ament_target_dependencies(test_speed rclcpp geometry_msgs)
 
 install(TARGETS
 
-  battery led lcd speakers mic test_motors test_encoders test_max_speed test_speed
+  test_motors test_encoders test_max_speed test_speed
 
   DESTINATION lib/${PROJECT_NAME})
 
@@ -128,13 +107,14 @@ ament_export_include_directories(
   include
 )
 ament_export_libraries(
-  rae_hw
+  ${PROJECT_NAME}
 )
 ament_export_dependencies(
-  hardware_interface
-  pluginlib
-  rclcpp
-  rclcpp_lifecycle
+  ${DEPENDENCIES}
+)
+install(
+    DIRECTORY include/
+    DESTINATION include
 )
 
 ament_package()

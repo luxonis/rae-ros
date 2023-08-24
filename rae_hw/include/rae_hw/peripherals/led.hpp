@@ -11,7 +11,7 @@
 #include <linux/ioctl.h>
 #include <sys/stat.h>
 #include <linux/types.h>
-#include "rae_hw/spidev.h"
+#include "rae_hw/peripherals/spidev.h"
 #include "rclcpp/rclcpp.hpp"
 #include "rae_msgs/msg/led_control.hpp"
 
@@ -22,11 +22,11 @@
 
 namespace rae_hw
 {
-    class Leds : public rclcpp::Node
+    class LEDNode : public rclcpp::Node
     {
     public:
-        Leds();
-        ~Leds(); 
+        LEDNode(const rclcpp::NodeOptions &options);
+        ~LEDNode(); 
 
     private:
         void transmitSPI();

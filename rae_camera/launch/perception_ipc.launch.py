@@ -3,7 +3,7 @@ import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, OpaqueFunction, ExecuteProcess, RegisterEventHandler, TimerAction, LogInfo
-from launch.event_handlers import  OnProcessStart
+from launch.event_handlers import OnProcessStart
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import ComposableNodeContainer, Node
 from launch_ros.descriptions import ComposableNode
@@ -35,12 +35,12 @@ def launch_setup(context, *args, **kwargs):
     ]
 
     perception = Node(
-            package='rae_camera',
-            executable='perception_ipc_rtabmap',
-            output='screen',
-            parameters=[params_file],
-            remappings=remappings
-           )
+        package='rae_camera',
+        executable='perception_ipc_rtabmap',
+        output='screen',
+        parameters=[params_file],
+        remappings=remappings
+    )
 
     return [
         perception,
