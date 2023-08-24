@@ -31,7 +31,7 @@ def launch_setup(context, *args, **kwargs):
         ("depth/image", name+"/stereo_front/image_raw"),
         ('image', name+'/right/image_raw'),
         ('camera_info', name+'/right/camera_info'),
-        ('image_rect', name+'/righ/image_rect')
+        ('image_rect', name+'/right/image_rect')
     ]
 
     perception = Node(
