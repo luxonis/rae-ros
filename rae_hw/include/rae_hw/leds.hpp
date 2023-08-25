@@ -11,6 +11,7 @@
 #include <linux/ioctl.h>
 #include <sys/stat.h>
 #include <linux/types.h>
+#include <map>
 #include "rae_hw/spidev.h"
 #include "rclcpp/rclcpp.hpp"
 #include "rae_msgs/msg/led_control.hpp"
@@ -29,6 +30,7 @@ namespace rae_hw
         ~Leds(); 
 
     private:
+        std::map<uint16_t, uint16_t> logicalToPhysicalMapping;
         void transmitSPI();
         void fillBuffer(uint8_t color);
         uint8_t convertColor(float num);

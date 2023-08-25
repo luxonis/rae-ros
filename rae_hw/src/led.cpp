@@ -3,7 +3,48 @@
 namespace rae_hw
 {
     Leds::Leds()
-        : Node("led_node")
+        : Node("led_node"),
+         logicalToPhysicalMapping{
+            {0, 0}, 
+            {1, 1},
+            {2, 2}, 
+            {3, 3},
+            {4, 4}, 
+            {5, 5},
+            {6, 6}, 
+            {7, 7},
+            {8, 8}, 
+            {9, 29},
+            {10, 30}, 
+            {11, 31},
+            {12, 32}, 
+            {13, 33},
+            {14, 34}, 
+            {15, 35},
+            {16, 36}, 
+            {17, 37},
+            {18, 38}, 
+            {19, 19},
+            {20, 20}, 
+            {21, 21},
+            {22, 22},
+            {23, 23}, 
+            {24, 24},
+            {25, 25}, 
+            {26, 26},
+            {27, 27}, 
+            {28, 28},
+            {29, 9}, 
+            {30, 10},
+            {31, 11},
+            {32, 12}, 
+            {33, 13},
+            {34, 14}, 
+            {35, 15},
+            {36, 16}, 
+            {37, 17},
+            {38, 18}
+        },
     {
         int ret = 0;
         memset(ws2812b_buffer, 0, WS2812B_BUFFER_SIZE);
@@ -38,13 +79,15 @@ namespace rae_hw
         setAllPixels(150, 10, 150);
         transmitSPI();
         RCLCPP_INFO(this->get_logger(), "LED node running!");
+
+       
     }
     Leds::~Leds(){
         setAllPixels(0, 0, 0);
         transmitSPI();
     }
     void Leds::topic_callback(const rae_msgs::msg::LEDControl &msg)
-    {
+    {   
         if (msg.control_type == msg.CTRL_TYPE_ALL)
         {
             uint8_t r = convertColor(msg.data[0].r);
@@ -105,8 +148,20 @@ namespace rae_hw
         }
     }
     void Leds::setSinglePixel(uint16_t pixel, uint8_t r, uint8_t g, uint8_t b)
-    {
-        ptr = &ws2812b_buffer[24 * pixel];
+    {   auto mapping_pair = logicalToPhysicalMapping.find(pixel);
+        if (mapping_pair != logicalToPhysicalMapping.end())
+        {
+            uint16_t physicalID = mapping_pair->second;
+            ptr = &ws2812b_buffer[24 * physicalID];
+        }
+        else
+        {
+            // Handle invalid logical IDs or cases not covered in the mapping
+            // For example, print a message indicating the LED doesn't exist
+            std::cout << "Logical LED ID " << pixel << " doesn't have a corresponding physical LED." << std::endl;
+            // You can also choose to skip or set a default pixel color here
+        }
+        
         fillBuffer(g);
         fillBuffer(r);
         fillBuffer(b);
