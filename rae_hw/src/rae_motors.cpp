@@ -88,7 +88,7 @@ namespace rae_hw
                 float timeDiff = std::chrono::duration<float>(currTime - prevErrorTime).count();
                 float error = targetSpeed - currSpeed;
                 float eP = error * currPID.P;
-                if(i_param_counter=500){
+                if(i_param_counter==500){
                     errSum=0;
                     i_param_counter=0;
                 }

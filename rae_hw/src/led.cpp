@@ -44,7 +44,8 @@ namespace rae_hw
             {36, 16}, 
             {37, 17},
             {38, 18}
-        },
+        }
+
     {
         int ret = 0;
         memset(ws2812b_buffer, 0, WS2812B_BUFFER_SIZE);
