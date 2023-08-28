@@ -14,7 +14,7 @@ ENV DEBIAN_FRONTEND=dialog
 RUN sh -c "$(wget https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O -)"
 
 RUN cd /tmp \
-   && git clone --recursive https://github.com/luxonis/depthai-core.git --branch rvc3_pointcloud \
+   && git clone --recursive https://github.com/luxonis/depthai-core.git --branch rvc3_develop \
    && cmake -Hdepthai-core -Bdepthai-core/build -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr/local \
    && cmake --build depthai-core/build --target install --parallel ${CORE_NUM} \
    && cd /tmp \
