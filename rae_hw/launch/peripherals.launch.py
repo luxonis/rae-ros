@@ -24,6 +24,7 @@ def generate_launch_description():
         Node(
             package="rae_hw",
             executable="led",
+            output="screen",
         ),
         Node(
             package="rae_hw",
@@ -35,7 +36,6 @@ def generate_launch_description():
         ),
         Node(
             package="rae_bringup",
-            executable="battery_status.py",
-            condition=IfCondition(LaunchConfiguration("enable_battery_status", default=True))
+            executable="led_test.py"
         ),
     ])

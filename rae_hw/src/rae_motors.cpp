@@ -100,7 +100,7 @@ namespace rae_hw
                 dir = (outSpeed >= 0) ^ reversePhPinLogic_;
                 prevErrorTime = currTime;
                 prevError = error;
-                std::cout << "CLS; MOTOR: " << pwmPin << "SPEED: " << outSpeed << "DC: "<< dutyCycle << std::endl;
+                //std::cout << "CLS; MOTOR: " << pwmPin << "SPEED: " << outSpeed << "DC: "<< dutyCycle << std::endl;
                 i_param_counter++;
             }
             else {
