@@ -51,8 +51,4 @@ def generate_launch_description():
             arguments=["joint_state_broadcaster",
                        "--controller-manager", "/controller_manager"],
         ),
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(
-                os.path.join(get_package_share_directory('rae_hw'), 'launch', 'peripherals.launch.py'))
-        ),
     ])

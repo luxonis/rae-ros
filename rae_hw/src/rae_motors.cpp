@@ -158,7 +158,7 @@ namespace rae_hw
             dutyCycleFile << dutyCycle;
             dutyCycleFile.close();
         }
-        std::this_thread::sleep_for(10ms);
+        usleep(500);
     }
 }
 
@@ -210,7 +210,7 @@ namespace rae_hw
                     direction=false;
                 }
                 else{
-                    std::cout << "We are missing ticks, adding or removing 2 based on previous state  " << pwmPin << std::endl;
+                    std::cout << "We are missing ticks, adding or removing 2 based on previous state  " << pwmPin << "Prev and current state" << prevState.A << prevState.B << currS.A << currS.B << std::endl;
                     count= direction ? (count + 2) : (count - 2);
 
                 }
@@ -228,7 +228,7 @@ namespace rae_hw
                     direction=false;
                 }
                 else{
-                    std::cout << "We are missing ticks, adding or removing 2 based on previous state  " << pwmPin << std::endl;
+                    std::cout << "We are missing ticks, adding or removing 2 based on previous state  " << pwmPin << "Prev and current state" << prevState.A << prevState.B << currS.A << currS.B << std::endl;
                     count= direction ? (count + 2) : (count - 2);
                 }
             }
@@ -245,7 +245,7 @@ namespace rae_hw
                     direction=true;
                 }
                 else{
-                    std::cout << "We are missing ticks, adding or removing 2 based on previous state  " << pwmPin << std::endl;
+                    std::cout << "We are missing ticks, adding or removing 2 based on previous state  " << pwmPin << "Prev and current state" << prevState.A << prevState.B << currS.A << currS.B << std::endl;
                     count= direction ? (count + 2) : (count - 2);
                 }
             }
@@ -262,7 +262,7 @@ namespace rae_hw
                     direction=true;
                 }
                 else{
-                    std::cout << "We are missing ticks, adding or removing 2 based on previous state  " << pwmPin << std::endl;
+                    std::cout << "We are missing ticks, adding or removing 2 based on previous state  " << pwmPin << "Prev and current state" << prevState.A << prevState.B << currS.A << currS.B << std::endl;
                     count= direction ? (count + 2) : (count - 2);
                 }
             }
@@ -277,6 +277,7 @@ namespace rae_hw
                 prevCount = count;
             }
             prevState = currS;
+            usleep(5);
         }
     }
 
