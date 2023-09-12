@@ -11,6 +11,11 @@ find_package(ament_cmake_auto REQUIRED)
 ament_auto_find_build_dependencies()
 find_package(ALSA REQUIRED)
 
+find_library(GPIOD_LIBRARY NAMES libgpiodcxx.so)
+if(NOT GPIOD_LIBRARY)
+  message(FATAL_ERROR "gpiod library not found. Install apt install libgpiod-dev")
+endif()
+
 include_directories(include)
 
 ament_auto_add_library(
