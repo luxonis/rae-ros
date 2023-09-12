@@ -1,7 +1,7 @@
 import os
 from ament_index_python.packages import get_package_share_path
 import launch
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, TimerAction
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 from launch.substitutions import LaunchConfiguration
@@ -36,12 +36,16 @@ def generate_launch_description():
             os.path.join(bridge_prefix, 'launch', 'rosbridge_websocket_launch.xml'),
             condition=IfCondition(enable_rosbridge)
             ),
+        TimerAction(
+            period=50.0,
+            actions=[
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(os.path.join(nav_prefix, 'navigation_launch.py')),
             launch_arguments={
                               'use_sim_time': 'false',
                               'params_file': params,
+                              'use_composition': 'True',
                               'container_name': 'rae_container'}.items(),
             condition=IfCondition(enable_nav)
-            ),
+            )]),
             ])
