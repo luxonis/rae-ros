@@ -9,11 +9,11 @@
 
 namespace rae_hw
 {
-  class Battery : public rclcpp::Node
+  class BatteryNode : public rclcpp::Node
   {
   public:
-    Battery();
-
+    BatteryNode(const rclcpp::NodeOptions& options);
+    ~BatteryNode();
   private:
     std::string readVarFromFile(const std::string &varName);
     void logStatus(const sensor_msgs::msg::BatteryState &message);

@@ -1,41 +1,72 @@
-import os
-
-from ament_index_python.packages import get_package_share_directory
 
 from launch import LaunchDescription
-from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, OpaqueFunction
-from launch_ros.actions import Node
+from launch.actions import DeclareLaunchArgument, OpaqueFunction
+from launch_ros.actions import Node, LoadComposableNodes, ComposableNodeContainer
 from launch.conditions import IfCondition
 from launch.substitutions import LaunchConfiguration
-import xacro
+from launch_ros.descriptions import ComposableNode
 
 
-def generate_launch_description():
-    return LaunchDescription([
-        Node(
-            package="rae_hw",
-            executable="battery",
+def launch_setup(context, *args, **kwargs):
+    name = LaunchConfiguration('name').perform(context)
+    enable_battery_status = LaunchConfiguration(
+        "enable_battery_status", default=True)
+    run_container = LaunchConfiguration("run_container", default=False)
+    return [
+        ComposableNodeContainer(
+            condition=IfCondition(run_container),
+            name=name+"_container",
+            namespace="",
+            package="rclcpp_components",
+            executable="component_container",
+            composable_node_descriptions=[],
+            output="both",
         ),
-        Node(
-            package="rae_hw",
-            executable="lcd",
-        ),
-        Node(
-            package="rae_hw",
-            executable="led",
-        ),
-        Node(
-            package="rae_hw",
-            executable="mic",
-        ),
-        Node(
-            package="rae_hw",
-            executable="speakers",
-        ),
+        LoadComposableNodes(
+            target_container=name+"_container",
+            composable_node_descriptions=[
+                ComposableNode(
+                    name="battery_node",
+                    package="rae_hw",
+                    plugin="rae_hw::BatteryNode",
+                ),
+                ComposableNode(
+                    name="lcd_node",
+                    package="rae_hw",
+                    plugin="rae_hw::LCDNode",
+                ),
+                ComposableNode(
+                    name="led_node",
+                    package="rae_hw",
+                    plugin="rae_hw::LEDNode",
+                ),
+                ComposableNode(
+                    name="mic_node",
+                    package="rae_hw",
+                    plugin="rae_hw::MicNode",
+                ),
+                ComposableNode(
+                    name="motors_node",
+                    package="rae_hw",
+                    plugin="rae_hw::SpeakersNode",
+                ),
+            ]),
+
         Node(
             package="rae_bringup",
             executable="battery_status.py",
-            condition=IfCondition(LaunchConfiguration("enable_battery_status", default=True))
+            condition=IfCondition(enable_battery_status)
         ),
-    ])
+    ]
+
+
+def generate_launch_description():
+    declared_arguments = [
+        DeclareLaunchArgument("name", default_value="rae"),
+        DeclareLaunchArgument("run_container", default_value="false"),
+        DeclareLaunchArgument("enable_battery_status", default_value="true"),
+    ]
+
+    return LaunchDescription(
+        declared_arguments + [OpaqueFunction(function=launch_setup)]
+    )

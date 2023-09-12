@@ -1,4 +1,4 @@
-#include "rae_hw/battery.hpp"
+#include "rae_hw/peripherals/battery.hpp"
 
 #include <iostream>
 #include <fstream>
@@ -6,18 +6,18 @@
 
 namespace rae_hw
 {
-  Battery::Battery()
-      : Node("battery")
+  BatteryNode::BatteryNode(const rclcpp::NodeOptions &options) : rclcpp::Node("battery", options)
   {
     using namespace std::chrono_literals;
     publisher = this->create_publisher<sensor_msgs::msg::BatteryState>("battery_status", 10);
     timer = this->create_wall_timer(
-        500ms, std::bind(&Battery::timerCallback, this));
+        500ms, std::bind(&BatteryNode::timerCallback, this));
     stateChangeTime = this->get_clock()->now();
     lastLogTime = this->get_clock()->now();
     RCLCPP_INFO(this->get_logger(), "Battery node running!");
   }
-  void Battery::timerCallback()
+  BatteryNode::~BatteryNode() = default;
+  void BatteryNode::timerCallback()
   {
     auto message = sensor_msgs::msg::BatteryState();
     message.header.stamp = this->get_clock()->now();
@@ -35,7 +35,7 @@ namespace rae_hw
     prevState = message;
   }
 
-  std::string Battery::readVarFromFile(const std::string &varName)
+  std::string BatteryNode::readVarFromFile(const std::string &varName)
   {
     std::string fileName = "/sys/class/power_supply/bq27441-0/" + varName;
     std::ifstream ifstrm(fileName, std::ios::in);
@@ -52,7 +52,7 @@ namespace rae_hw
     return s;
   }
 
-  void Battery::logStatus(const sensor_msgs::msg::BatteryState &message)
+  void BatteryNode::logStatus(const sensor_msgs::msg::BatteryState &message)
   {
     auto currTime = this->get_clock()->now();
     auto stateTimeDiff = currTime - stateChangeTime;
@@ -87,10 +87,5 @@ namespace rae_hw
     }
   }
 }
-int main(int argc, char *argv[])
-{
-  rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<rae_hw::Battery>());
-  rclcpp::shutdown();
-  return 0;
-}
+#include "rclcpp_components/register_node_macro.hpp"
+RCLCPP_COMPONENTS_REGISTER_NODE(rae_hw::BatteryNode);

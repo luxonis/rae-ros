@@ -1,17 +1,16 @@
-
+#include "rae_hw/peripherals/speakers.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "audio_msgs/msg/audio.hpp"
 
 #include <alsa/asoundlib.h>
-
-class Speakers : public rclcpp::Node
+namespace rae_hw
 {
-public:
-  Speakers()
-      : Node("speakers_node"), alsaHandle(NULL)
+
+  SpeakersNode::SpeakersNode(const rclcpp::NodeOptions &options)
+      : Node("speakers_node", options), alsaHandle(NULL)
   {
     this->subscription_ = this->create_subscription<audio_msgs::msg::Audio>(
-        "audio_out", 10, std::bind(&Speakers::audio_callback, this, std::placeholders::_1));
+        "audio_out", 10, std::bind(&SpeakersNode::audio_callback, this, std::placeholders::_1));
 
     // Setup ALSA
     snd_pcm_open(&alsaHandle, "default", SND_PCM_STREAM_PLAYBACK, 0);
@@ -19,13 +18,12 @@ public:
     RCLCPP_INFO(this->get_logger(), "Speakers node running!");
   }
 
-  ~Speakers()
+  SpeakersNode::~SpeakersNode()
   {
     snd_pcm_close(alsaHandle);
   }
 
-private:
-  void audio_callback(const audio_msgs::msg::Audio::SharedPtr msg)
+  void SpeakersNode::audio_callback(const audio_msgs::msg::Audio::SharedPtr msg)
   {
     // Assuming that frames are 4 bytes (2 channels, 16 bits each)
     int frames = msg->data.size() / 4;
@@ -47,14 +45,6 @@ private:
     }
   }
 
-  rclcpp::Subscription<audio_msgs::msg::Audio>::SharedPtr subscription_;
-  snd_pcm_t *alsaHandle;
 };
-
-int main(int argc, char *argv[])
-{
-  rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<Speakers>());
-  rclcpp::shutdown();
-  return 0;
-}
+#include "rclcpp_components/register_node_macro.hpp"
+RCLCPP_COMPONENTS_REGISTER_NODE(rae_hw::SpeakersNode);
