@@ -11,12 +11,12 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 
 def launch_setup(context, *args, **kwargs):
     params_file = LaunchConfiguration("params_file")
-    rae_prefix = get_package_share_directory('rae_bringup')
+    rae_prefix = get_package_share_directory('rae_camera')
     name = LaunchConfiguration('name').perform(context)
     laserscan_config = os.path.join(
-        get_package_share_directory('laserscan_kinect'),
+        rae_prefix,
         'config',
-        'params.yaml'
+        'laserscan_kinect.yaml'
     )
     return [
         Node(
