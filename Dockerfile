@@ -10,10 +10,6 @@ RUN apt-get update \
 
 ENV WS=/ws
 RUN mkdir -p $WS/src
-
-RUN cd ./$WS/src && git clone https://github.com/BrettRD/ros-gst-bridge.git
-RUN cd ./$WS/src && git clone https://github.com/Serafadam/ira_laser_tools.git
-
 COPY ./ .$WS/src/rae-ros
 
 RUN rm -rf .$WS/src/rae-ros/rae_gazebo
