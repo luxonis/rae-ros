@@ -1,15 +1,13 @@
-# RAE-ROS
-(Will be moved to public later)
+# RAE ROS
 
-Welcome to official RAE ROS repository.
+This repository contains rae [ROS](https://www.ros.org/) integration files.
 
 Make sure you have [IGN (Gazebo) Fortress](https://gazebosim.org/docs/fortress/install) installed, along with [ros_ign_bridge](https://github.com/gazebosim/ros_gz/tree/ros2#from-source) for Fortress version of IGN Gazebo (for ROS2 Humble distro). 
 
-
-### Setting up procedure - Real Robot
+### Setting up procedure
 #### SSH
 
-1. Connect via USB cable or wifi `keembay`, password `wifiwifi@`
+1. Connect via USB cable or wifi `rae-<ID>`, password `wifiwifi@` (See [rae getting started documentation](https://docs.luxonis.com/projects/hardware/en/latest/pages/rae/#getting-started)).
 2. To use SHH without typing password each time - `ssh-copy-id root@192.168.11.1`
 3. Currently date resets after each startup to set current - ssh root@192.168.11.1 sudo date -s @`( date -u +"%s" )`
 
@@ -28,61 +26,20 @@ Make sure you have [IGN (Gazebo) Fortress](https://gazebosim.org/docs/fortress/i
 9. Launching navigation stack  first connect RAE to WIFI with internet access, then install slam_toolbox - `sudo apt install ros-humble-slam-toolbox` then run `ros2 launch rae_bringup bringup.launch.py sim:=false use_rviz:=true`
 
 #### Calibration
-Steps to use it in basic docker image:
 
-- apt update
-- apt install neovim libgl1-mesa-glx python3-pip
-- git clone --branch rae-calib https://github.com/luxonis/depthai.git
-- cd depthai/
-- python3 install_requirements.py 
--  python3 calibrate.py -s 2.5 -db -nx 11 -ny 8 -brd /depthai/cal.json -cd 1 -c 3
+Every shipped rae has already been factory calibrated, so this step is rarely needed. Besides the section below, [Calibration documentation](https://docs.luxonis.com/projects/hardware/en/latest/pages/guides/calibration/) is also a good source of information.
 
-You might need to create a separate base calibration file for that (cal.json), maybe using rae board will work in your case.
-Contents of cal.json
-``` json
-{
-    "board_config":
-    {
-        "name": "RAE",
-        "revision": "R1M0E1",
-        "cameras":{
-            "CAM_C": {
-                "name": "right",
-                "hfov": 110,
-                "type": "color"
-            },
-            "CAM_B": {
-                "name": "left",
-                "hfov": 110,
-                "type": "color",
-                "extrinsics": {
-                    "to_cam": "CAM_C",
-                    "specTranslation": {
-                        "x": -7.5,
-                        "y": 0,
-                        "z": 0
-                    },
-                    "rotation":{
-                        "r": 0,
-                        "p": 0,
-                        "y": 0
-                    }
-                }
-            }
-        },
-        "stereo_config":{
-            "left_cam": "CAM_C",
-            "right_cam": "CAM_B"
-        }
-    }
-}
+Within the docker image, you can execute:
+
+```bash
+apt update
+apt install neovim libgl1-mesa-glx python3-pip
+git clone --branch rae-calib https://github.com/luxonis/depthai.git
+cd depthai/
+python3 install_requirements.py
+# To calibrate rae's front cameras - for back cameras we would change the board name to "RAE-D-E"
+python3 calibrate.py -s <size> -db -nx <squares_X> -ny <squares_Y> -brd RAE-A-B-C -cd 1 -c 3
 ```
-Changes to calibrate.py:
-add
-`imx412' : dai.ColorCameraProperties.SensorResolution.THE_800_P,`
-in sensors list (again this might be my setup only)
-and raise epipolar error threshold, current max value is 0.6 and if you get more calibration won't save.
-
 
 #### Some hardware notes:
 
