@@ -5,14 +5,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - main
-      - develop
-    tags:
-      - 'v*'
-  pull_request:
-    branches:
-      - main
-      - develop
+      - '*'
 env:
   ROS_DISTRO: humble
 
@@ -69,7 +62,7 @@ jobs:
           push: ${{ env.PUSH }}
           no-cache: true
           tags: | 
-            luxonis/rae-ros-sim:${{ github.head_ref }}
+            luxonis/rae-ros-sim:${{ steps.vars.outputs.short_ref }}
       
       - name: Build Robot
         uses: docker/build-push-action@v3
@@ -96,4 +89,4 @@ jobs:
           push: ${{ env.PUSH }}
           no-cache: true
           tags: | 
-            luxonis/rae-ros-robot:${{ github.head_ref }}
+            luxonis/rae-ros-robot:${{ steps.vars.outputs.short_ref }}
