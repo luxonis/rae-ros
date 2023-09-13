@@ -13,7 +13,7 @@ def launch_setup(context, *args, **kwargs):
     log_level = 'info'
     if (context.environment.get('DEPTHAI_DEBUG') == '1'):
         log_level = 'debug'
-    params_file = LaunchConfiguration("params_file")
+    params_file = LaunchConfiguration('params_file')
     name = LaunchConfiguration('name').perform(context)
 
     reset_pwm = ExecuteProcess(
@@ -22,20 +22,20 @@ def launch_setup(context, *args, **kwargs):
     )
 
     perception = ComposableNodeContainer(
-        name=name+"_container",
-        namespace="",
-        package="rclcpp_components",
-        executable="component_container",
+        name=name+'_container',
+        namespace='',
+        package='rclcpp_components',
+        executable='component_container',
         composable_node_descriptions=[
             ComposableNode(
-                package="depthai_ros_driver",
-                plugin="depthai_ros_driver::Camera",
+                package='depthai_ros_driver',
+                plugin='depthai_ros_driver::Camera',
                 name=name,
                 parameters=[params_file],
             ),
         ],
         arguments=['--ros-args', '--log-level', log_level],
-        output="both",
+        output='both',
     )
 
     return [
@@ -56,10 +56,10 @@ def launch_setup(context, *args, **kwargs):
 
 
 def generate_launch_description():
-    camera_prefix = get_package_share_directory("rae_camera")
+    camera_prefix = get_package_share_directory('rae_camera')
     declared_arguments = [
-        DeclareLaunchArgument("name", default_value="rae"),
-        DeclareLaunchArgument("params_file", default_value=os.path.join(
+        DeclareLaunchArgument('name', default_value='rae'),
+        DeclareLaunchArgument('params_file', default_value=os.path.join(
             camera_prefix, 'config', 'camera.yaml')),
     ]
 

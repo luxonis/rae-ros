@@ -13,7 +13,7 @@ def launch_setup(context, *args, **kwargs):
     log_level = 'info'
     if (context.environment.get('DEPTHAI_DEBUG') == '1'):
         log_level = 'debug'
-    params_file = LaunchConfiguration("params_file")
+    params_file = LaunchConfiguration('params_file')
     name = LaunchConfiguration('name').perform(context)
     hw_prefix = get_package_share_directory('rae_hw')
     reset_pwm = ExecuteProcess(
@@ -25,9 +25,9 @@ def launch_setup(context, *args, **kwargs):
         # ('__camera', 'rae'),
         ('camera:__node', 'rae'),
         ('odom', '/diff_controller/odom'),
-        ("rgb/image", name+"/right/image_raw"),
-        ("rgb/camera_info", name+"/right/camera_info"),
-        ("depth/image", name+"/stereo_front/image_raw"),
+        ('rgb/image', name+'/right/image_raw'),
+        ('rgb/camera_info', name+'/right/camera_info'),
+        ('depth/image', name+'/stereo_front/image_raw'),
         ('image', name+'/right/image_raw'),
         ('camera_info', name+'/right/camera_info'),
         ('image_rect', name+'/right/image_rect')
@@ -61,10 +61,10 @@ def launch_setup(context, *args, **kwargs):
 
 
 def generate_launch_description():
-    camera_prefix = get_package_share_directory("rae_camera")
+    camera_prefix = get_package_share_directory('rae_camera')
     declared_arguments = [
-        DeclareLaunchArgument("name", default_value="rae"),
-        DeclareLaunchArgument("params_file", default_value=os.path.join(
+        DeclareLaunchArgument('name', default_value='rae'),
+        DeclareLaunchArgument('params_file', default_value=os.path.join(
             camera_prefix, 'config', 'ipc.yaml')),
     ]
 
