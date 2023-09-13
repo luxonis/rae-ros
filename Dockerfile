@@ -20,12 +20,15 @@ RUN cd /tmp \
    && cd /tmp \
    && rm -r depthai-core
 
-ENV DEPTHAI_WS=/depthai_ws
-RUN mkdir -p $DEPTHAI_WS/src
-RUN cd .$DEPTHAI_WS/src && git clone --branch rae_pipeline_humble https://github.com/luxonis/depthai-ros.git
+ENV UNDERLAY_WS=/depthai_ws
+RUN mkdir -p $UNDERLAY_WS/src
+RUN cd ./$UNDERLAY_WS/src && git clone https://github.com/BrettRD/ros-gst-bridge.git
+RUN cd ./$UNDERLAY_WS/src && git clone https://github.com/Serafadam/ira_laser_tools.git
+RUN cd ./$UNDERLAY_WS/src && git clone https://github.com/Serafadam/depth_nav_tools.git
+RUN cd .$UNDERLAY_WS/src && git clone --branch rae_pipeline_humble https://github.com/luxonis/depthai-ros.git
 
 RUN apt update && rosdep update
 
-RUN cd .$DEPTHAI_WS/ && rosdep install --from-paths src --ignore-src  -y --skip-keys depthai
+RUN cd .$UNDERLAY_WS/ && rosdep install --from-paths src --ignore-src  -y --skip-keys depthai
 
-RUN cd .$DEPTHAI_WS/ && . /opt/ros/${ROS_DISTRO}/setup.sh && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
+RUN cd .$UNDERLAY_WS/ && . /opt/ros/${ROS_DISTRO}/setup.sh && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
