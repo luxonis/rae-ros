@@ -15,7 +15,7 @@ def generate_launch_description():
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
                 os.path.join(hw_prefix, 'launch', 'control.launch.py')),
-            launch_arguments={'run_container': 'true',
+            launch_arguments={'run_container': 'false',
                               'enable_battery_status': 'true',
                               'enable_localization': 'true'}.items())
     ])
