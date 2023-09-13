@@ -14,7 +14,7 @@ COPY ./ .$WS/src/rae-ros
 
 RUN rm -rf .$WS/src/rae-ros/rae_gazebo
 
-RUN cd  .$WS/ && apt update && rosdep update && rosdep install --from-paths src --ignore-src  -y --skip-keys depthai --skip-keys depthai_bridge --skip-keys depthai_ros_driver
+RUN cd  .$WS/ && apt update && rosdep update && rosdep install --from-paths src --ignore-src  -y --skip-keys depthai --skip-keys depthai_bridge --skip-keys depthai_ros_driver --skip-keys audio_msgs --skip-keys laserscan_kinect
 
 RUN cd .$WS/ && . /opt/ros/${ROS_DISTRO}/setup.sh && . $UNDERLAY_WS/install/setup.sh && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
 
