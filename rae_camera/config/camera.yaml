@@ -26,7 +26,7 @@
       i_set_isp_scale: false
       i_width: 640
       i_height: 400
-      i_fps: 15.0
+      i_fps: 30.0
     right:
       i_publish_topic: false
       i_output_isp: false
@@ -35,7 +35,7 @@
       i_set_isp_scale: false
       i_width: 640
       i_height: 400
-      i_fps: 15.0
+      i_fps: 30.0
     stereo_front:
       i_align_depth: true
       i_board_socket_id: 2
@@ -54,7 +54,7 @@
       i_set_isp_scale: false
       i_width: 640
       i_height: 400
-      i_fps: 15.0
+      i_fps: 30.0
     right_back:
       i_publish_topic: false
       i_output_isp: false
@@ -63,4 +63,4 @@
       i_set_isp_scale: false
       i_width: 640
       i_height: 400
-      i_fps: 15.0
+      i_fps: 30.0
