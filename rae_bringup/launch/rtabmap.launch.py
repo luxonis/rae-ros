@@ -14,12 +14,12 @@ def launch_setup(context, *args, **kwargs):
     if (context.environment.get('DEPTHAI_DEBUG') == '1'):
         log_level = 'debug'
     params_file = LaunchConfiguration("params_file")
-    depthai_prefix = get_package_share_directory("depthai_ros_driver")
+    rae_prefix = get_package_share_directory('rae_camera')
     name = LaunchConfiguration('name').perform(context)
     laserscan_config = os.path.join(
-        get_package_share_directory('laserscan_kinect'),
+        rae_prefix,
         'config',
-        'params.yaml'
+        'laserscan_kinect.yaml'
     )
     parameters = [
         {
