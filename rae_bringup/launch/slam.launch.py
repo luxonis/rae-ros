@@ -10,7 +10,7 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 
 
 def launch_setup(context, *args, **kwargs):
-    params_file = LaunchConfiguration("params_file")
+    params_file = LaunchConfiguration('params_file')
     rae_prefix = get_package_share_directory('rae_camera')
     name = LaunchConfiguration('name').perform(context)
     laserscan_config = os.path.join(
@@ -29,7 +29,7 @@ def launch_setup(context, *args, **kwargs):
         name='slam_toolbox',
         output='screen'),
         LoadComposableNodes(
-            target_container=name+"_container",
+            target_container=name+'_container',
             composable_node_descriptions=[
                     ComposableNode(
                         package='laserscan_kinect',
@@ -58,9 +58,9 @@ def launch_setup(context, *args, **kwargs):
                         ]
                     ),
                     ComposableNode(
-                        package="ira_laser_tools",
-                        name="laser_scan_multi_merger",
-                        plugin="ira_laser_tools::LaserscanMerger",
+                        package='ira_laser_tools',
+                        name='laser_scan_multi_merger',
+                        plugin='ira_laser_tools::LaserscanMerger',
                         parameters=[{'laserscan_topics': '/rae/scan_back /rae/scan_front',
                                     'destination_frame': 'base_link',
                                     'scan_destination_topic': '/scan'}
@@ -72,9 +72,9 @@ def launch_setup(context, *args, **kwargs):
     ]
 def generate_launch_description():
     bringup_prefix = get_package_share_directory('rae_bringup')
-    rviz_config = os.path.join(bringup_prefix, "config", "sim.rviz")
+    rviz_config = os.path.join(bringup_prefix, 'config', 'sim.rviz')
     declared_arguments = [
-        DeclareLaunchArgument("name", default_value="rae"),
+        DeclareLaunchArgument('name', default_value='rae'),
         DeclareLaunchArgument('sim`', default_value='False'),
         DeclareLaunchArgument('use_rviz', default_value='False'),
         DeclareLaunchArgument('rviz_config', default_value=rviz_config),

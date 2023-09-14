@@ -31,21 +31,23 @@ def generate_launch_description():
             PythonLaunchDescriptionSource(
                 os.path.join(bringup_prefix, 'launch', 'rtabmap.launch.py')),
             condition=IfCondition(enable_rtabmap)
-            ),
-    IncludeLaunchDescription(
-            os.path.join(bridge_prefix, 'launch', 'rosbridge_websocket_launch.xml'),
+        ),
+        IncludeLaunchDescription(
+            os.path.join(bridge_prefix, 'launch',
+                         'rosbridge_websocket_launch.xml'),
             condition=IfCondition(enable_rosbridge)
-            ),
+        ),
         TimerAction(
             period=50.0,
             actions=[
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(os.path.join(nav_prefix, 'navigation_launch.py')),
-            launch_arguments={
-                              'use_sim_time': 'false',
-                              'params_file': params,
-                              'use_composition': 'True',
-                              'container_name': 'rae_container'}.items(),
-            condition=IfCondition(enable_nav)
-            )]),
-            ])
+                IncludeLaunchDescription(
+                    PythonLaunchDescriptionSource(os.path.join(
+                        nav_prefix, 'navigation_launch.py')),
+                    launch_arguments={
+                        'use_sim_time': 'false',
+                        'params_file': params,
+                        'use_composition': 'True',
+                        'container_name': 'rae_container'}.items(),
+                    condition=IfCondition(enable_nav)
+                )]),
+    ])

@@ -14,5 +14,8 @@ def generate_launch_description():
                 os.path.join(camera_prefix, 'launch', 'rae_camera.launch.py'))),
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
-                os.path.join(hw_prefix, 'launch', 'control.launch.py'))),
+                os.path.join(hw_prefix, 'launch', 'control.launch.py')),
+            launch_arguments={'run_container': 'false',
+                              'enable_battery_status': 'true',
+                              'enable_localization': 'true'}.items())
     ])

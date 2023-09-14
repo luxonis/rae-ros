@@ -1,15 +1,12 @@
-# RAE-ROS
-(Will be moved to public later)
+# RAE ROS
 
-Welcome to official RAE ROS repository.
+This repository contains rae [ROS](https://www.ros.org/) integration files.
 
-Make sure you have [IGN (Gazebo) Fortress](https://gazebosim.org/docs/fortress/install) installed, along with [ros_ign_bridge](https://github.com/gazebosim/ros_gz/tree/ros2#from-source) for Fortress version of IGN Gazebo (for ROS2 Humble distro). 
+### Setting up procedure
 
-
-### Setting up procedure - Real Robot
 #### SSH
 
-1. Connect via USB cable or wifi `keembay`, password `wifiwifi@`
+1. Connect via USB cable or wifi `rae-<ID>`, password `wifiwifi@` (See [rae getting started documentation](https://docs.luxonis.com/projects/hardware/en/latest/pages/rae/#getting-started)).
 2. To use SHH without typing password each time - `ssh-copy-id root@192.168.11.1`
 3. Currently date resets after each startup to set current - ssh root@192.168.11.1 sudo date -s @`( date -u +"%s" )`
 
@@ -34,61 +31,20 @@ Example launch with an argument - `ros2 launch rae_bringup bringup.launch.py ena
 
 
 #### Calibration
-Steps to use it in basic docker image:
 
-- apt update
-- apt install neovim libgl1-mesa-glx python3-pip
-- git clone --branch rae-calib https://github.com/luxonis/depthai.git
-- cd depthai/
-- python3 install_requirements.py 
--  python3 calibrate.py -s 2.5 -db -nx 11 -ny 8 -brd /depthai/cal.json -cd 1 -c 3
+Every shipped rae has already been factory calibrated, so this step is rarely needed. Besides the section below, [Calibration documentation](https://docs.luxonis.com/projects/hardware/en/latest/pages/guides/calibration/) is also a good source of information.
 
-You might need to create a separate base calibration file for that (cal.json), maybe using rae board will work in your case.
-Contents of cal.json
-``` json
-{
-    "board_config":
-    {
-        "name": "RAE",
-        "revision": "R1M0E1",
-        "cameras":{
-            "CAM_C": {
-                "name": "right",
-                "hfov": 110,
-                "type": "color"
-            },
-            "CAM_B": {
-                "name": "left",
-                "hfov": 110,
-                "type": "color",
-                "extrinsics": {
-                    "to_cam": "CAM_C",
-                    "specTranslation": {
-                        "x": -7.5,
-                        "y": 0,
-                        "z": 0
-                    },
-                    "rotation":{
-                        "r": 0,
-                        "p": 0,
-                        "y": 0
-                    }
-                }
-            }
-        },
-        "stereo_config":{
-            "left_cam": "CAM_C",
-            "right_cam": "CAM_B"
-        }
-    }
-}
+Within the docker image, you can execute:
+
+```bash
+apt update
+apt install neovim libgl1-mesa-glx python3-pip
+git clone --branch rae-calib https://github.com/luxonis/depthai.git
+cd depthai/
+python3 install_requirements.py
+# To calibrate rae's front cameras - for back cameras we would change the board name to "RAE-D-E"
+python3 calibrate.py -s <size> -db -nx <squares_X> -ny <squares_Y> -brd RAE-A-B-C -cd 1 -c 3
 ```
-Changes to calibrate.py:
-add
-`imx412' : dai.ColorCameraProperties.SensorResolution.THE_800_P,`
-in sensors list (again this might be my setup only)
-and raise epipolar error threshold, current max value is 0.6 and if you get more calibration won't save.
-
 
 #### Some hardware notes:
 
@@ -146,33 +102,6 @@ In `rae_hw/test` you can find three scripts that will help you verify that the m
 Scipt arguments - `[encRatioL encRatioR]`. Full arg version `ros2 run rae_hw test_encoders 187 187`
 2. Finding out max speed - `ros2 run rae_hw test_max_speed`. Script arguments `[duration encRatioL encRatioR]`. Full arg version `ros2 run rae_hw test_max_speed 1.0 187 187`
 3. Motor verification - `ros2 run rae_hw test_motors`. Script arguments `[duration speedL speedR encRatioL encRatioR maxVelL maxVelR]`. Full arg version `ros2 run rae_hw test_motors 5.0 16.0 16.0 187 187 32 32`
-
-### Setting up procedure - Simulation
-
-
-1. `mkdir -p rae_ws/src`
-2. `cd rae_ws/src`
-3. `git clone git@github.com:luxonis/rae.git` 
-4. `cd ..`
-5. `rosdep install --from-paths src --ignore-src -r -y`
-6. `source /opt/ros/<ros-distro>/setup.bash`
-7. `colcon build` 
-8. `source install/setup.bash`
-
-
-```
-ros2 launch rae_bringup bringup.launch.py use_rviz:=true
-```
-Launch file will spawn a basic world (with sun and ground plane) with RAE in the middle, along with ROS2 bridge which will send over Twist commands to the simulation. It may take a while for program to start for the first time since it will be downloading RAE model from Fuel. If you want to use local model you can point IGN_GAZEBO_RESOURCE_PATH enivroment variable towards models folder in this package. You can also add this model to any world (defined by a sdf file) with this code snippet, where pose defines a starting position:
-
-```
-        <include>
-            <pose> 0 0 0.05 0 0 0 </pose>
-            <uri>
-                https://fuel.gazebosim.org/1.0/danilopejovic/models/WIP-robotmodel1danilo
-            </uri>
-        </include>
-```
 
 
 You can controll the robot via keyboard teleopt (in a new terminal) with:
