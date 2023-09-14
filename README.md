@@ -2,9 +2,8 @@
 
 This repository contains rae [ROS](https://www.ros.org/) integration files.
 
-Make sure you have [IGN (Gazebo) Fortress](https://gazebosim.org/docs/fortress/install) installed, along with [ros_ign_bridge](https://github.com/gazebosim/ros_gz/tree/ros2#from-source) for Fortress version of IGN Gazebo (for ROS2 Humble distro). 
-
 ### Setting up procedure
+
 #### SSH
 
 1. Connect via USB cable or wifi `rae-<ID>`, password `wifiwifi@` (See [rae getting started documentation](https://docs.luxonis.com/projects/hardware/en/latest/pages/rae/#getting-started)).
@@ -21,9 +20,15 @@ Make sure you have [IGN (Gazebo) Fortress](https://gazebosim.org/docs/fortress/i
 6. Attach to the shell - `docker attach <container_name>`, or if you want to create separate session `docker exec -it <container_name> zsh
 7. To launch robot hardware - `ros2 launch rae_bringup robot.launch.py`. This launches:
    - Motor drivers and differential controller
-   - Camera driver, currently set up to provide Depth and streams from left & right camera. Note here that you have to calibrate cameras (see steps below). Currently a default calibration file is loaded. It's located in `rae_bringup/config/cal.json`. To use one on the device or from other path, change `i_external_calibration_path` parameter in  `rae_bringup/config/camera.yaml`
+   - Camera driver, currently set up to provide Depth and streams from left & right camera. Note here that you have to calibrate cameras (see steps below). Currently a default calibration file is loaded. It's located in `rae_camera/config/cal.json`. To use one on the device or from other path, change `i_external_calibration_path` parameter in  `rae_camera/config/camera.yaml`
    - Depth image -> LaserScan conversion node used for SLAM
-9. Launching navigation stack  first connect RAE to WIFI with internet access, then install slam_toolbox - `sudo apt install ros-humble-slam-toolbox` then run `ros2 launch rae_bringup bringup.launch.py sim:=false use_rviz:=true`
+8. Launching whole stack - `ros2 launch rae_bringup bringup.launch.py`. It has following arguments used for enabling parts of the stack:
+   - `enable_slam_toolbox` (true)
+   - `enable_rosbridge` (false)
+   - `enable_rtabmap` (false)
+   - `enable_nav` (false)
+Example launch with an argument - `ros2 launch rae_bringup bringup.launch.py enable_nav:=false`
+
 
 #### Calibration
 
@@ -97,33 +102,6 @@ In `rae_hw/test` you can find three scripts that will help you verify that the m
 Scipt arguments - `[encRatioL encRatioR]`. Full arg version `ros2 run rae_hw test_encoders 187 187`
 2. Finding out max speed - `ros2 run rae_hw test_max_speed`. Script arguments `[duration encRatioL encRatioR]`. Full arg version `ros2 run rae_hw test_max_speed 1.0 187 187`
 3. Motor verification - `ros2 run rae_hw test_motors`. Script arguments `[duration speedL speedR encRatioL encRatioR maxVelL maxVelR]`. Full arg version `ros2 run rae_hw test_motors 5.0 16.0 16.0 187 187 32 32`
-
-### Setting up procedure - Simulation
-
-
-1. `mkdir -p rae_ws/src`
-2. `cd rae_ws/src`
-3. `git clone git@github.com:luxonis/rae.git` 
-4. `cd ..`
-5. `rosdep install --from-paths src --ignore-src -r -y`
-6. `source /opt/ros/<ros-distro>/setup.bash`
-7. `colcon build` 
-8. `source install/setup.bash`
-
-
-```
-ros2 launch rae_bringup bringup.launch.py use_rviz:=true
-```
-Launch file will spawn a basic world (with sun and ground plane) with RAE in the middle, along with ROS2 bridge which will send over Twist commands to the simulation. It may take a while for program to start for the first time since it will be downloading RAE model from Fuel. If you want to use local model you can point IGN_GAZEBO_RESOURCE_PATH enivroment variable towards models folder in this package. You can also add this model to any world (defined by a sdf file) with this code snippet, where pose defines a starting position:
-
-```
-        <include>
-            <pose> 0 0 0.05 0 0 0 </pose>
-            <uri>
-                https://fuel.gazebosim.org/1.0/danilopejovic/models/WIP-robotmodel1danilo
-            </uri>
-        </include>
-```
 
 
 You can controll the robot via keyboard teleopt (in a new terminal) with:

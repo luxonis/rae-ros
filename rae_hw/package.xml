@@ -3,9 +3,10 @@
 <package format="3">
   <name>rae_hw</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="mat.hladky@gmail.com">mateo</maintainer>
-  <license>TODO: License declaration</license>
+  <description>RAE HW package</description>
+  <maintainer email="adam.serafin@luxonis.com">Adam Serafin</maintainer>
+  <maintainer email="danilo.pejovic@luxonis.com">Danilo Pejovic</maintainer>
+  <license>MIT</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
@@ -14,6 +15,7 @@
   <depend>pluginlib</depend>
   <depend>rclcpp</depend>
   <depend>rclcpp_lifecycle</depend>
+  <depend>rclcpp_components</depend>
 
   <depend>controller_manager</depend>
   <depend>diff_drive_controller</depend>
@@ -22,7 +24,9 @@
   <depend>sensor_msgs</depend>
   <depend>geometry_msgs</depend>
   <depend>rae_msgs</depend>
+  <depend>cv_bridge</depend>
   <depend>audio_msgs</depend>
+  <depend>robot_localization</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

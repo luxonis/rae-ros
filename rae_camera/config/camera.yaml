@@ -1,0 +1,66 @@
+/rae:
+  ros__parameters:
+    camera:
+      i_nn_type: none
+      i_pipeline_type: rae
+      i_enable_ir: false
+      i_enable_imu: true
+      i_calibration_dump: false
+      i_pipeline_dump: false
+    nn:
+      i_nn_config_path: /workspaces/rae_ws/src/rae-ros/rae_camera/config/yolo.json
+      i_disable_resize: true
+      i_enable_passthrough: true
+    rgb:
+      i_output_isp: false
+      i_set_isp_scale: false
+      i_fps: 15.0
+      i_preview_size: 416
+      i_board_socket_id: 0
+    # For rgbd mode
+    left:
+      i_resolution: '800P'
+      i_publish_topic: true
+      i_output_isp: false
+      i_board_socket_id: 1
+      i_set_isp_scale: false
+      i_width: 640
+      i_height: 400
+      i_fps: 30.0
+    right:
+      i_publish_topic: false
+      i_output_isp: false
+      i_board_socket_id: 2
+      i_resolution: '800P'
+      i_set_isp_scale: false
+      i_width: 640
+      i_height: 400
+      i_fps: 30.0
+    stereo_front:
+      i_align_depth: true
+      i_board_socket_id: 2
+      i_publish_right_rect: false
+      i_depth_preset: HIGH_ACCURACY
+    stereo_back:
+      i_align_depth: true
+      i_board_socket_id: 4
+      i_publish_right_rect: false
+      i_depth_preset: HIGH_ACCURACY
+    left_back:
+      i_resolution: '800P'
+      i_publish_topic: true
+      i_output_isp: false
+      i_board_socket_id: 3
+      i_set_isp_scale: false
+      i_width: 640
+      i_height: 400
+      i_fps: 30.0
+    right_back:
+      i_publish_topic: false
+      i_output_isp: false
+      i_board_socket_id: 4
+      i_resolution: '800P'
+      i_set_isp_scale: false
+      i_width: 640
+      i_height: 400
+      i_fps: 30.0

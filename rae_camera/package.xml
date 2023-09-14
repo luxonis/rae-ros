@@ -3,9 +3,10 @@
 <package format="3">
   <name>rae_camera</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
+  <description>RAE camera package</description>
   <maintainer email="adam.serafin@luxonis.com">Adam Serafin</maintainer>
-  <license>TODO: License declaration</license>
+  <maintainer email="danilo.pejovic@luxonis.com">Danilo Pejovic</maintainer>
+  <license>MIT</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
@@ -21,6 +22,14 @@
   <depend>vision_msgs</depend>
   <depend>libopencv-dev</depend>
   <depend>depthai</depend>
+  <depend>imu_filter_madgwick</depend>
+  <depend>rclcpp_components</depend>
+  <depend>depthai_ros_driver</depend>
+  <depend>rtabmap_slam</depend>
+  <depend>ira_laser_tools</depend>
+  <depend>laserscan_kinect</depend>
+  <depend>image_proc</depend>
+  <depend>rtabmap_odom</depend>
 
   <export>
     <build_type>ament_cmake</build_type>
