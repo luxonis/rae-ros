@@ -18,7 +18,7 @@
       i_preview_size: 416
       i_board_socket_id: 0
     left:
-      i_resolution: '800'
+      i_resolution: '800P'
       i_publish_topic: false
       i_output_isp: false
       i_board_socket_id: 1
@@ -30,7 +30,7 @@
       i_publish_topic: true
       i_output_isp: false
       i_board_socket_id: 2
-      i_resolution: '800'
+      i_resolution: '800P'
       i_set_isp_scale: false
       i_width: 640
       i_height: 400
@@ -46,7 +46,7 @@
       i_depth_preset: HIGH_ACCURACY
       i_subpixel: true
     left_back:
-      i_resolution: '800'
+      i_resolution: '800P'
       i_publish_topic: false
       i_output_isp: false
       i_board_socket_id: 3
@@ -57,7 +57,7 @@
       i_publish_topic: false
       i_output_isp: false
       i_board_socket_id: 4
-      i_resolution: '800'
+      i_resolution: '800P'
       i_set_isp_scale: false
       i_width: 640
       i_height: 400

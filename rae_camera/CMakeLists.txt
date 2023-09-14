@@ -30,7 +30,6 @@ find_package(ira_laser_tools REQUIRED)
 find_package(image_proc REQUIRED)
 find_package(laserscan_kinect REQUIRED)
 
-
 find_package(OpenCV 4 REQUIRED COMPONENTS imgproc highgui)
 set(dependencies
   camera_info_manager
@@ -44,7 +43,6 @@ set(dependencies
   depthai
   OpenCV
 )
-
 
 set(IPC_DEPS_RTABMAP
 rclcpp

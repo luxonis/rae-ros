@@ -1,5 +1,5 @@
 ARG ROS_DISTRO=humble
-FROM luxonis/depthai-ros-rae AS builder
+FROM luxonis/depthai-ros-rae-iron AS builder
 ARG SIM=0
 ARG CORE_NUM=1
 ARG BUILD_TYPE="RelWithDebInfo"
