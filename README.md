@@ -92,28 +92,40 @@ Scipt arguments - `[encRatioL encRatioR]`. Full arg version `ros2 run rae_hw tes
 Motor configuration parameters are provided in `rae_description/urdf/rae_ros2_control.urdf.xacro` file.
 Pin numbers shouldn't change between devices, but if that's the case you can edit that file to set new ones.
 - PWM pins (speed control):
-<param name="pwmL">19</param>
-<param name="pwmR">20</param>
+```
+<param name="pwmL">2</param>
+<param name="pwmR">1</param>
+```
 - Phase pins (direction control)
+```
 <param name="phL">41</param>
 <param name="phR">45</param>
+```
 - Encoder pins - each motor has A and B pins for encoders.
+```
 <param name="enLA">42</param>
 <param name="enLB">43</param>
 <param name="enRA">46</param>
 <param name="enRB">47</param>
+```
 - How many encoder tics are there per revolution - this might vary from setup to setup. To verify that, run the controller and rotate a wheel manually. You can see current positions/velocities by listening on `/joint_states` topic - `ros2 topic echo /joint_states`.
+```
 <param name="encTicsPerRevL">756</param>
 <param name="encTicsPerRevR">756</param>
+```
 - Max motor speed in rads/s
+```
 <param name="maxVelL">32</param>
 <param name="maxVelR">32</param>
+```
 
 - Both wheels have parameters for PID control set in that file, those values could need some tuning:
+  ```
       <param name="closed_loopR">1</param>
       <param name="PID_P_R">0.2</param>
       <param name="PID_I_R">0.1</param>
       <param name="PID_D_R">0.0005</param>
+   ```
 
 Parameters for differential driver controller are present in `rae_hw/config/controller.yaml`. `wheel_separation` and `wheel_radius` parameters might also need tuning depending on the setup.
 
@@ -122,10 +134,10 @@ Implementation of motor control is found in rae_hw package. You can set the moto
  `ros2 launch rae_hw control.launch.py`
 
 You can then control the robot via keyboard teleopt from your pc via (assuming you are connected to same network robot is in):
-1. sudo apt-get install ros-<ros-distro>-teleop-twist-keyboard
+1. sudo apt-get install ros-humble-teleop-twist-keyboard
 2. ros2 run  teleop_twist_keyboard teleop_twist_keyboard
 
-If keyboard is too limitng for your tests you could also use ros-<ros-distro>-teleop-twist-joy and connect a joystick. 
+If keyboard is too limitng for your tests you could also use ros-humble-teleop-twist-joy and connect a joystick. 
 
 #### LED node
 
