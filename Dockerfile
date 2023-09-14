@@ -15,7 +15,7 @@ RUN sh -c "$(wget https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh
 
 RUN cd /tmp \
    && git clone --recursive https://github.com/luxonis/depthai-core.git --branch rvc3_develop \
-   && cmake -Hdepthai-core -Bdepthai-core/build -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr/local \
+   && cmake -Hdepthai-core -Bdepthai-core/build -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
    && cmake --build depthai-core/build --target install --parallel ${CORE_NUM} \
    && cd /tmp \
    && rm -r depthai-core
