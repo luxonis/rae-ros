@@ -14,13 +14,13 @@ int main(int argc, char *argv[]){
         std::cout << "Help:\n";
         std::cout << "Positional arguments only for now.\n";
         std::cout << "ros2 run rae_hw test_encoders encRatioL encRatioR.\n";
-        std::cout << "With default arguments ros2 run rae_hw test_encoders 187 187" << std::endl;
+        std::cout << "With default arguments ros2 run rae_hw test_encoders 756 756" << std::endl;
         return 0;
     }
     if(argc > 1 && argc < 3){
         std::cout << "Please input all arguments in following form: \n";
         std::cout << "ros2 run rae_hw test_encoders encRatioL encRatioR.\n";
-        std::cout << "ros2 run rae_hw test_encoders 187 187" << std::endl;
+        std::cout << "ros2 run rae_hw test_encoders 756 756" << std::endl;
     }
     else if(argc == 3){
         encRatioL = atoi(argv[1]);

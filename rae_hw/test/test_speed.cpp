@@ -26,13 +26,13 @@ int main(int argc, char *argv[]){
         std::cout << "Help:\n";
         std::cout << "Positional arguments only for now.\n";
         std::cout << "ros2 run rae_hw test_encoders duration encRatioL encRatioR speedL speedR P I D.\n";
-        std::cout << "With default arguments ros2 run rae_hw test_encoders 5.0 187 187 16.0 16.0 0.5 0.0 0.0" << std::endl;
+        std::cout << "With default arguments ros2 run rae_hw test_encoders 5.0 756 756 16.0 16.0 0.5 0.0 0.0" << std::endl;
         return 0;
     }
     if(argc > 1 && argc < 9){
         std::cout << "Please input all arguments in following form: \n";
         std::cout << "ros2 run rae_hw test_encoders duration encRatioL encRatioR speedL speedR P I D.\n";
-        std::cout << "ros2 run rae_hw test_encoders 5.0 187 187 16.0 16.0 0.5 0.0 0.0" << std::endl;
+        std::cout << "ros2 run rae_hw test_encoders 5.0 756 756 16.0 16.0 0.5 0.0 0.0" << std::endl;
     }
     else if(argc == 9){
         duration = atof(argv[1]);
