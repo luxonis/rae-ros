@@ -23,24 +23,6 @@ def generate_launch_description():
             PythonLaunchDescriptionSource(
                 os.path.join(bringup_prefix, 'launch', 'robot.launch.py'))),
         IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(
-                os.path.join(bringup_prefix, 'launch', 'slam.launch.py')),
-            condition=IfCondition(enable_slam_toolbox)
-        ),
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(
-                os.path.join(bringup_prefix, 'launch', 'rtabmap.launch.py')),
-            condition=IfCondition(enable_rtabmap)
-        ),
-        IncludeLaunchDescription(
-            os.path.join(bridge_prefix, 'launch',
-                         'rosbridge_websocket_launch.xml'),
-            condition=IfCondition(enable_rosbridge)
-        ),
-        TimerAction(
-            period=50.0,
-            actions=[
-                IncludeLaunchDescription(
                     PythonLaunchDescriptionSource(os.path.join(
                         nav_prefix, 'navigation_launch.py')),
                     launch_arguments={
@@ -49,5 +31,25 @@ def generate_launch_description():
                         'use_composition': 'True',
                         'container_name': 'rae_container'}.items(),
                     condition=IfCondition(enable_nav)
-                )]),
+                ),
+
+        TimerAction(
+            period=10.0,
+            actions=[
+                IncludeLaunchDescription(
+                    PythonLaunchDescriptionSource(
+                os.path.join(bringup_prefix, 'launch', 'slam.launch.py')),
+            condition=IfCondition(enable_slam_toolbox)
+        ),
+                IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(
+                os.path.join(bringup_prefix, 'launch', 'rtabmap.launch.py')),
+            condition=IfCondition(enable_rtabmap)
+        ),
+                IncludeLaunchDescription(
+            os.path.join(bridge_prefix, 'launch',
+                         'rosbridge_websocket_launch.xml'),
+            condition=IfCondition(enable_rosbridge)
+        ),
+                ]),
     ])

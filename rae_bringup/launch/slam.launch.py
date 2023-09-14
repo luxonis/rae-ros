@@ -10,7 +10,7 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 
 
 def launch_setup(context, *args, **kwargs):
-    params_file = LaunchConfiguration('params_file')
+    params_file = LaunchConfiguration('slam_params_file')
     rae_prefix = get_package_share_directory('rae_camera')
     name = LaunchConfiguration('name').perform(context)
     laserscan_config = os.path.join(

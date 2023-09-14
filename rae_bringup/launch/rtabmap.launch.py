@@ -9,10 +9,7 @@ from launch_ros.descriptions import ComposableNode
 
 
 def launch_setup(context, *args, **kwargs):
-    log_level = 'info'
-    if (context.environment.get('DEPTHAI_DEBUG') == '1'):
-        log_level = 'debug'
-    params_file = LaunchConfiguration('params_file')
+
     rae_prefix = get_package_share_directory('rae_camera')
     name = LaunchConfiguration('name').perform(context)
     laserscan_config = os.path.join(
@@ -53,8 +50,8 @@ def launch_setup(context, *args, **kwargs):
     remappings = [
         #   ('imu', '/imu/data'),
         ('odom', '/diff_controller/odom'),
-        ('rgb/image', name+'/right_front/image_raw'),
-        ('rgb/camera_info', name+'/right_front/camera_info'),
+        ('rgb/image', name+'/right/image_raw'),
+        ('rgb/camera_info', name+'/right/camera_info'),
         ('depth/image', name+'/stereo_front/image_raw'),
     ]
 
@@ -68,9 +65,9 @@ def launch_setup(context, *args, **kwargs):
                     package='image_proc',
                     plugin='image_proc::RectifyNode',
                     name='rectify_color_node',
-                    remappings=[('image', name+'/right_front/image_raw'),
-                                ('camera_info', name+'/right_front/camera_info'),
-                                ('image_rect', name+'/right_front/image_rect'),]
+                    remappings=[('image', name+'/right/image_raw'),
+                                ('camera_info', name+'/right/camera_info'),
+                                ('image_rect', name+'/right/image_rect'),]
                 ),
                 ComposableNode(
                     package='rtabmap_slam',
