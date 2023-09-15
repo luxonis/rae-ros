@@ -2,8 +2,50 @@
 
 namespace rae_hw
 {
-    LEDNode::LEDNode(const rclcpp::NodeOptions &options)
-        : Node("led_node", options)
+    Leds::Leds()
+        : Node("led_node"),
+         logicalToPhysicalMapping{
+            {0, 0}, 
+            {1, 1},
+            {2, 2}, 
+            {3, 3},
+            {4, 4}, 
+            {5, 5},
+            {6, 6}, 
+            {7, 7},
+            {8, 8}, 
+            {9, 29},
+            {10, 30}, 
+            {11, 31},
+            {12, 32}, 
+            {13, 33},
+            {14, 34}, 
+            {15, 35},
+            {16, 36}, 
+            {17, 37},
+            {18, 38}, 
+            {19, 19},
+            {20, 20}, 
+            {21, 21},
+            {22, 22},
+            {23, 23}, 
+            {24, 24},
+            {25, 25}, 
+            {26, 26},
+            {27, 27}, 
+            {28, 28},
+            {29, 9}, 
+            {30, 10},
+            {31, 11},
+            {32, 12}, 
+            {33, 13},
+            {34, 14}, 
+            {35, 15},
+            {36, 16}, 
+            {37, 17},
+            {38, 18}
+        }
+
     {
         int ret = 0;
         memset(ws2812b_buffer, 0, WS2812B_BUFFER_SIZE);
@@ -34,18 +76,19 @@ namespace rae_hw
         }
 
         subscription_ = this->create_subscription<rae_msgs::msg::LEDControl>(
-            "led", 10, std::bind(&LEDNode::topic_callback, this, std::placeholders::_1));
+            "leds", 10, std::bind(&Leds::topic_callback, this, std::placeholders::_1));
         setAllPixels(150, 10, 150);
         transmitSPI();
         RCLCPP_INFO(this->get_logger(), "LED node running!");
+
+       
     }
-    LEDNode::~LEDNode()
-    {
+    Leds::~Leds(){
         setAllPixels(0, 0, 0);
         transmitSPI();
     }
-    void LEDNode::topic_callback(const rae_msgs::msg::LEDControl &msg)
-    {
+    void Leds::topic_callback(const rae_msgs::msg::LEDControl &msg)
+    {   
         if (msg.control_type == msg.CTRL_TYPE_ALL)
         {
             uint8_t r = convertColor(msg.data[0].r);
@@ -72,25 +115,25 @@ namespace rae_hw
         }
         transmitSPI();
     }
-    uint8_t LEDNode::convertColor(float num)
+        uint8_t Leds::convertColor(float num)
     {
         return static_cast<uint8_t>(round(num * 255.0));
     }
-    void LEDNode::transmitSPI()
+    void Leds::transmitSPI()
     {
-        struct spi_ioc_transfer tr = spi_ioc_transfer();
-        tr.tx_buf = (unsigned long)ws2812b_buffer;
-        tr.len = WS2812B_BUFFER_SIZE;
-        tr.speed_hz = speed;
-        tr.delay_usecs = 0;
-        tr.bits_per_word = 8;
-        
+        struct spi_ioc_transfer tr = {
+            .tx_buf = (unsigned long)ws2812b_buffer,
+            .len = WS2812B_BUFFER_SIZE,
+            .speed_hz = speed,
+            .delay_usecs = 0,
+            .bits_per_word = 8,
+        };
         int ret = ioctl(fd, SPI_IOC_MESSAGE(1), &tr);
 
         if (ret < 1)
             RCLCPP_ERROR(this->get_logger(), "can't send spi message");
     }
-    void LEDNode::fillBuffer(uint8_t color)
+    void Leds::fillBuffer(uint8_t color)
     {
         for (uint8_t mask = 0x80; mask; mask >>= 1)
         {
@@ -105,15 +148,27 @@ namespace rae_hw
             ptr++;
         }
     }
-    void LEDNode::setSinglePixel(uint16_t pixel, uint8_t r, uint8_t g, uint8_t b)
-    {
-        ptr = &ws2812b_buffer[24 * pixel];
+    void Leds::setSinglePixel(uint16_t pixel, uint8_t r, uint8_t g, uint8_t b)
+    {   auto mapping_pair = logicalToPhysicalMapping.find(pixel);
+        if (mapping_pair != logicalToPhysicalMapping.end())
+        {
+            uint16_t physicalID = mapping_pair->second;
+            ptr = &ws2812b_buffer[24 * physicalID];
+        }
+        else
+        {
+            // Handle invalid logical IDs or cases not covered in the mapping
+            // For example, print a message indicating the LED doesn't exist
+            std::cout << "Logical LED ID " << pixel << " doesn't have a corresponding physical LED." << std::endl;
+            // You can also choose to skip or set a default pixel color here
+        }
+        
         fillBuffer(g);
         fillBuffer(r);
         fillBuffer(b);
     }
 
-    void LEDNode::setAllPixels(uint8_t r, uint8_t g, uint8_t b)
+    void Leds::setAllPixels(uint8_t r, uint8_t g, uint8_t b)
     {
         // printf("All pixels\n");
         ptr = ws2812b_buffer;
