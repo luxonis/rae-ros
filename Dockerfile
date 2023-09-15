@@ -20,7 +20,7 @@ RUN cd /tmp \
    && cd /tmp \
    && rm -r depthai-core
 
-ENV UNDERLAY_WS=/depthai_ws
+ENV UNDERLAY_WS=/underlay_ws
 RUN mkdir -p $UNDERLAY_WS/src
 RUN cd ./$UNDERLAY_WS/src && git clone https://github.com/BrettRD/ros-gst-bridge.git
 RUN cd ./$UNDERLAY_WS/src && git clone https://github.com/Serafadam/ira_laser_tools.git
