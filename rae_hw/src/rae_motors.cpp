@@ -162,7 +162,7 @@ namespace rae_hw
     }
 }
 
-    void RaeMotor::setPWM(int period, int duty_cycle)
+    void RaeMotor::setPWM( int duty_cycle)
     {
         std::string dutyCyclePath = pwmName_ + "/pwm" + std::to_string(pwmPin) + "/duty_cycle";
         std::ofstream dutyCycleFile(dutyCyclePath);

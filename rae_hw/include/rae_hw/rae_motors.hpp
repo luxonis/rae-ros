@@ -68,7 +68,7 @@ namespace rae_hw
         void run();
         /// @brief Stops motors, joins threads and frees GPIO pins.
         void stop();
-        void setPWM(int period, int duty_cycle);
+        void setPWM(int duty_cycle);
         void disablePWM();
 
     private:

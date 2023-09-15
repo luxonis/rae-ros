@@ -2,9 +2,9 @@
 
 namespace rae_hw
 {
-    Leds::Leds()
-        : Node("led_node"),
-         logicalToPhysicalMapping{
+    LEDNode::LEDNode(const rclcpp::NodeOptions &options)
+        : Node("led_node", options),
+        logicalToPhysicalMapping{
             {0, 0}, 
             {1, 1},
             {2, 2}, 
@@ -45,7 +45,6 @@ namespace rae_hw
             {37, 17},
             {38, 18}
         }
-
     {
         int ret = 0;
         memset(ws2812b_buffer, 0, WS2812B_BUFFER_SIZE);
@@ -76,19 +75,18 @@ namespace rae_hw
         }
 
         subscription_ = this->create_subscription<rae_msgs::msg::LEDControl>(
-            "leds", 10, std::bind(&Leds::topic_callback, this, std::placeholders::_1));
+            "led", 10, std::bind(&LEDNode::topic_callback, this, std::placeholders::_1));
         setAllPixels(150, 10, 150);
         transmitSPI();
         RCLCPP_INFO(this->get_logger(), "LED node running!");
-
-       
     }
-    Leds::~Leds(){
+    LEDNode::~LEDNode()
+    {
         setAllPixels(0, 0, 0);
         transmitSPI();
     }
-    void Leds::topic_callback(const rae_msgs::msg::LEDControl &msg)
-    {   
+    void LEDNode::topic_callback(const rae_msgs::msg::LEDControl &msg)
+    {
         if (msg.control_type == msg.CTRL_TYPE_ALL)
         {
             uint8_t r = convertColor(msg.data[0].r);
@@ -115,25 +113,25 @@ namespace rae_hw
         }
         transmitSPI();
     }
-        uint8_t Leds::convertColor(float num)
+    uint8_t LEDNode::convertColor(float num)
     {
         return static_cast<uint8_t>(round(num * 255.0));
     }
-    void Leds::transmitSPI()
+    void LEDNode::transmitSPI()
     {
-        struct spi_ioc_transfer tr = {
-            .tx_buf = (unsigned long)ws2812b_buffer,
-            .len = WS2812B_BUFFER_SIZE,
-            .speed_hz = speed,
-            .delay_usecs = 0,
-            .bits_per_word = 8,
-        };
+        struct spi_ioc_transfer tr = spi_ioc_transfer();
+        tr.tx_buf = (unsigned long)ws2812b_buffer;
+        tr.len = WS2812B_BUFFER_SIZE;
+        tr.speed_hz = speed;
+        tr.delay_usecs = 0;
+        tr.bits_per_word = 8;
+        
         int ret = ioctl(fd, SPI_IOC_MESSAGE(1), &tr);
 
         if (ret < 1)
             RCLCPP_ERROR(this->get_logger(), "can't send spi message");
     }
-    void Leds::fillBuffer(uint8_t color)
+    void LEDNode::fillBuffer(uint8_t color)
     {
         for (uint8_t mask = 0x80; mask; mask >>= 1)
         {
@@ -148,7 +146,7 @@ namespace rae_hw
             ptr++;
         }
     }
-    void Leds::setSinglePixel(uint16_t pixel, uint8_t r, uint8_t g, uint8_t b)
+    void LEDNode::setSinglePixel(uint16_t pixel, uint8_t r, uint8_t g, uint8_t b)
     {   auto mapping_pair = logicalToPhysicalMapping.find(pixel);
         if (mapping_pair != logicalToPhysicalMapping.end())
         {
@@ -168,7 +166,7 @@ namespace rae_hw
         fillBuffer(b);
     }
 
-    void Leds::setAllPixels(uint8_t r, uint8_t g, uint8_t b)
+    void LEDNode::setAllPixels(uint8_t r, uint8_t g, uint8_t b)
     {
         // printf("All pixels\n");
         ptr = ws2812b_buffer;
