@@ -52,4 +52,3 @@ jobs:
           no-cache: true
           tags: | 
             luxonis/depthai-ros-rae
-      
