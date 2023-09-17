@@ -134,6 +134,16 @@ sensor_msgs::msg::LaserScan::SharedPtr LaserScanKinect::getLaserScanMsg(
   return scan_msg_;
 }
 
+ void LaserScanKinect::setFilterMode(std::string mode) {
+    if (mode == "median") {
+      filter_mode_ = FilterMode::MEDIAN;
+    } else if (mode == "smallest") {
+      filter_mode_ = FilterMode::SMALLEST;
+    } else {
+      filter_mode_ = FilterMode::SMALLEST;
+    }
+}
+
 void LaserScanKinect::setMinRange(const float rmin)
 {
   if (rmin >= 0) {
@@ -445,6 +455,7 @@ void LaserScanKinect::convertDepthToPolarCoords(
 
   // Converts depth from specific column to polar coordinates
   auto convert_to_polar = [&](size_t col, float depth) -> float {
+      // TODO(Saching13): include the case if it is not zero
       if (depth != std::numeric_limits<T>::max()) {
         // Calculate x in XZ ( z = depth )
         float x = (col - cam_model_.cx()) * depth / cam_model_.fx();
@@ -459,8 +470,13 @@ void LaserScanKinect::convertDepthToPolarCoords(
   auto process_columns = [&](size_t left, size_t right) {
       for (size_t i = left; i <= right; ++i) {
 
-        const auto depth_min = getMedianValueInColumn<T>(depth_msg, i);
-        // const auto depth_min = getSmallestValueInColumn<T>(depth_msg, i);
+        float depth_min = std::numeric_limits<float>::max();
+        if (filter_mode_ == FilterMode::MEDIAN){
+          depth_min = getMedianValueInColumn<T>(depth_msg, i);
+        }
+        else {
+          depth_min = getSmallestValueInColumn<T>(depth_msg, i);
+        }
         const auto range_in_polar = convert_to_polar(i, depth_min);
 
         // std::cout << "scan_msg_index_[i] is -> " <<  scan_msg_index_[i] << std::endl;

@@ -1,7 +1,7 @@
 laserscan_kinect:
   ros__parameters:
     # Frame id for the output laserscan.
-    output_frame_id: oak_rgb_camera_optical_frame
+    output_frame_id: oak_rgb_camera_frame
     # Minimum sensor range (m).
     range_min: 0.4
     # Maximum sensor range (m).
@@ -26,3 +26,4 @@ laserscan_kinect:
 
     publish_dbg_info: true
     threads_num: 1
+    filter_mode: median

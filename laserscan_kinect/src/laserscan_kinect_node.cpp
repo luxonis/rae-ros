@@ -41,6 +41,7 @@ LaserScanKinectNode::LaserScanKinectNode()
   declare_parameter("tilt_compensation_en", false);
   declare_parameter("publish_dbg_info", false);
   declare_parameter("threads_num", 1);
+  declare_parameter("filter_mode", "median");
 
   // Subscription to depth image topic
   publisher_ = this->create_publisher<sensor_msgs::msg::LaserScan>("scan", 10);
@@ -119,6 +120,15 @@ rcl_interfaces::msg::SetParametersResult LaserScanKinectNode::parametersCallback
         converter_.setPublishDbgImgEnable(parameter.as_bool());
       } else if (parameter.get_name() == "threads_num") {
         converter_.setThreadsNum(parameter.as_int());
+      }
+      else if(parameter.get_name() == "filter_mode") {
+        std::string filter_mode = parameter.as_string();
+        converter_.setFilterMode(filter_mode);
+      }
+      else {
+        RCLCPP_ERROR(this->get_logger(), "Invalid parameter: %s", parameter.get_name().c_str());
+        result.successful = false;
+        result.reason = "Invalid parameter";
       }
     }
   } catch (const std::exception & e) {

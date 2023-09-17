@@ -28,6 +28,12 @@
 namespace laserscan_kinect
 {
 
+enum class FilterMode
+{
+  MEDIAN,
+  SMALLEST
+};
+
 class LaserScanKinect
 {
 public:
@@ -49,6 +55,12 @@ public:
   sensor_msgs::msg::LaserScan::SharedPtr getLaserScanMsg(
     const sensor_msgs::msg::Image::ConstSharedPtr & depth_msg,
     const sensor_msgs::msg::CameraInfo::ConstSharedPtr & info_msg);
+
+  /**
+   * @brief setFilterMode sets the filter mode used in conversion
+   * @param mode
+   */
+  void setFilterMode(std::string mode);
   /**
    * @brief setOutputFrame sets the frame to output laser scan
    * @param frame
@@ -191,7 +203,7 @@ private:
   bool tilt_compensation_enable_{false};  ///< Determines if tilt compensation feature is on
   bool publish_dbg_image_{false};        ///< Determines if debug image should be published
   unsigned threads_num_{1};                ///< Determines threads number used in image processing
-
+  FilterMode filter_mode_ = FilterMode::MEDIAN;  ///< Determines filter mode used in conversion
   /// Published scan message
   sensor_msgs::msg::LaserScan::SharedPtr scan_msg_;
 

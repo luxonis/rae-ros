@@ -37,6 +37,7 @@ def generate_launch_description():
         remappings=[
             ('/image', '/oak/stereo/image_raw'),
             ('/camera_info', '/oak/stereo/camera_info'),
+            ('/scan', '/median_scan')
         ]
     )
     ld.add_action(laserscan_node)
