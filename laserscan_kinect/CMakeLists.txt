@@ -1,8 +1,11 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.15)
 project(laserscan_kinect)
 # add_compile_options(-g)
 
 add_compile_options(-Wall -Wextra -Wpedantic)
+# set(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} -fsanitize=address  -fsanitize=leak -g")
+# add_compile_options(-fsanitize=address)
+# add_link_options(-fsanitize=address)
 
 ### Dependencies
 find_package(ament_cmake_auto REQUIRED)

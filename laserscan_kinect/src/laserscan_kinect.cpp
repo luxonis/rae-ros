@@ -23,6 +23,7 @@
 #include <list>
 #include <utility>
 #include <chrono>
+#include <iostream>
 
 #include "sensor_msgs/image_encodings.hpp"
 
@@ -37,7 +38,12 @@ sensor_msgs::msg::LaserScan::SharedPtr LaserScanKinect::getLaserScanMsg(
 {
   // Configure message if necessary
   if (!is_scan_msg_configured_ || cam_model_update_) {
-    cam_model_.fromCameraInfo(info_msg);
+    sensor_msgs::msg::CameraInfo::SharedPtr info_msg_non_const =
+      std::make_shared<sensor_msgs::msg::CameraInfo>(*info_msg);
+    info_msg_non_const->p[3] = 0.0;
+
+    cam_model_.fromCameraInfo(info_msg_non_const);
+    // std::cout << "Projection Matrix -> " << cam_model_.projectionMatrix() << std::endl;
 
     double min_angle, max_angle;
     using Point = cv::Point2d;
@@ -66,6 +72,10 @@ sensor_msgs::msg::LaserScan::SharedPtr LaserScanKinect::getLaserScanMsg(
     scan_msg_->angle_increment = (max_angle - min_angle) / (depth_msg->width - 1);
     scan_msg_->time_increment = 0.0;
     scan_msg_->scan_time = 1.0 / 30.0;
+    // std::cout << " Min angle -> " << min_angle << std::endl;
+    // std::cout << " Max angle -> " << max_angle << std::endl;
+    // std::cout << " Vertical FOV -> " << vertical_fov << std::endl;
+    // std::cout << " Angle increment -> " << scan_msg_->angle_increment << std::endl;
 
     // Set min and max range in preparing message
     if (tilt_compensation_enable_) {
@@ -116,7 +126,10 @@ sensor_msgs::msg::LaserScan::SharedPtr LaserScanKinect::getLaserScanMsg(
   if (publish_dbg_image_) {
     dbg_image_ = prepareDbgImage(depth_msg, min_dist_points_indices_);
   }
-  min_dist_points_indices_.clear();
+  // std::cout << "min_dist_points_indices_ size is " << min_dist_points_indices_.size() << std::endl;
+  if (!min_dist_points_indices_.empty()) {
+    min_dist_points_indices_.clear();
+  }
 
   return scan_msg_;
 }
@@ -338,7 +351,8 @@ float LaserScanKinect::getMedianValueInColumn(
     // std::cout << "depth_median col: " << col << std::endl;
     // std::cout << "Min dist_points size -> " << min_dist_points_indices_.size() << std::endl;
     std::lock_guard<std::mutex> guard(points_indices_mutex_);
-    min_dist_points_indices_.emplace_back(depth_median.first, col);
+    // min_dist_points_indices_.emplace_back(depth_median.first, col);
+    min_dist_points_indices_.push_back({depth_median.first, col});
   }
 
   // if (depth_median.first > 1300){
@@ -445,9 +459,12 @@ void LaserScanKinect::convertDepthToPolarCoords(
   auto process_columns = [&](size_t left, size_t right) {
       for (size_t i = left; i <= right; ++i) {
 
-        // const auto depth_min = getMedianValueInColumn<T>(depth_msg, i);
-        const auto depth_min = getSmallestValueInColumn<T>(depth_msg, i);
+        const auto depth_min = getMedianValueInColumn<T>(depth_msg, i);
+        // const auto depth_min = getSmallestValueInColumn<T>(depth_msg, i);
         const auto range_in_polar = convert_to_polar(i, depth_min);
+
+        // std::cout << "scan_msg_index_[i] is -> " <<  scan_msg_index_[i] << std::endl;
+        // std::cout << "scan message range is -> " << scan_msg_->ranges.size() << std::endl;
         {
           std::lock_guard<std::mutex> guard(scan_msg_mutex_);
           scan_msg_->ranges[scan_msg_index_[i]] = range_in_polar;

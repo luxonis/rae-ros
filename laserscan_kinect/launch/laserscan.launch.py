@@ -28,6 +28,7 @@ def generate_launch_description():
         'params.yaml'
     )
         # prefix=['xterm -e gdb -ex run --args'],
+        # prefix=['xterm -e valgrind -v --tool=memcheck --leak-check=full --show-leak-kinds=all --track-origins=yes '],
 
     laserscan_node = Node(
         package='laserscan_kinect',
