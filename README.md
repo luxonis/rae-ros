@@ -20,7 +20,7 @@ You can download prebuilt images form [dockerhub](https://hub.docker.com/r/luxon
 Downloading prebuilt images is reccomended if you are not planning to considerably change source code. 
 
 1. Clone repository `git clone git@github.com:luxonis/rae-ros.git`
-2. Build docker image `cd rae && docker buildx build --platform arm64 --build-arg USE_RVIZ=0 --build-arg SIM=0 --build-arg ROS_DISTRO=humble --build-arg CORE_NUM=10 -f Dockerfile --squash -t <docker-image-name>:<tag> --load .
+2. Build docker image `cd rae && docker buildx build --platform arm64 --build-arg USE_RVIZ=0 --build-arg SIM=0 --build-arg ROS_DISTRO=humble --build-arg CORE_NUM=10 --build-arg INCLUDE_SPECTACULARAI_ROS=NO -f Dockerfile --squash -t <docker-image-name>:<tag> --load .
 `
 3. Upload docker image to robot. Connect robot to your PC via USB so you can transfer image quicker. Note that currently space on the robot is limited, so you need to have 7-8 GB of free space in `/data` directory - `docker save <docker-image-name>:<tag> | ssh -C root@192.168.197.55 docker load`
 4. SSH into robot and run docker image - `docker run -it --restart=unless-stopped -v /dev/:/dev/ -v /sys/:/sys/ --privileged  --net=host <docker-image-name>:<tag>`

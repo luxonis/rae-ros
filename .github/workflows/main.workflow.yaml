@@ -46,6 +46,8 @@ jobs:
             ROS_DISTRO=${{ env.ROS_DISTRO }}
             USE_RVIZ=1
             SIM=1
+          secrets: |
+            "GITHUB_RAE_PAT_TOKEN=${{ secrets.GITHUB_RAE_PAT_TOKEN }}"
           platforms: |
             amd64
           no-cache: true
@@ -72,6 +74,8 @@ jobs:
             ROS_DISTRO=${{ env.ROS_DISTRO }}
             USE_RVIZ=0
             SIM=0
+          secrets: |
+            "GITHUB_RAE_PAT_TOKEN=${{ secrets.GITHUB_RAE_PAT_TOKEN }}"
           platforms: |
             arm64
           no-cache: true
@@ -84,6 +88,8 @@ jobs:
             ROS_DISTRO=${{ env.ROS_DISTRO }}
             USE_RVIZ=0
             SIM=0
+          secrets: |
+            "GITHUB_RAE_PAT_TOKEN=${{ secrets.GITHUB_RAE_PAT_TOKEN }}"
           platforms: |
             arm64
           push: ${{ env.PUSH }}
