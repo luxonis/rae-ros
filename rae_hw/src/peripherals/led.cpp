@@ -75,7 +75,7 @@ namespace rae_hw
         }
 
         subscription_ = this->create_subscription<rae_msgs::msg::LEDControl>(
-            "led", 10, std::bind(&LEDNode::topic_callback, this, std::placeholders::_1));
+            "leds", 10, std::bind(&LEDNode::topic_callback, this, std::placeholders::_1));
         setAllPixels(150, 10, 150);
         transmitSPI();
         RCLCPP_INFO(this->get_logger(), "LED node running!");
