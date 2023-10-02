@@ -47,7 +47,7 @@ jobs:
             USE_RVIZ=1
             SIM=1
           secrets: |
-            "GITHUB_RAE_PAT_TOKEN=${{ secrets.GITHUB_RAE_PAT_TOKEN }}"
+            "SPECTACULAR_AI_TOKEN=${{ secrets.SPECTACULAR_AI_TOKEN }}"
           platforms: |
             amd64
           no-cache: true
