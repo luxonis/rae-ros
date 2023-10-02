@@ -75,7 +75,7 @@ jobs:
             USE_RVIZ=0
             SIM=0
           secrets: |
-            "GITHUB_RAE_PAT_TOKEN=${{ secrets.GITHUB_RAE_PAT_TOKEN }}"
+            "SPECTACULAR_AI_TOKEN=${{ secrets.SPECTACULAR_AI_TOKEN }}"
           platforms: |
             arm64
           no-cache: true
@@ -89,7 +89,7 @@ jobs:
             USE_RVIZ=0
             SIM=0
           secrets: |
-            "GITHUB_RAE_PAT_TOKEN=${{ secrets.GITHUB_RAE_PAT_TOKEN }}"
+            "SPECTACULAR_AI_TOKEN=${{ secrets.SPECTACULAR_AI_TOKEN }}"
           platforms: |
             arm64
           push: ${{ env.PUSH }}
