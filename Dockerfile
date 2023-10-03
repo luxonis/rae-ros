@@ -30,7 +30,7 @@ RUN --mount=type=secret,id=SPECTACULAR_AI_TOKEN if [ "$INCLUDE_SPECTACULARAI_ROS
       && git clone --single-branch --branch ${SPECTACULARAI_ROS_VERSION} https://github.com/SpectacularAI/ros.git sai_ros \
       && cd sai_ros \
       && apt-get -y install unzip --no-install-recommends \
-      && ROS_DISTRO=$ROS_DISTRO DEPTHAI_WS=$UNDERLAY_WS SPECTACULAR_AI_TOKEN=$(cat /run/secrets/SPECTACULAR_AI_TOKEN) . ./scripts/download_and_build_static.sh \
+      && ROS_DISTRO=$ROS_DISTRO DEPTHAI_WS=$UNDERLAY_WS GITHUB_RAE_PAT_TOKEN=$(cat /run/secrets/SPECTACULAR_AI_TOKEN) . ./scripts/download_and_build_static.sh \
       && apt-get -y remove unzip \
       && echo "if [ -f $(pwd)/spectacularai_ros2/install/setup.bash ]; then source $(pwd)/spectacularai_ros2/install/setup.bash; fi" >> $HOME/.bashrc; \
   fi
