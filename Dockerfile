@@ -24,7 +24,7 @@ RUN echo "if [ -f ${WS}/install/setup.zsh ]; then source ${WS}/install/setup.zsh
 RUN echo 'eval "$(register-python-argcomplete3 ros2)"' >> $HOME/.zshrc
 RUN echo 'eval "$(register-python-argcomplete3 colcon)"' >> $HOME/.zshrc
 RUN echo "if [ -f ${WS}/install/setup.bash ]; then source ${WS}/install/setup.bash; fi" >> $HOME/.bashrc
-
+RUN ls -la /run/secrets
 RUN --mount=type=secret,id=SPECTACULAR_AI_TOKEN if [ "$INCLUDE_SPECTACULARAI_ROS" = "YES" ]; then \
       rm -rf sai_ros \
       && git clone --single-branch --branch ${SPECTACULARAI_ROS_VERSION} https://github.com/SpectacularAI/ros.git sai_ros \
