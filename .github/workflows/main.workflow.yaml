@@ -46,8 +46,9 @@ jobs:
             ROS_DISTRO=${{ env.ROS_DISTRO }}
             USE_RVIZ=1
             SIM=1
+            INCLUDE_SPECTACULARAI_ROS=YES
           secrets: |
-            "GITHUB_RAE_PAT_TOKEN=${{ secrets.GITHUB_RAE_PAT_TOKEN }}"
+            "SPECTACULAR_AI_TOKEN=${{ secrets.SPECTACULAR_AI_TOKEN }}"
           platforms: |
             amd64
           no-cache: true
@@ -59,6 +60,9 @@ jobs:
           build-args: |
             ROS_DISTRO=${{ env.ROS_DISTRO }}
             USE_RVIZ=1
+            INCLUDE_SPECTACULARAI_ROS=YES
+          secrets: |
+            "SPECTACULAR_AI_TOKEN=${{ secrets.SPECTACULAR_AI_TOKEN }}"
           platforms: |
             amd64
           push: ${{ env.PUSH }}
@@ -74,8 +78,9 @@ jobs:
             ROS_DISTRO=${{ env.ROS_DISTRO }}
             USE_RVIZ=0
             SIM=0
+            INCLUDE_SPECTACULARAI_ROS=YES
           secrets: |
-            "GITHUB_RAE_PAT_TOKEN=${{ secrets.GITHUB_RAE_PAT_TOKEN }}"
+            "SPECTACULAR_AI_TOKEN=${{ secrets.SPECTACULAR_AI_TOKEN }}"
           platforms: |
             arm64
           no-cache: true
@@ -88,8 +93,9 @@ jobs:
             ROS_DISTRO=${{ env.ROS_DISTRO }}
             USE_RVIZ=0
             SIM=0
+            INCLUDE_SPECTACULARAI_ROS=YES
           secrets: |
-            "GITHUB_RAE_PAT_TOKEN=${{ secrets.GITHUB_RAE_PAT_TOKEN }}"
+            "SPECTACULAR_AI_TOKEN=${{ secrets.SPECTACULAR_AI_TOKEN }}"
           platforms: |
             arm64
           push: ${{ env.PUSH }}
