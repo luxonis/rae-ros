@@ -3,7 +3,7 @@ FROM luxonis/depthai-ros-rae AS builder
 ARG SIM=0
 ARG CORE_NUM=1
 ARG BUILD_TYPE="RelWithDebInfo"
-ARG INCLUDE_SPECTACULARAI_ROS=YES
+ARG INCLUDE_SPECTACULARAI_ROS=NO
 ARG SPECTACULARAI_ROS_VERSION=v0.0.1
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -26,7 +26,6 @@ RUN echo 'eval "$(register-python-argcomplete3 colcon)"' >> $HOME/.zshrc
 RUN echo "if [ -f ${WS}/install/setup.bash ]; then source ${WS}/install/setup.bash; fi" >> $HOME/.bashrc
 RUN --mount=type=secret,id=SPECTACULAR_AI_TOKEN if [ "$INCLUDE_SPECTACULARAI_ROS" = "YES" ]; then \
       rm -rf sai_ros \
-      && ls -la /run/secrets \
       && git clone --single-branch --branch ${SPECTACULARAI_ROS_VERSION} https://github.com/SpectacularAI/ros.git sai_ros \
       && cd sai_ros \
       && apt-get -y install unzip --no-install-recommends \
