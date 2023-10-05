@@ -45,7 +45,7 @@ namespace rae_hw
         prevErrorTime = std::chrono::high_resolution_clock::now();
         std::string periodPath = pwmName_ + "/pwm" + std::to_string(pwmPin) + "/period";
         std::ofstream periodFile(periodPath);
-        periodFile << 100000;
+        periodFile << 120000;
         periodFile.close();
 
     }
@@ -54,10 +54,10 @@ namespace rae_hw
         stop();
     }
 
-    float RaeMotor::calcSpeed()
+    void RaeMotor::calcSpeed()
     {
-        // while (_running)
-        // {
+        while (_running)
+        {
             auto currTime = std::chrono::high_resolution_clock::now();
             float currPos = getPos();
             float timeDiff = std::chrono::duration<float>(currTime - prevVelTime).count();
@@ -67,9 +67,8 @@ namespace rae_hw
             }
             prevVelTime = currTime;
             prevPos = currPos;
-            // std::this_thread::sleep_for(10ms);
-        //}
-            return currentSpeed;
+            std::this_thread::sleep_for(70ms);
+        }
     }
 
     void RaeMotor::controlSpeed()
@@ -79,29 +78,27 @@ namespace rae_hw
         std::string dutyCyclePath = pwmName_ + "/pwm" + std::to_string(pwmPin) + "/duty_cycle";
         std::ofstream dutyCycleFile(dutyCyclePath);
         bool dir;
-        uint32_t dutyCycle;
-        float currSpeed = calcSpeed();
-        int i_param_counter=0;
         if (closedLoop_)
             {
                 auto currTime = std::chrono::high_resolution_clock::now();
                 float timeDiff = std::chrono::duration<float>(currTime - prevErrorTime).count();
+                float currSpeed = getSpeed();
                 float error = targetSpeed - currSpeed;
                 float eP = error * currPID.P;
-                if(i_param_counter==500){
-                    errSum=0;
-                    i_param_counter=0;
-                }
                 errSum += (error * timeDiff);
                 float eI = errSum * currPID.I;
                 float eD = (error - prevError) / timeDiff * currPID.D;
                 float outSpeed = targetSpeed + eP + eI + eD;
-                dutyCycle = speedToPWM(outSpeed);
+                uint32_t dutyCycle = speedToPWM(outSpeed);
                 dir = (outSpeed >= 0) ^ reversePhPinLogic_;
                 prevErrorTime = currTime;
                 prevError = error;
-                //std::cout << "CLS; MOTOR: " << pwmPin << "SPEED: " << outSpeed << "DC: "<< dutyCycle << std::endl;
-                i_param_counter++;
+                if (dutyCycleFile.is_open())
+        {
+            dutyCycleFile << dutyCycle;
+            dutyCycleFile.close();
+        }
+            usleep(100000);
             }
             else {
 
@@ -153,12 +150,7 @@ namespace rae_hw
         // Print the speed information
        // std::cout << "Target Speed: " << targetSpeed << std::endl;
        // std::cout << "Duty Cycle: " << dutyCycle << std::endl;
-          if (dutyCycleFile.is_open())
-        {
-            dutyCycleFile << dutyCycle;
-            dutyCycleFile.close();
-        }
-        usleep(5000);
+        std::this_thread::sleep_for(5ms);
     }
 }
 
@@ -191,79 +183,42 @@ namespace rae_hw
     {
         while (_running)
         {
-            
+            usleep(1);
             int currA = enAPin.get_value();
             int currB = enBPin.get_value();
             State currS{currA, currB};
-            bool direction=true; //true is forwards, false is backwards
             int count = prevCount;
-            if (currS == Clockwise && currS != prevState)
+            if (currS == Clockwise)
             {
                 if (prevState == Rest)
                 {
-                    count++;
-                    direction=true;
+                    encDirection = true;
                 }
-                else if (prevState == Halfway)
+                else
                 {
-                    count--;
-                    direction=false;
-                }
-                else{
-                   // std::cout << "We are missing ticks, adding or removing 2 based on previous state  " << pwmPin << "Prev and current state" << prevState.A << prevState.B << currS.A << currS.B << std::endl;
-                    count= direction ? (count + 2) : (count - 2);
-
+                    encDirection = false;
                 }
             }
-            else if (currS == Halfway && currS != prevState)
+            else if (currS == Counter)
             {
-                if (prevState == Clockwise)
+                if (prevState == Rest)
                 {
-                    count++;
-                    direction=true;
+                    encDirection = false;
                 }
-                else if (prevState == Counter)
+                else
                 {
-                    count--;
-                    direction=false;
-                }
-                else{
-                    //std::cout << "We are missing ticks, adding or removing 2 based on previous state  " << pwmPin << "Prev and current state" << prevState.A << prevState.B << currS.A << currS.B << std::endl;
-                    count= direction ? (count + 2) : (count - 2);
-                }
-            }
-            else if (currS == Counter && currS != prevState)
-            {
-                if (prevState == Halfway)
-                {
-                    count++;
-                    direction=true;
-                }
-                else if (prevState == Rest)
-                {
-                    count--;
-                    direction=true;
-                }
-                else{
-                   // std::cout << "We are missing ticks, adding or removing 2 based on previous state  " << pwmPin << "Prev and current state" << prevState.A << prevState.B << currS.A << currS.B << std::endl;
-                    count= direction ? (count + 2) : (count - 2);
+                    encDirection = true;
                 }
             }
             else if (currS == Rest && currS != prevState)
             {
-                if (prevState == Counter)
+                if (encDirection)
                 {
                     count++;
-                    direction=true;
                 }
-                else if (prevState == Clockwise)
+                else
                 {
                     count--;
-                    direction=true;
-                }
-                else{
-                   // std::cout << "We are missing ticks, adding or removing 2 based on previous state  " << pwmPin << "Prev and current state" << prevState.A << prevState.B << currS.A << currS.B << std::endl;
-                    count= direction ? (count + 2) : (count - 2);
                 }
             }
             if (count != prevCount)
@@ -271,16 +226,14 @@ namespace rae_hw
                 {
                     std::lock_guard<std::mutex> lck(posMtx);
                     rads = count * encRatio;
-                    
+                  //  std::cout << "Speed rads: " << rads << std::endl;
 
                 }
                 prevCount = count;
             }
             prevState = currS;
-            usleep(5);
         }
     }
-
     float RaeMotor::getPos()
     {
         std::lock_guard<std::mutex> lck(posMtx);
@@ -297,7 +250,7 @@ namespace rae_hw
      // Calculate the duty cycle as a percentage of the maximum period
     float normSpeed = speed / velLim;  // Normalize speed to the range [-1.0, 1.0]
     float clSpeedNorm = std::clamp(normSpeed, -1.0f, 1.0f);
-    uint32_t normduty = static_cast<uint32_t>(std::abs(clSpeedNorm * 100000.0f));
+    uint32_t normduty = static_cast<uint32_t>(std::abs(clSpeedNorm * 120000.0f));
     return normduty;
 }
     void RaeMotor::motorSet(float speed)
@@ -317,7 +270,7 @@ namespace rae_hw
         enableFile << 1;  // Enable PWM
         enableFile.close();
         encoderThread = std::thread(&RaeMotor::readEncoders, this);
-        // calcSpeedThread = std::thread(&RaeMotor::calcSpeed, this);
+        calcSpeedThread = std::thread(&RaeMotor::calcSpeed, this);
         speedControlThread = std::thread(&RaeMotor::controlSpeed, this);
         if (motDirection)
         {
@@ -334,7 +287,7 @@ namespace rae_hw
         _running = false;
         disablePWM();
         encoderThread.join();
-        // calcSpeedThread.join();
+        calcSpeedThread.join();
         speedControlThread.join();
         phPin.set_value(0);
         phPin.release();

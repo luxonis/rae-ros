@@ -33,7 +33,6 @@ install(
   scripts/battery_status.py
   scripts/audio_spectrum.py
   scripts/sound_test.py
-  scripts/led_test.py
   DESTINATION lib/${PROJECT_NAME}
 )
 install(DIRECTORY launch config DESTINATION share/${PROJECT_NAME})

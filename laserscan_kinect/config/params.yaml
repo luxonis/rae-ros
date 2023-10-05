@@ -3,17 +3,17 @@ laserscan_kinect_front:
     # Frame id for the output laserscan.
     output_frame_id: base_link
     # Minimum sensor range (m).
-    range_min: 0.4
+    range_min: 0.1
     # Maximum sensor range (m).
     range_max: 10.0
     # Height of used part of depth img (px).
-    scan_height: 60
+    scan_height: 180
     # Row step in depth image processing (px).
-    depth_img_row_step: 10
+    depth_img_row_step: 20
     # If continously camera data update.
     cam_model_update: false
     # Offset in Y axis
-    vertical_offset: 310
+    vertical_offset: 180
 
     # Height of sensor optical center mount (m).
     sensor_mount_height: 0.8
@@ -33,17 +33,17 @@ laserscan_kinect_back:
     # Frame id for the output laserscan.
     output_frame_id: base_link_back
     # Minimum sensor range (m).
-    range_min: 0.4
+    range_min: 0.3
     # Maximum sensor range (m).
     range_max: 10.0
     # Height of used part of depth img (px).
-    scan_height: 60
+    scan_height: 180
     # Row step in depth image processing (px).
     depth_img_row_step: 10
     # If continously camera data update.
     cam_model_update: false
     # Offset in Y axis
-    vertical_offset: 310
+    vertical_offset: 180
 
     # Height of sensor optical center mount (m).
     sensor_mount_height: 0.8

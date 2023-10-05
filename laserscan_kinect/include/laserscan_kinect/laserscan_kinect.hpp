@@ -20,13 +20,19 @@
 #include <mutex>
 #include <list>
 #include <utility>
-
+#include <thread>
 #include "sensor_msgs/msg/image.hpp"
 #include "sensor_msgs/msg/laser_scan.hpp"
 #include "image_geometry/pinhole_camera_model.h"
 
 namespace laserscan_kinect
 {
+
+enum class FilterMode
+{
+  MEDIAN,
+  SMALLEST
+};
 
 class LaserScanKinect
 {
@@ -49,6 +55,12 @@ public:
   sensor_msgs::msg::LaserScan::SharedPtr getLaserScanMsg(
     const sensor_msgs::msg::Image::ConstSharedPtr & depth_msg,
     const sensor_msgs::msg::CameraInfo::ConstSharedPtr & info_msg);
+
+  /**
+   * @brief setFilterMode sets the filter mode used in conversion
+   * @param mode
+   */
+  void setFilterMode(std::string mode);
   /**
    * @brief setOutputFrame sets the frame to output laser scan
    * @param frame
@@ -127,8 +139,6 @@ public:
 
   void setThreadsNum(unsigned threads_num);
 
-  void setVerticalOffset(int offset) {image_vertical_offset_ = offset;}
-
   bool getPublishDbgImgEnable() const;
 
   sensor_msgs::msg::Image::SharedPtr getDbgImage() const;
@@ -153,6 +163,14 @@ protected:
   */
   void calcScanMsgIndexForImgCols(
     const sensor_msgs::msg::Image::ConstSharedPtr & depth_msg);
+
+  /**
+  * @brief getMedianValueInColumn finds median values in depth image columns
+    */
+  template<typename T>
+  float getMedianValueInColumn(
+    const sensor_msgs::msg::Image::ConstSharedPtr & depth_msg, int col);
+
   /**
   * @brief getSmallestValueInColumn finds smallest values in depth image columns
     */
@@ -185,7 +203,7 @@ private:
   bool tilt_compensation_enable_{false};  ///< Determines if tilt compensation feature is on
   bool publish_dbg_image_{false};        ///< Determines if debug image should be published
   unsigned threads_num_{1};                ///< Determines threads number used in image processing
-
+  FilterMode filter_mode_ = FilterMode::MEDIAN;  ///< Determines filter mode used in conversion
   /// Published scan message
   sensor_msgs::msg::LaserScan::SharedPtr scan_msg_;
 

@@ -23,6 +23,7 @@
 #include <list>
 #include <utility>
 #include <chrono>
+#include <iostream>
 
 #include "sensor_msgs/image_encodings.hpp"
 
@@ -37,7 +38,12 @@ sensor_msgs::msg::LaserScan::SharedPtr LaserScanKinect::getLaserScanMsg(
 {
   // Configure message if necessary
   if (!is_scan_msg_configured_ || cam_model_update_) {
-    cam_model_.fromCameraInfo(info_msg);
+    sensor_msgs::msg::CameraInfo::SharedPtr info_msg_non_const =
+      std::make_shared<sensor_msgs::msg::CameraInfo>(*info_msg);
+    info_msg_non_const->p[3] = 0.0;
+
+    cam_model_.fromCameraInfo(info_msg_non_const);
+    // std::cout << "Projection Matrix -> " << cam_model_.projectionMatrix() << std::endl;
 
     double min_angle, max_angle;
     using Point = cv::Point2d;
@@ -66,6 +72,10 @@ sensor_msgs::msg::LaserScan::SharedPtr LaserScanKinect::getLaserScanMsg(
     scan_msg_->angle_increment = (max_angle - min_angle) / (depth_msg->width - 1);
     scan_msg_->time_increment = 0.0;
     scan_msg_->scan_time = 1.0 / 30.0;
+    // std::cout << " Min angle -> " << min_angle << std::endl;
+    // std::cout << " Max angle -> " << max_angle << std::endl;
+    // std::cout << " Vertical FOV -> " << vertical_fov << std::endl;
+    // std::cout << " Angle increment -> " << scan_msg_->angle_increment << std::endl;
 
     // Set min and max range in preparing message
     if (tilt_compensation_enable_) {
@@ -88,7 +98,7 @@ sensor_msgs::msg::LaserScan::SharedPtr LaserScanKinect::getLaserScanMsg(
       throw std::runtime_error(ss.str());
     }
 
-    // image_vertical_offset_ = static_cast<int>(cam_cy - scan_height_ / 2.0);
+    image_vertical_offset_ = static_cast<int>(cam_cy - scan_height_ / 2.0);
 
     is_scan_msg_configured_ = true;
   }
@@ -116,9 +126,22 @@ sensor_msgs::msg::LaserScan::SharedPtr LaserScanKinect::getLaserScanMsg(
   if (publish_dbg_image_) {
     dbg_image_ = prepareDbgImage(depth_msg, min_dist_points_indices_);
   }
-  min_dist_points_indices_.clear();
+  // std::cout << "min_dist_points_indices_ size is " << min_dist_points_indices_.size() << std::endl;
+  if (!min_dist_points_indices_.empty()) {
+    min_dist_points_indices_.clear();
+  }
 
   return scan_msg_;
+}
+
+ void LaserScanKinect::setFilterMode(std::string mode) {
+    if (mode == "median") {
+      filter_mode_ = FilterMode::MEDIAN;
+    } else if (mode == "smallest") {
+      filter_mode_ = FilterMode::SMALLEST;
+    } else {
+      filter_mode_ = FilterMode::SMALLEST;
+    }
 }
 
 void LaserScanKinect::setMinRange(const float rmin)
@@ -261,9 +284,116 @@ void LaserScanKinect::calcScanMsgIndexForImgCols(
 }
 
 template<typename T>
+float LaserScanKinect::getMedianValueInColumn(
+  const sensor_msgs::msg::Image::ConstSharedPtr & depth_msg, int col)
+{
+  // TODO(Saching13): Do we need minimum ? May be median is better
+  // The original did min because they needed to come to the min that is not ground. 
+  // This makes sense when the sensor is very accurate. 
+  // But in our case we don't want noise. So we need to first eliminate noise. 
+  // How can we do this ?
+  // Do median to remove the noise in ROI
+  // Use confidence map to remove the noise in ROI
+  // So do some outlier removal 
+
+  // float depth_min = std::numeric_limits<float>::max();
+  // int depth_min_row = -1;
+
+  const int row_size = depth_msg->width;
+
+  const T * data = reinterpret_cast<const T *>(&depth_msg->data[0]);
+  std::vector<std::pair<int, float>> row_depth_vals;
+  row_depth_vals.reserve(scan_height_);
+  // Loop over pixels in column and calculate z_min in each column
+  for (size_t i = image_vertical_offset_; i < image_vertical_offset_ + scan_height_;
+    i += depth_img_row_step_)
+  {
+    float depth_raw = 0.0;
+    float depth_m = 0.0;
+
+    if (typeid(T) == typeid(uint16_t)) {
+      unsigned depth_raw_mm = static_cast<unsigned>(data[row_size * i + col]);
+      depth_raw = static_cast<float>(depth_raw_mm) / 1000.0;
+    } else if (typeid(T) == typeid(float)) {
+      depth_raw = static_cast<float>(data[row_size * i + col]);
+    }
+
+    if (tilt_compensation_enable_) {  // Check if tilt compensation is enabled
+      depth_m = depth_raw * tilt_compensation_factor_[i];
+    } else {
+      depth_m = depth_raw;
+    }
+
+    float curr_depth = 0.0;
+    size_t curr_depth_index = i;
+    // Check if point is in ranges and find min value in column
+    if (depth_raw >= range_min_ && depth_raw <= range_max_) {
+      if (ground_remove_enable_) {
+        if (depth_raw < dist_to_ground_corrected[i]) {
+
+          curr_depth = depth_m;
+          curr_depth_index = i;
+        }
+      } else {
+          curr_depth = depth_m;
+          curr_depth_index = i;
+      }
+    }
+
+    if (curr_depth > 0.0) {
+      row_depth_vals.push_back({static_cast<int>(curr_depth_index), curr_depth});
+    }
+  }
+
+  if (row_depth_vals.size() == 0) {
+    return 0.0;
+  }
+
+  auto m = row_depth_vals.begin() + row_depth_vals.size() / 2;
+  std::nth_element(row_depth_vals.begin(), m, row_depth_vals.end(), 
+            [](const std::pair<int, float>& a, const std::pair<int, int>& b) {
+                      return a.second < b.second;
+                  });
+  std::pair<int, float> depth_median = row_depth_vals[row_depth_vals.size() / 2];
+  {
+    // std::cout << "Depth median size -> " << row_depth_vals.size() << std::endl;
+    // std::cout << "depth_median row index: " << depth_median.first << std::endl;
+    // std::cout << "depth_median col: " << col << std::endl;
+    // std::cout << "Min dist_points size -> " << min_dist_points_indices_.size() << std::endl;
+    std::lock_guard<std::mutex> guard(points_indices_mutex_);
+    // min_dist_points_indices_.emplace_back(depth_median.first, col);
+    min_dist_points_indices_.push_back({depth_median.first, col});
+  }
+
+  // if (depth_median.first > 1300){
+  //   std::cout << "Depth median size -> " << row_depth_vals.size() << std::endl;
+  //   std::cout << "depth_median row index: " << depth_median.first << std::endl;
+  //   std::cout << "depth_median col: " << col << std::endl;
+  //   std::cout << ":Depth median value -> " << depth_median.second << std::endl;
+  // }
+
+  return depth_median.second;
+}
+
+
+template float LaserScanKinect::getMedianValueInColumn<uint16_t>(
+  const sensor_msgs::msg::Image::ConstSharedPtr &, int);
+template float LaserScanKinect::getMedianValueInColumn<float>(
+  const sensor_msgs::msg::Image::ConstSharedPtr &, int);
+
+template<typename T>
 float LaserScanKinect::getSmallestValueInColumn(
   const sensor_msgs::msg::Image::ConstSharedPtr & depth_msg, int col)
 {
+  // TODO(Saching13): Do we need minimum ? May be median is better
+  // The original did min because they needed to come to the min that is not ground. 
+  // This makes sense when the sensor is very accurate. 
+  // But in our case we don't want noise. So we need to first eleminate nose. 
+  // How can we do this ?
+  // Do median to remove the noise in ROI
+  // Use confidence map to remove the noise in ROI
+  // So do some outlier removal 
+
   float depth_min = std::numeric_limits<float>::max();
   int depth_min_row = -1;
 
@@ -322,8 +452,10 @@ template<typename T>
 void LaserScanKinect::convertDepthToPolarCoords(
   const sensor_msgs::msg::Image::ConstSharedPtr & depth_msg)
 {
+
   // Converts depth from specific column to polar coordinates
   auto convert_to_polar = [&](size_t col, float depth) -> float {
+      // TODO(Saching13): include the case if it is not zero
       if (depth != std::numeric_limits<T>::max()) {
         // Calculate x in XZ ( z = depth )
         float x = (col - cam_model_.cx()) * depth / cam_model_.fx();
@@ -337,8 +469,18 @@ void LaserScanKinect::convertDepthToPolarCoords(
   // Processing for specified columns from [left, right]
   auto process_columns = [&](size_t left, size_t right) {
       for (size_t i = left; i <= right; ++i) {
-        const auto depth_min = getSmallestValueInColumn<T>(depth_msg, i);
+
+        float depth_min = std::numeric_limits<float>::max();
+        if (filter_mode_ == FilterMode::MEDIAN){
+          depth_min = getMedianValueInColumn<T>(depth_msg, i);
+        }
+        else {
+          depth_min = getSmallestValueInColumn<T>(depth_msg, i);
+        }
         const auto range_in_polar = convert_to_polar(i, depth_min);
+
+        // std::cout << "scan_msg_index_[i] is -> " <<  scan_msg_index_[i] << std::endl;
+        // std::cout << "scan message range is -> " << scan_msg_->ranges.size() << std::endl;
         {
           std::lock_guard<std::mutex> guard(scan_msg_mutex_);
           scan_msg_->ranges[scan_msg_index_[i]] = range_in_polar;
@@ -406,10 +548,11 @@ sensor_msgs::msg::Image::SharedPtr LaserScanKinect::prepareDbgImage(
   }
 
   // Add ground points to debug image (as red points)
+  // std::cout << "min_dist_points_indices size is " << min_dist_points_indices.size() << std::endl;
   for (const auto & pt : min_dist_points_indices) {
     const auto row = pt.first;
     const auto col = pt.second;
-
+    // std::cout << "in dbg image Row : " << row << " Col: " << col << std::endl;
     if (row >= 0 && col >= 0) {
       rgb_data[row * img->width + col][0] = 255;
       rgb_data[row * img->width + col][1] = 0;
@@ -420,8 +563,8 @@ sensor_msgs::msg::Image::SharedPtr LaserScanKinect::prepareDbgImage(
   // Add line which is the border of the detection area
   std::list<std::pair<unsigned, unsigned>> pts;
   for (unsigned i = 0; i < img->width; ++i) {
-    const auto line1_row = image_vertical_offset_;
-    const auto line2_row = image_vertical_offset_ + scan_height_;
+    const auto line1_row = cam_model_.cy() - scan_height_ / 2.0;
+    const auto line2_row = cam_model_.cy() + scan_height_ / 2.0;
 
     if (line1_row >= 0 && line1_row < img->height && line2_row >= 0 && line2_row < img->height) {
       pts.push_back({line1_row, i});

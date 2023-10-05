@@ -41,7 +41,7 @@ LaserScanKinectNode::LaserScanKinectNode(const rclcpp::NodeOptions& options)
   declare_parameter("tilt_compensation_en", false);
   declare_parameter("publish_dbg_info", false);
   declare_parameter("threads_num", 1);
-  declare_parameter("vertical_offset", 0);
+  declare_parameter("filter_mode", "median");
 
   // Subscription to depth image topic
   publisher_ = this->create_publisher<sensor_msgs::msg::LaserScan>("scan", 10);
@@ -54,6 +54,7 @@ LaserScanKinectNode::LaserScanKinectNode(const rclcpp::NodeOptions& options)
   pub_dbg_img_ = image_transport::create_publisher(this, "debug_image");
 
   RCLCPP_INFO(this->get_logger(), "Node laserscan_kinect initialized.");
+  RCLCPP_INFO(this->get_logger(), "Node 2 initialized.");
 }
 
 LaserScanKinectNode::~LaserScanKinectNode()
@@ -65,6 +66,8 @@ void LaserScanKinectNode::depthCallback(
   const sensor_msgs::msg::Image::ConstSharedPtr & image,
   const sensor_msgs::msg::CameraInfo::ConstSharedPtr & info)
 {
+    // RCLCPP_INFO(get_logger(), "In depthCallback.");
+
   try {
     auto laserscan_msg = converter_.getLaserScanMsg(image, info);
     publisher_->publish(*laserscan_msg);
@@ -117,8 +120,15 @@ rcl_interfaces::msg::SetParametersResult LaserScanKinectNode::parametersCallback
         converter_.setPublishDbgImgEnable(parameter.as_bool());
       } else if (parameter.get_name() == "threads_num") {
         converter_.setThreadsNum(parameter.as_int());
-      } else if (parameter.get_name() == "vertical_offset") {
-        converter_.setVerticalOffset(parameter.as_int());
+      }
+      else if(parameter.get_name() == "filter_mode") {
+        std::string filter_mode = parameter.as_string();
+        converter_.setFilterMode(filter_mode);
+      }
+      else {
+        RCLCPP_ERROR(this->get_logger(), "Invalid parameter: %s", parameter.get_name().c_str());
+        result.successful = false;
+        result.reason = "Invalid parameter";
       }
     }
   } catch (const std::exception & e) {
