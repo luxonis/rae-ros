@@ -1,0 +1,22 @@
+/rae:
+  ros__parameters:
+    camera:
+      i_enable_imu: true
+      i_enable_ir: false
+      i_floodlight_brightness: 0
+      i_pipeline_type: depth
+      i_usb_speed: SUPER_PLUS
+      i_nn_type: none
+    left:
+      i_fps: 30.0
+      i_resolution: '800P'
+      i_sensor_img_orientation: AUTO
+    right:
+      i_fps: 30.0
+      i_resolution: '800P'
+    stereo:
+      i_align_depth: true
+      i_board_socket_id: 2
+      i_subpixel: true
+      i_publish_synced_rect_pair: true
+      i_right_rect_enable_feature_tracker: true
