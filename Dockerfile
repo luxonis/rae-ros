@@ -32,6 +32,7 @@ RUN --mount=type=secret,id=SPECTACULAR_AI_TOKEN if [ "$INCLUDE_SPECTACULARAI_ROS
       && ROS_DISTRO=$ROS_DISTRO DEPTHAI_WS=$UNDERLAY_WS GITHUB_RAE_PAT_TOKEN=$(cat /run/secrets/SPECTACULAR_AI_TOKEN) . ./scripts/download_and_build_static.sh \
       && apt-get -y remove unzip \
       && echo "if [ -f $(pwd)/spectacularai_ros2/install/setup.bash ]; then source $(pwd)/spectacularai_ros2/install/setup.bash; fi" >> $HOME/.bashrc; \
+      && echo "if [ -f $(pwd)/spectacularai_ros2/install/setup.bash ]; then source $(pwd)/spectacularai_ros2/install/setup.bash; fi" >> $HOME/.zshrc; \
   fi
 
 ENTRYPOINT [ "/ws/src/rae-ros/entrypoint.sh" ]

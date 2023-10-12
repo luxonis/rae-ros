@@ -14,9 +14,7 @@ def launch_setup(context, *args, **kwargs):
 
     params_file = LaunchConfiguration("params_file")
     name = LaunchConfiguration('name').perform(context)
-    parent_frame = LaunchConfiguration('parent_frame',  default = 'oak-d-base-frame')
-    urdf_launch_dir = os.path.join(get_package_share_directory('depthai_descriptions'), 'launch')
-    depthai_prefix = get_package_share_directory("depthai_ros_driver")
+    parent_frame = LaunchConfiguration('parent_frame',  default = 'base_footprint')
     return [
             Node(
                 condition=IfCondition(LaunchConfiguration("use_rviz").perform(context)),
@@ -28,12 +26,9 @@ def launch_setup(context, *args, **kwargs):
             ),
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
-                os.path.join(urdf_launch_dir, 'urdf_launch.py')),
-            launch_arguments={'tf_prefix': name,
-                              'base_frame': name,
-                              'parent_frame': parent_frame,
-                              'use_composition': 'true',
-                              'use_base_descr': 'true'}.items()),
+                os.path.join(get_package_share_directory('rae_description'), 'launch', 'rsp.launch.py')),
+            launch_arguments={'sim': 'false'}.items()
+        ),
 
         ComposableNodeContainer(
             name=name+"_container",
@@ -80,12 +75,13 @@ def launch_setup(context, *args, **kwargs):
 
 def generate_launch_description():
     spectacular_prefix = get_package_share_directory("spectacularai_ros2")
+    rae_camera_prefix = get_package_share_directory("rae_camera")
     declared_arguments = [
         DeclareLaunchArgument("name", default_value="rae"),
         DeclareLaunchArgument("use_rviz", default_value='false'),
         DeclareLaunchArgument("recording_folder", default_value=""),
-        DeclareLaunchArgument("parent_frame", default_value="oak-d-base-frame"),
-        DeclareLaunchArgument("params_file", default_value=os.path.join(spectacular_prefix, 'launch', 'oak_d.yaml')),
+        DeclareLaunchArgument("parent_frame", default_value="base_footprint"),
+        DeclareLaunchArgument("params_file", default_value=os.path.join(rae_camera_prefix, 'config', 'spectacular.yaml')),
         DeclareLaunchArgument("rviz_config", default_value=os.path.join(spectacular_prefix, 'launch', 'oak_d.rviz')),
     ]
     return LaunchDescription(
