@@ -30,5 +30,6 @@
       i_align_depth: true
       i_board_socket_id: 2
       i_subpixel: true
-      i_publish_synced_rect_pair: true
+      i_publish_right_rect: true
+      i_publish_left_rect: true
       i_right_rect_enable_feature_tracker: true
