@@ -14,7 +14,6 @@ def launch_setup(context, *args, **kwargs):
 
     params_file = LaunchConfiguration("params_file")
     name = LaunchConfiguration('name').perform(context)
-    parent_frame = LaunchConfiguration('parent_frame',  default = 'base_footprint')
     return [
             Node(
                 condition=IfCondition(LaunchConfiguration("use_rviz").perform(context)),
@@ -53,7 +52,7 @@ def launch_setup(context, *args, **kwargs):
                     package='spectacularai_ros2',
                     plugin='spectacularAI::ros2::Node',
                     parameters=[
-                        {"imu_frame_id": name+"_imu_frame"},
+                        {"imu_frame_id": "base_footprint"},
                         {"world_frame_id": "world"},
                         {"cam0_frame_id": name+"_left_camera_optical_frame"},
                         {"cam1_frame_id": name+"_right_camera_optical_frame"},
@@ -89,7 +88,7 @@ def generate_launch_description():
         DeclareLaunchArgument("recording_folder", default_value=""),
         DeclareLaunchArgument("parent_frame", default_value="base_footprint"),
         DeclareLaunchArgument("params_file", default_value=os.path.join(rae_camera_prefix, 'config', 'spectacular.yaml')),
-        DeclareLaunchArgument("rviz_config", default_value=os.path.join(spectacular_prefix, 'launch', 'oak_d.rviz')),
+        DeclareLaunchArgument("rviz_config", default_value=os.path.join(rae_camera_prefix, 'config', 'spectacular.rviz')),
     ]
     return LaunchDescription(
         declared_arguments + [OpaqueFunction(function=launch_setup)]
