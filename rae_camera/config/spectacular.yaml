@@ -18,7 +18,7 @@
       i_fps: 30.0
       i_sensor_img_orientation: AUTO
     right:
-      i_publish_topic: true
+      i_publish_topic: false
       i_output_isp: false
       i_board_socket_id: 2
       i_resolution: '800P'
