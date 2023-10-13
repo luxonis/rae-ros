@@ -43,6 +43,13 @@ def launch_setup(context, *args, **kwargs):
                     parameters=[params_file],
                 ),
                 ComposableNode(
+                        package="depthai_filters",
+                        name="feature_overlay_rgb",
+                        plugin="depthai_filters::FeatureTrackerOverlay",
+                        remappings=[('rgb/preview/image_raw', name+'/right/image_rect'),
+                                    ('feature_tracker/tracked_features', name+'/right_rect_feature_tracker/tracked_features')]
+                    ),
+                ComposableNode(
                     package='spectacularai_ros2',
                     plugin='spectacularAI::ros2::Node',
                     parameters=[
