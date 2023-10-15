@@ -20,7 +20,7 @@ def launch_setup(context, *args, **kwargs):
         'rae_hw'), 'config', 'controller.yaml')
     run_container = LaunchConfiguration('run_container', default='true')
     enable_battery_status = LaunchConfiguration('enable_battery_status', default='true')
-    enable_localization = LaunchConfiguration('enable_localization', default='false')
+    enable_localization = LaunchConfiguration('enable_localization', default='true')
     return [
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
@@ -35,6 +35,22 @@ def launch_setup(context, *args, **kwargs):
             output='screen',
             parameters=[os.path.join(get_package_share_directory(
                 'rae_hw'), 'config', 'ekf.yaml')],
+        ),
+        Node(
+                package='imu_complementary_filter',
+                executable='complementary_filter_node',
+                name='complementary_filter_gain_node',
+                output='screen',
+                parameters=[
+                    {'do_bias_estimation': True},
+                    {'do_adaptive_gain': True},
+                    {'use_mag': False},
+                    {'gain_acc': 0.01},
+                    {'gain_mag': 0.01},
+                ],
+                remappings=[
+                    ('/imu/data_raw', '/rae/imu/data'),
+              ]
         ),
         Node(
             package='controller_manager',
@@ -73,7 +89,7 @@ def generate_launch_description():
         DeclareLaunchArgument('name', default_value='rae'),
         DeclareLaunchArgument('run_container', default_value='true'),
         DeclareLaunchArgument('enable_battery_status', default_value='true'),
-        DeclareLaunchArgument('enable_localization', default_value='false')
+        DeclareLaunchArgument('enable_localization', default_value='true')
     ]
 
     return LaunchDescription(declared_arguments + [OpaqueFunction(function=launch_setup)])
