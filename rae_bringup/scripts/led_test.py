@@ -44,7 +44,7 @@ class CarDemoNode(Node):
         led_msg = LEDControl()
         led_msg.header.stamp = self.get_clock().now().to_msg()
         led_msg.data = [ColorRGBA(r=0.0, g=0.0, b=0.0, a=0.0)]*40
-        for i in range(40):
+        for i in range(39):
             led_msg.single_led_n = 0
             led_msg.control_type = 2 
             if i < 8:

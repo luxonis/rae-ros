@@ -56,8 +56,8 @@ namespace rae_hw
 
     float RaeMotor::calcSpeed()
     {
-        // while (_running)
-        // {
+    
+        // Get current position and time different and caluclate the speed
             auto currTime = std::chrono::high_resolution_clock::now();
             float currPos = getPos();
             float timeDiff = std::chrono::duration<float>(currTime - prevVelTime).count();
@@ -67,8 +67,6 @@ namespace rae_hw
             }
             prevVelTime = currTime;
             prevPos = currPos;
-            // std::this_thread::sleep_for(10ms);
-        //}
             return currentSpeed;
     }
 
