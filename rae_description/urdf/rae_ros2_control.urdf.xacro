@@ -15,18 +15,18 @@
       <param name="enLB">43</param>
       <param name="enRA">46</param>
       <param name="enRB">47</param>
-      <param name="encTicsPerRevL">187</param>
-      <param name="encTicsPerRevR">187</param>
+      <param name="encTicsPerRevL">756</param>
+      <param name="encTicsPerRevR">756</param>
       <param name="maxVelL">32</param>
       <param name="maxVelR">32</param>
       <param name="closed_loopL">1</param>
-      <param name="PID_P_L">0.5</param>
-      <param name="PID_I_L">0.0</param>
-      <param name="PID_D_L">0.0</param>
+      <param name="PID_P_L">0.2</param>
+      <param name="PID_I_L">0.1</param>
+      <param name="PID_D_L">0.0005</param>
       <param name="closed_loopR">1</param>
-      <param name="PID_P_R">0.5</param>
-      <param name="PID_I_R">0.0</param>
-      <param name="PID_D_R">0.0</param>
+      <param name="PID_P_R">0.2</param>
+      <param name="PID_I_R">0.1</param>
+      <param name="PID_D_R">0.0005</param>
 
       <param name="loop_rate">30</param>
       <param name="chip_name">gpiochip0</param>

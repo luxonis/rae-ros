@@ -9,20 +9,20 @@ using namespace std::chrono_literals;
 
 int main(int argc, char *argv[]){
     float duration = 5.0;
-    int encRatioL = 187;
-    int encRatioR = 187;
+    int encRatioL = 756;
+    int encRatioR = 756;
 
     if(argc == 2 && std::strcmp( argv[1], "-h" ) == 0 ){
         std::cout << "Help:\n";
         std::cout << "Positional arguments only for now.\n";
         std::cout << "ros2 run rae_hw test_encoders duration encRatioL encRatioR.\n";
-        std::cout << "With default arguments ros2 run rae_hw test_encoders 5.0 187 187" << std::endl;
+        std::cout << "With default arguments ros2 run rae_hw test_encoders 5.0 756 756" << std::endl;
         return 0;
     }
     if(argc > 1 && argc < 4){
         std::cout << "Please input all arguments in following form: \n";
         std::cout << "ros2 run rae_hw test_encoders duration encRatioL encRatioR.\n";
-        std::cout << "ros2 run rae_hw test_encoders 5.0 187 187" << std::endl;
+        std::cout << "ros2 run rae_hw test_encoders 5.0 756 756" << std::endl;
     }
     else if(argc == 4){
         duration = atof(argv[1]);
@@ -45,8 +45,8 @@ int main(int argc, char *argv[]){
     auto prevTime = startTime;
     bool timePassed = false;
     while(!timePassed){
-        motorL->setPWM(150000, 100000);
-        motorR->setPWM(150000, 100000);
+        motorL->setPWM(100000);
+        motorR->setPWM(100000);
         auto currTime = std::chrono::high_resolution_clock::now();
         float currLeftPos = motorL->getPos();
         float currRightPos = motorR->getPos();
