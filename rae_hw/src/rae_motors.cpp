@@ -98,7 +98,6 @@ namespace rae_hw
                 dir = (outSpeed >= 0) ^ reversePhPinLogic_;
                 prevErrorTime = currTime;
                 prevError = error;
-                //std::cout << "CLS; MOTOR: " << pwmPin << "SPEED: " << outSpeed << "DC: "<< dutyCycle << std::endl;
                 i_param_counter++;
             }
             else {
@@ -148,9 +147,6 @@ namespace rae_hw
             }
         }
 
-        // Print the speed information
-       // std::cout << "Target Speed: " << targetSpeed << std::endl;
-       // std::cout << "Duty Cycle: " << dutyCycle << std::endl;
           if (dutyCycleFile.is_open())
         {
             dutyCycleFile << dutyCycle;
@@ -208,7 +204,6 @@ namespace rae_hw
                     direction=false;
                 }
                 else{
-                   // std::cout << "We are missing ticks, adding or removing 2 based on previous state  " << pwmPin << "Prev and current state" << prevState.A << prevState.B << currS.A << currS.B << std::endl;
                     count= direction ? (count + 2) : (count - 2);
 
                 }
@@ -226,7 +221,6 @@ namespace rae_hw
                     direction=false;
                 }
                 else{
-                    //std::cout << "We are missing ticks, adding or removing 2 based on previous state  " << pwmPin << "Prev and current state" << prevState.A << prevState.B << currS.A << currS.B << std::endl;
                     count= direction ? (count + 2) : (count - 2);
                 }
             }
@@ -243,7 +237,6 @@ namespace rae_hw
                     direction=true;
                 }
                 else{
-                   // std::cout << "We are missing ticks, adding or removing 2 based on previous state  " << pwmPin << "Prev and current state" << prevState.A << prevState.B << currS.A << currS.B << std::endl;
                     count= direction ? (count + 2) : (count - 2);
                 }
             }
@@ -260,7 +253,6 @@ namespace rae_hw
                     direction=true;
                 }
                 else{
-                   // std::cout << "We are missing ticks, adding or removing 2 based on previous state  " << pwmPin << "Prev and current state" << prevState.A << prevState.B << currS.A << currS.B << std::endl;
                     count= direction ? (count + 2) : (count - 2);
                 }
             }
@@ -315,7 +307,6 @@ namespace rae_hw
         enableFile << 1;  // Enable PWM
         enableFile.close();
         encoderThread = std::thread(&RaeMotor::readEncoders, this);
-        // calcSpeedThread = std::thread(&RaeMotor::calcSpeed, this);
         speedControlThread = std::thread(&RaeMotor::controlSpeed, this);
         if (motDirection)
         {
@@ -332,7 +323,6 @@ namespace rae_hw
         _running = false;
         disablePWM();
         encoderThread.join();
-        // calcSpeedThread.join();
         speedControlThread.join();
         phPin.set_value(0);
         phPin.release();
