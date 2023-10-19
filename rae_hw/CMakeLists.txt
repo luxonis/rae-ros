@@ -58,6 +58,13 @@ install(
   LIBRARY DESTINATION lib
 )
 
+add_executable(mic_node src/mic_node.cpp)
+ament_target_dependencies(mic_node rclcpp audio_msgs)
+target_link_libraries(mic_node ${PROJECT_NAME})
+
+add_executable(speakers_node src/speakers_node.cpp)
+ament_target_dependencies(speakers_node rclcpp audio_msgs)
+target_link_libraries(speakers_node ${PROJECT_NAME})
 
 add_executable(test_motors test/test_motors.cpp src/rae_motors.cpp)
 target_link_libraries(test_motors ${GPIOD_LIBRARY})
@@ -76,7 +83,7 @@ ament_target_dependencies(test_speed rclcpp geometry_msgs)
 
 install(TARGETS
 
-  test_motors test_encoders test_max_speed test_speed
+  test_motors test_encoders test_max_speed test_speed mic_node speakers_node
 
   DESTINATION lib/${PROJECT_NAME})
 
