@@ -10,13 +10,14 @@
 #include <sys/ioctl.h>
 #include <linux/ioctl.h>
 #include <sys/stat.h>
+#include <map>
 #include <linux/types.h>
 #include "rae_hw/peripherals/spidev.h"
 #include "rclcpp/rclcpp.hpp"
 #include "rae_msgs/msg/led_control.hpp"
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
-#define WS2812B_NUM_LEDS 40
+#define WS2812B_NUM_LEDS 39
 #define WS2812B_RESET_PULSE 60
 #define WS2812B_BUFFER_SIZE (WS2812B_NUM_LEDS * 24 + WS2812B_RESET_PULSE)
 
@@ -29,6 +30,7 @@ namespace rae_hw
         ~LEDNode(); 
 
     private:
+        std::map<uint16_t, uint16_t> logicalToPhysicalMapping;
         void transmitSPI();
         void fillBuffer(uint8_t color);
         uint8_t convertColor(float num);

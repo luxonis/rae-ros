@@ -68,7 +68,7 @@ namespace rae_hw
         void run();
         /// @brief Stops motors, joins threads and frees GPIO pins.
         void stop();
-        void setPWM(int period, int duty_cycle);
+        void setPWM(int duty_cycle);
         void disablePWM();
 
     private:
@@ -84,7 +84,7 @@ namespace rae_hw
         /// @param speed in rads/s
         /// @return PWM target in range [0:1000]us
         uint32_t speedToPWM(float speed);
-        void calcSpeed();
+        float calcSpeed();
         void controlSpeed();
         volatile uint32_t dutyTarget = 0;
         volatile uint32_t dutyTrue = 0;
