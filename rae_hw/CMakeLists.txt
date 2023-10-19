@@ -83,7 +83,7 @@ ament_target_dependencies(test_speed rclcpp geometry_msgs)
 
 install(TARGETS
 
-  test_motors test_encoders test_max_speed test_speed mic_node
+  test_motors test_encoders test_max_speed test_speed mic_node speakers_node
 
   DESTINATION lib/${PROJECT_NAME})
 
