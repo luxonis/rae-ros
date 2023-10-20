@@ -44,8 +44,9 @@ def launch_setup(context, *args, **kwargs):
                 parameters=[
                     {'do_bias_estimation': True},
                     {'do_adaptive_gain': True},
+                    {'orientation_stddev': 0.001},
                     {'use_mag': False},
-                    {'gain_acc': 0.01},
+                    {'gain_acc': 0.04},
                     {'gain_mag': 0.01},
                 ],
                 remappings=[
