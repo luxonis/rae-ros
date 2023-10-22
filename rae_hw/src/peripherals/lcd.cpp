@@ -15,6 +15,10 @@ namespace rae_hw
     LCDNode::LCDNode(const rclcpp::NodeOptions &options)
         : Node("lcd_node", options)
     {
+        std::string logo_key = "default_logo_path";
+        declare_parameter<std::string>(logo_key);
+        default_logo_path = get_parameter(logo_key).as_string();
+
         // Open the framebuffer device
         fbfd = open("/dev/fb0", O_RDWR);
         if (fbfd == -1)
@@ -52,16 +56,22 @@ namespace rae_hw
             "lcd", 10, std::bind(&LCDNode::image_callback, this, std::placeholders::_1));
         RCLCPP_INFO(this->get_logger(), "LCD node running!");
     }
+
     LCDNode::~LCDNode()
     {
+        // Load default image
+        cv::Mat default_img = cv::imread(default_logo_path);
+        if (!default_img.empty())
+        {
+            display_image(default_img);
+        }
+
         munmap(fbp, screensize);
         close(fbfd);
     }
 
-    void LCDNode::image_callback(const sensor_msgs::msg::Image::SharedPtr msg)
+    void LCDNode::display_image(const cv::Mat& img)
     {
-        // Convert ROS image message to OpenCV image
-        cv::Mat img = cv_bridge::toCvCopy(msg, "bgr8")->image;
         // Resize to match the screen dimensions
         cv::resize(img, img, cv::Size(vinfo.xres, vinfo.yres));
         // Iterate over the image pixels
@@ -77,8 +87,15 @@ namespace rae_hw
                 *((cv::Vec3b *)(fbp + location)) = pixel;
             }
         }
-    };
+    }
 
+    void LCDNode::image_callback(const sensor_msgs::msg::Image::SharedPtr msg)
+    {
+        // Convert ROS image message to OpenCV image
+        cv::Mat img = cv_bridge::toCvCopy(msg, "bgr8")->image;
+        display_image(img);
+    };
 }
+
 #include "rclcpp_components/register_node_macro.hpp"
 RCLCPP_COMPONENTS_REGISTER_NODE(rae_hw::LCDNode);

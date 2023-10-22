@@ -34,6 +34,9 @@ def launch_setup(context, *args, **kwargs):
                     name='lcd_node',
                     package='rae_hw',
                     plugin='rae_hw::LCDNode',
+                    parameters=[{
+                        'default_logo_path': LaunchConfiguration('default_logo_path')
+                    }],
                 ),
                 ComposableNode(
                     name='led_node',
@@ -62,6 +65,7 @@ def generate_launch_description():
         DeclareLaunchArgument('name', default_value='rae'),
         DeclareLaunchArgument('run_container', default_value='true'),
         DeclareLaunchArgument('enable_battery_status', default_value='true'),
+        DeclareLaunchArgument('default_logo_path', default_value='/usr/share/rae-logo-white.jpg'),
     ]
 
     return LaunchDescription(
