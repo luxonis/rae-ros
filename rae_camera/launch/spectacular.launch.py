@@ -11,24 +11,22 @@ from launch_ros.descriptions import ComposableNode
 
 
 def launch_setup(context, *args, **kwargs):
-
     params_file = LaunchConfiguration("params_file")
     name = LaunchConfiguration('name').perform(context)
     return [
-            Node(
-                condition=IfCondition(LaunchConfiguration("use_rviz").perform(context)),
-                package="rviz2",
-                executable="rviz2",
-                name="rviz2",
-                output="log",
-                arguments=["-d", LaunchConfiguration("rviz_config")],
-            ),
+        Node(
+            condition=IfCondition(LaunchConfiguration("use_rviz").perform(context)),
+            package="rviz2",
+            executable="rviz2",
+            name="rviz2",
+            output="log",
+            arguments=["-d", LaunchConfiguration("rviz_config")],
+        ),
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
                 os.path.join(get_package_share_directory('rae_description'), 'launch', 'rsp.launch.py')),
             launch_arguments={'sim': 'false'}.items()
         ),
-
         ComposableNodeContainer(
             name=name+"_container",
             namespace="",
@@ -52,15 +50,18 @@ def launch_setup(context, *args, **kwargs):
                     package='spectacularai_ros2',
                     plugin='spectacularAI::ros2::Node',
                     parameters=[
-                        {"imu_frame_id": "base_footprint"},
-                        {"world_frame_id": "world"},
-                        {"cam0_frame_id": name+"_left_camera_optical_frame"},
-                        {"cam1_frame_id": name+"_right_camera_optical_frame"},
+                        # Camera extrinsics
+                        {"cam0_optical_frame_id": name + "_right_camera_optical_frame"},
+                        {"cam1_optical_frame_id": name + "_left_camera_optical_frame"},
+                        {"base_link_frame_id": LaunchConfiguration('parent_frame').perform(context)},
                         {"depth_scale": 1.0/1000.0}, # Depth map values are multiplied with this to get distance in meters
                         {"camera_input_type": "stereo_depth_features"},
                         {"recording_folder": LaunchConfiguration('recording_folder').perform(context)},
                         {"enable_mapping": True},
                         {"enable_occupancy_grid": True},
+                        {"output_on_imu_samples": True},
+                        {"separate_odom_tf": True},
+                        {"device_model": "RAE"} # Use stored imuToCamera from spectacularai_ros project
                     ],
                     remappings=[
                         ('input/imu', name + '/imu/data'),
@@ -80,7 +81,6 @@ def launch_setup(context, *args, **kwargs):
 
 
 def generate_launch_description():
-    spectacular_prefix = get_package_share_directory("spectacularai_ros2")
     rae_camera_prefix = get_package_share_directory("rae_camera")
     declared_arguments = [
         DeclareLaunchArgument("name", default_value="rae"),
