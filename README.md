@@ -42,18 +42,23 @@ Example launch with an argument - `ros2 launch rae_bringup bringup.launch.py ena
 
 Every shipped rae has already been factory calibrated, so this step is rarely needed. Besides the section below, [Calibration documentation](https://docs.luxonis.com/projects/hardware/en/latest/pages/guides/calibration/) is also a good source of information.
 
-Within the docker image, you can execute:
+With PC conecteted to RAE via SSH (RH agent use depthai_gate):
 
 ```bash
-apt update
-apt install neovim libgl1-mesa-glx python3-pip
-git clone --branch rae-calib https://github.com/luxonis/depthai.git
+robothub-ctl stop
+```
+On your PC:
+```
+git clone --branch rvc3_calibration_rae https://github.com/luxonis/depthai.git
 cd depthai/
 python3 install_requirements.py
 # To calibrate rae's front cameras - for back cameras we would change the board name to "RAE-D-E"
-python3 calibrate.py -s <size> -db -nx <squares_X> -ny <squares_Y> -brd RAE-A-B-C -cd 1 -c 3
+python3 calibrate.py -s <size>  -brd RAE-A-B-C -cd 1 -c 3
 ```
-
+Some tips:
+1. Try to fill stereo pairs matrices (color camera preview can be out of FOV, but not the Stereo pairs)
+2. Put charuco on a flat surface (bigger board it will be better)
+3. When you take a frame is a better practice to freeze board (motion are not ok)
 #### Some hardware notes:
 
 ##### Peripherals:
