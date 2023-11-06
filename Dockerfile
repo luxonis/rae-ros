@@ -6,12 +6,33 @@ ARG BUILD_TYPE="RelWithDebInfo"
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
-   && apt-get -y install --no-install-recommends software-properties-common git libusb-1.0-0-dev wget zsh python3-colcon-common-extensions python3-rosdep build-essential neovim tmux htop net-tools iputils-ping gpiod gstreamer1.0-plugins-bad gstreamer1.0-alsa libasound2-dev busybox
+   && apt-get -y install --no-install-recommends \
+    software-properties-common \
+    git \
+    nano \
+    libusb-1.0-0-dev \
+    wget \
+    zsh \
+    python3-colcon-common-extensions \
+    python3-rosdep \
+    build-essential \
+    neovim \
+    tmux \
+    htop \
+    net-tools \
+    iputils-ping \
+    gpiod \
+    gstreamer1.0-plugins-bad \
+    gstreamer1.0-alsa \
+    libasound2-dev \
+    busybox
 
 ENV WS=/ws
 RUN mkdir -p $WS/src
 COPY ./ .$WS/src/rae-ros
 
+RUN cp -R .$WS/src/rae-ros/assets/. /usr/share
+RUN rm -rf .$WS/src/rae-ros/assets
 RUN rm -rf .$WS/src/rae-ros/rae_gazebo
 
 RUN cd  .$WS/ && apt update && rosdep update && rosdep install --from-paths src --ignore-src  -y --skip-keys depthai --skip-keys depthai_bridge --skip-keys depthai_ros_driver --skip-keys audio_msgs --skip-keys laserscan_kinect --skip-keys ira_laser_tools

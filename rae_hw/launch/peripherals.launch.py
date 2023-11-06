@@ -34,24 +34,24 @@ def launch_setup(context, *args, **kwargs):
                     name='lcd_node',
                     package='rae_hw',
                     plugin='rae_hw::LCDNode',
+                    parameters=[{
+                        'default_logo_path': LaunchConfiguration('default_logo_path')
+                    }],
                 ),
                 ComposableNode(
                     name='led_node',
                     package='rae_hw',
                     plugin='rae_hw::LEDNode',
-                ),
-                ComposableNode(
-                    name='mic_node',
-                    package='rae_hw',
-                    plugin='rae_hw::MicNode',
-                ),
-                ComposableNode(
-                    name='motors_node',
-                    package='rae_hw',
-                    plugin='rae_hw::SpeakersNode',
-                ),
+                )
             ]),
-
+        Node(
+            package='rae_hw',
+            executable='mic_node'
+        ),
+        Node(
+            package='rae_hw',
+            executable='speakers_node'
+        ),
         Node(
             package='rae_bringup',
             executable='battery_status.py',
@@ -65,6 +65,7 @@ def generate_launch_description():
         DeclareLaunchArgument('name', default_value='rae'),
         DeclareLaunchArgument('run_container', default_value='true'),
         DeclareLaunchArgument('enable_battery_status', default_value='true'),
+        DeclareLaunchArgument('default_logo_path', default_value='/usr/share/rae-logo-white.jpg'),
     ]
 
     return LaunchDescription(

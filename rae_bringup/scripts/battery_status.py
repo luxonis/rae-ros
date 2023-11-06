@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 import rclpy
+import signal
+import sys
 from rclpy.node import Node
-from rclpy.time import Time
 
 from sensor_msgs.msg import BatteryState, Image
 from std_msgs.msg import ColorRGBA
@@ -95,7 +96,7 @@ class BatteryStatusNode(Node):
         led_msg = LEDControl()
         led_msg.header.stamp = self.get_clock().now().to_msg()
         led_msg.data = [ColorRGBA(r=0.0, g=0.0, b=0.0, a=0.0)]*40
-        for i in range(40):
+        for i in range(39):
             led_msg.single_led_n = 0
             led_msg.control_type = 2  # assuming 0 means "set color"
 
@@ -106,16 +107,20 @@ class BatteryStatusNode(Node):
         self.publisher_led.publish(led_msg)
 
 
+def signal_handler(node):
+    def handle(sig, frame):
+        if rclpy.ok():
+            node.destroy_node()
+            rclpy.shutdown()
+        sys.exit(0)
+    return handle
+
+
 def main(args=None):
     rclpy.init(args=args)
-
     battery_status_node = BatteryStatusNode()
-
+    signal.signal(signal.SIGINT, signal_handler(battery_status_node))
     rclpy.spin(battery_status_node)
-
-    # Destroy the node explicitly
-    battery_status_node.destroy_node()
-    rclpy.shutdown()
 
 
 if __name__ == '__main__':

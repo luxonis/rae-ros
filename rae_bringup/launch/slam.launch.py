@@ -78,7 +78,7 @@ def generate_launch_description():
         DeclareLaunchArgument('sim`', default_value='False'),
         DeclareLaunchArgument('use_rviz', default_value='False'),
         DeclareLaunchArgument('rviz_config', default_value=rviz_config),
-        DeclareLaunchArgument('params_file', default_value=os.path.join(bringup_prefix, 'config', 'slam_param.yaml')),
+        DeclareLaunchArgument('slam_params_file', default_value=os.path.join(bringup_prefix, 'config', 'slam_param.yaml')),
     ]
 
     return LaunchDescription(

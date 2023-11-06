@@ -17,7 +17,7 @@
 #include "rae_msgs/msg/led_control.hpp"
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
-#define WS2812B_NUM_LEDS 40
+#define WS2812B_NUM_LEDS 39
 #define WS2812B_RESET_PULSE 60
 #define WS2812B_BUFFER_SIZE (WS2812B_NUM_LEDS * 24 + WS2812B_RESET_PULSE)
 

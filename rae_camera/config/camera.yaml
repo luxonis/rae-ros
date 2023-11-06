@@ -19,6 +19,15 @@
       i_nn_config_path: /workspaces/rae_ws/src/rae-ros/rae_camera/config/yolo.json
       i_disable_resize: true
       i_enable_passthrough: true
+    imu:
+      i_batch_report_threshold: 5
+      i_max_batch_reports: 5
+      i_enable_rotation: true
+      i_message_type: IMU_WITH_MAG_SPLIT
+      i_sync_method: COPY
+      i_gyro_freq: 100
+      i_acc_freq: 100
+      i_rot_freq: 100
     rgb:
       i_output_isp: false
       i_set_isp_scale: false
