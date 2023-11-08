@@ -1,49 +1,59 @@
 ARG ROS_DISTRO=humble
-FROM luxonis/depthai-ros-rae AS builder
-ARG SIM=0
-ARG CORE_NUM=1
+
+FROM alpine/git:latest AS rae-ros-downloader
+RUN git clone --branch humble https://github.com/luxonis/rae-ros
+
+FROM alpine/git:latest AS ros-gst-bridge-downloader
+RUN git clone https://github.com/BrettRD/ros-gst-bridge && \
+    cd ros-gst-bridge && \
+    git checkout 23980326ce8c0fefc0d5d590c2bfc9d308f35a73  # Pin latest master version at the time
+
+FROM ros:${ROS_DISTRO}-ros-core
+
+ARG CORE_NUM=10
 ARG BUILD_TYPE="RelWithDebInfo"
 
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update \
-   && apt-get -y install --no-install-recommends \
+
+RUN apt-get update && apt-get -y install --no-install-recommends \
     software-properties-common \
-    git \
-    nano \
     libusb-1.0-0-dev \
-    wget \
-    zsh \
     python3-colcon-common-extensions \
     python3-rosdep \
     build-essential \
-    neovim \
-    tmux \
-    htop \
-    net-tools \
-    iputils-ping \
     gpiod \
-    gstreamer1.0-plugins-bad \
-    gstreamer1.0-alsa \
+    python3-pip \
     libasound2-dev \
-    busybox
+    gstreamer1.0-plugins-bad
+
 
 ENV WS=/ws
-RUN mkdir -p $WS/src
-COPY ./ .$WS/src/rae-ros
 
-RUN cp -R .$WS/src/rae-ros/assets/. /usr/share
-RUN rm -rf .$WS/src/rae-ros/assets
-RUN rm -rf .$WS/src/rae-ros/rae_gazebo
+COPY ./entrypoint.sh .$WS/src/rae/entrypoint.sh
+RUN mkdir -p $WS/src/rae
 
-RUN cd  .$WS/ && apt update && rosdep update && rosdep install --from-paths src --ignore-src  -y --skip-keys depthai --skip-keys depthai_bridge --skip-keys depthai_ros_driver --skip-keys audio_msgs --skip-keys laserscan_kinect --skip-keys ira_laser_tools
+COPY --from=rae-ros-downloader /git/rae-ros/rae_hw $WS/src/rae/rae_hw
+COPY --from=rae-ros-downloader /git/rae-ros/rae_description $WS/src/rae/rae_description
+COPY --from=rae-ros-downloader /git/rae-ros/rae_msgs $WS/src/rae/rae_msgs
 
-RUN cd .$WS/ && . /opt/ros/${ROS_DISTRO}/setup.sh && . $UNDERLAY_WS/install/setup.sh && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
+RUN rosdep init
 
-RUN echo "if [ -f ${WS}/install/setup.zsh ]; then source ${WS}/install/setup.zsh; fi" >> $HOME/.zshrc
-RUN echo 'eval "$(register-python-argcomplete3 ros2)"' >> $HOME/.zshrc
-RUN echo 'eval "$(register-python-argcomplete3 colcon)"' >> $HOME/.zshrc
+COPY --from=ros-gst-bridge-downloader /git/ros-gst-bridge $WS/src/ros-gst-bridge
+
+RUN apt update && rosdep update
+
+RUN cd .$WS/ && rosdep install --from-paths src --ignore-src -y --skip-keys depthai
+RUN cd .$WS/ && . /opt/ros/${ROS_DISTRO}/setup.sh && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
+
 RUN echo "if [ -f ${WS}/install/setup.bash ]; then source ${WS}/install/setup.bash; fi" >> $HOME/.bashrc
-ENTRYPOINT [ "/ws/src/rae-ros/entrypoint.sh" ]
+
+COPY ./requirements.txt .$WS/src/requirements.txt
+RUN python3 -m pip install --extra-index-url https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local/ -r .$WS/src/requirements.txt
+
+RUN chmod +x /ws/src/rae/entrypoint.sh
+
+ENTRYPOINT [ "/ws/src/rae/entrypoint.sh" ]
+
 RUN rm -rf /usr/share/doc
 
-CMD ["zsh"]
+CMD ["bash"]
