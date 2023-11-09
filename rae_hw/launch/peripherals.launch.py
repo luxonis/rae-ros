@@ -29,19 +29,6 @@ def launch_setup(context, *args, **kwargs):
                     name='battery_node',
                     package='rae_hw',
                     plugin='rae_hw::BatteryNode',
-                ),
-                ComposableNode(
-                    name='lcd_node',
-                    package='rae_hw',
-                    plugin='rae_hw::LCDNode',
-                    parameters=[{
-                        'default_logo_path': LaunchConfiguration('default_logo_path')
-                    }],
-                ),
-                ComposableNode(
-                    name='led_node',
-                    package='rae_hw',
-                    plugin='rae_hw::LEDNode',
                 )
             ]),
         Node(
@@ -51,11 +38,6 @@ def launch_setup(context, *args, **kwargs):
         Node(
             package='rae_hw',
             executable='speakers_node'
-        ),
-        Node(
-            package='rae_bringup',
-            executable='battery_status.py',
-            condition=IfCondition(enable_battery_status)
         ),
     ]
 
