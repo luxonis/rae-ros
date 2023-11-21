@@ -53,7 +53,7 @@ RUN echo "if [ -f ${WS}/install/setup.bash ]; then source ${WS}/install/setup.ba
 
 COPY ./requirements.txt .$WS/src/requirements.txt
 COPY ./depthai-2.22.0.0.dev0+19c262d4bc45f69cf75031933e6eda7037b5d497-cp310-cp310-linux_aarch64.whl .$WS/src/depthai-2.22.0.0.dev0+19c262d4bc45f69cf75031933e6eda7037b5d497-cp310-cp310-linux_aarch64.whl
-RUN python3 -m pip install --extra-index-url .$WS/src/depthai-2.22.0.0.dev0+19c262d4bc45f69cf75031933e6eda7037b5d497-cp310-cp310-linux_aarch64.whl
+RUN python3 -m pip install .$WS/src/depthai-2.22.0.0.dev0+19c262d4bc45f69cf75031933e6eda7037b5d497-cp310-cp310-linux_aarch64.whl
 RUN echo "export LD_LIBRARY_PATH=/usr/local/lib/python3.10/dist-packages${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" >> $HOME/.bashrc
 RUN chmod +x /ws/src/rae/entrypoint.sh
 
