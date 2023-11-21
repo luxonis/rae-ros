@@ -57,6 +57,7 @@ jobs:
           build-args: |
             ROS_DISTRO=${{ env.ROS_DISTRO }}
             USE_RVIZ=1
+            SIM=1
           platforms: |
             amd64
           push: ${{ env.PUSH }}
