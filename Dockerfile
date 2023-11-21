@@ -25,7 +25,10 @@ RUN apt-get update \
     gstreamer1.0-plugins-bad \
     gstreamer1.0-alsa \
     libasound2-dev \
-    busybox
+    busybox \
+    alsa-utils \
+    mpg123 \
+    libmpg123-dev
 
 ENV WS=/ws
 RUN mkdir -p $WS/src
