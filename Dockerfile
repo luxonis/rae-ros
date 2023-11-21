@@ -24,6 +24,10 @@ RUN apt-get update && apt-get -y install --no-install-recommends \
     gpiod \
     python3-pip \
     libasound2-dev \
+    ros-humble-depthai-ros-msgs \
+    ros-humble-cv-bridge \ 
+    ros-humble-image-transport \
+    ros-humble-image-transport-plugins \
     gstreamer1.0-plugins-bad
 
 
@@ -48,8 +52,9 @@ RUN cd .$WS/ && . /opt/ros/${ROS_DISTRO}/setup.sh && colcon build --symlink-inst
 RUN echo "if [ -f ${WS}/install/setup.bash ]; then source ${WS}/install/setup.bash; fi" >> $HOME/.bashrc
 
 COPY ./requirements.txt .$WS/src/requirements.txt
-RUN python3 -m pip install --extra-index-url https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local/ -r .$WS/src/requirements.txt
-
+COPY ./depthai-2.22.0.0.dev0+19c262d4bc45f69cf75031933e6eda7037b5d497-cp310-cp310-linux_aarch64.whl .$WS/src/depthai-2.22.0.0.dev0+19c262d4bc45f69cf75031933e6eda7037b5d497-cp310-cp310-linux_aarch64.whl
+RUN python3 -m pip install --extra-index-url .$WS/src/depthai-2.22.0.0.dev0+19c262d4bc45f69cf75031933e6eda7037b5d497-cp310-cp310-linux_aarch64.whl
+RUN echo "export LD_LIBRARY_PATH=/usr/local/lib/python3.10/dist-packages${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" >> $HOME/.bashrc
 RUN chmod +x /ws/src/rae/entrypoint.sh
 
 ENTRYPOINT [ "/ws/src/rae/entrypoint.sh" ]
