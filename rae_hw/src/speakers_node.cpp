@@ -6,9 +6,11 @@ SpeakersNode::SpeakersNode(const rclcpp::NodeOptions &options)
     : Node("speakers_node", options) {
   // Initialize ALSA or any other audio setup code here
 
-  // Subscribe to the audio topic
-  subscription_ = create_subscription<std_msgs::msg::Int32>(
-      "audio_topic", 10, std::bind(&SpeakersNode::audio_callback, this, std::placeholders::_1));
+  // Create Audio Service
+  play_audio_service_ = create_service<rae_msgs::srv::PlayAudio>(
+      "play_audio", std::bind(&SpeakersNode::play_audio_service_callback, this,
+                              std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+
 
   // Any other initialization code here
   
@@ -22,13 +24,18 @@ SpeakersNode::~SpeakersNode() {
   mpg123_exit();
 }
 
-void SpeakersNode::audio_callback(const std_msgs::msg::Int32::SharedPtr msg) {
-  // Assuming msg->data contains the raw audio data
+void SpeakersNode::play_audio_service_callback(
+    const std::shared_ptr<rmw_request_id_t> request_header,
+    const std::shared_ptr<rae_msgs::srv::PlayAudio::Request> request,
+    const std::shared_ptr<rae_msgs::srv::PlayAudio::Response> response) {
+  // Use request->mp3_file to get the MP3 file location
+  const char *mp3_file = request->mp3_file.c_str();
 
-  // You can implement your logic here to process and play the audio
-  // For example, you can save it to a temporary file and then play it using a
-  // library like libmpg123
-  play_mp3("/ws/src/rae-ros/horn_cucaracha.mp3");
+  // Call the play_mp3 function
+  play_mp3(mp3_file);
+
+  // Respond with success (modify based on your play_mp3 result)
+  response->success = true;
 }
 
 void SpeakersNode::play_mp3(const char *mp3_file) {
