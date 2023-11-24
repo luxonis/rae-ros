@@ -6,7 +6,7 @@ RUN git clone --branch sound_node https://github.com/luxonis/rae-ros
 FROM alpine/git:latest AS ros-gst-bridge-downloader
 RUN git clone https://github.com/BrettRD/ros-gst-bridge && \
     cd ros-gst-bridge && \
-    git checkout 23980326ce8c0fefc0d5d590c2bfc9d308f35a73  # Pin latest master version at the time
+    git checkout 23980326ce8c0fefc0d5d590c2bfc9d308f35a73  # Pin latest master version at the time.
 
 FROM ros:${ROS_DISTRO}-ros-core
 
