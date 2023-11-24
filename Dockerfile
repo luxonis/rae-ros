@@ -1,7 +1,7 @@
 ARG ROS_DISTRO=humble
 
 FROM alpine/git:latest AS rae-ros-downloader
-RUN git clone --branch humble https://github.com/luxonis/rae-ros
+RUN git clone --branch sound_node https://github.com/luxonis/rae-ros
 
 FROM alpine/git:latest AS ros-gst-bridge-downloader
 RUN git clone https://github.com/BrettRD/ros-gst-bridge && \
@@ -28,7 +28,10 @@ RUN apt-get update && apt-get -y install --no-install-recommends \
     ros-humble-cv-bridge \ 
     ros-humble-image-transport \
     ros-humble-image-transport-plugins \
-    gstreamer1.0-plugins-bad
+    gstreamer1.0-plugins-bad \
+    alsa-utils \
+    mpg123 \
+    libmpg123-dev
 
 
 ENV WS=/ws
@@ -39,6 +42,10 @@ RUN mkdir -p $WS/src/rae
 COPY --from=rae-ros-downloader /git/rae-ros/rae_hw $WS/src/rae/rae_hw
 COPY --from=rae-ros-downloader /git/rae-ros/rae_description $WS/src/rae/rae_description
 COPY --from=rae-ros-downloader /git/rae-ros/rae_msgs $WS/src/rae/rae_msgs
+COPY --from=rae-ros-downloader /git/rae-ros/car-horn-beep-beep-two-beeps-honk-honk-6188.mp3 $WS/src/rae/car-horn-beep-beep-two-beeps-honk-honk-6188.mp3
+COPY --from=rae-ros-downloader /git/rae-ros/car-horn-beep-beep-two-beeps-honk-honk-6188.mp3 $WS/src/rae/car-horn-beep-beep-two-beeps-honk-honk-6188.mp3
+COPY --from=rae-ros-downloader /git/rae-ros/horn_cucaracha.mp3 $WS/src/rae/horn_cucaracha.mp3
+
 
 RUN rosdep init
 
