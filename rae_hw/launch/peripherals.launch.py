@@ -9,8 +9,6 @@ from launch_ros.descriptions import ComposableNode
 
 def launch_setup(context, *args, **kwargs):
     name = LaunchConfiguration('name').perform(context)
-    enable_battery_status = LaunchConfiguration(
-        'enable_battery_status', default=True)
     run_container = LaunchConfiguration('run_container', default=True)
     return [
         ComposableNodeContainer(
@@ -46,7 +44,6 @@ def generate_launch_description():
     declared_arguments = [
         DeclareLaunchArgument('name', default_value='rae'),
         DeclareLaunchArgument('run_container', default_value='true'),
-        DeclareLaunchArgument('enable_battery_status', default_value='true'),
         DeclareLaunchArgument('default_logo_path', default_value='/usr/share/rae-logo-white.jpg'),
     ]
 

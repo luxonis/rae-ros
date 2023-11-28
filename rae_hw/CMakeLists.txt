@@ -16,7 +16,16 @@ if(NOT GPIOD_LIBRARY)
   message(FATAL_ERROR "gpiod library not found. Install apt install libgpiod-dev")
 endif()
 
-include_directories(include)
+# Find mpg123 package
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(MPG123 REQUIRED libmpg123)
+
+# Add GStreamer packages
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(GST REQUIRED gstreamer-1.0)
+
+include_directories(include
+                    ${GST_INCLUDE_DIRS}  )
 
 ament_auto_add_library(
   ${PROJECT_NAME}
@@ -27,16 +36,16 @@ ament_auto_add_library(
   src/peripherals/lcd.cpp
   src/peripherals/led.cpp
   src/peripherals/mic.cpp
-  src/peripherals/speakers.cpp
 )
 ament_target_dependencies(${PROJECT_NAME} ${DEPENDENCIES} ALSA)
 
 target_include_directories(
   ${PROJECT_NAME}
+  ${MPG123_INCLUDE_DIRS}
   PUBLIC
   include
 )
-target_link_libraries(${PROJECT_NAME} ${GPIOD_LIBRARY})
+target_link_libraries(${PROJECT_NAME} ${MPG123_LIBRARIES} ${GPIOD_LIBRARY})
 
 # prevent pluginlib from using boost
 target_compile_definitions(${PROJECT_NAME} PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
@@ -91,6 +100,8 @@ install(
   DIRECTORY include/
   DESTINATION include
 )
+
+
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

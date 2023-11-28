@@ -42,9 +42,6 @@ RUN mkdir -p $WS/src/rae
 COPY --from=rae-ros-downloader /git/rae-ros/rae_hw $WS/src/rae/rae_hw
 COPY --from=rae-ros-downloader /git/rae-ros/rae_description $WS/src/rae/rae_description
 COPY --from=rae-ros-downloader /git/rae-ros/rae_msgs $WS/src/rae/rae_msgs
-COPY --from=rae-ros-downloader /git/rae-ros/car-horn-beep-beep-two-beeps-honk-honk-6188.mp3 $WS/src/rae/car-horn-beep-beep-two-beeps-honk-honk-6188.mp3
-COPY --from=rae-ros-downloader /git/rae-ros/car-horn-beep-beep-two-beeps-honk-honk-6188.mp3 $WS/src/rae/car-horn-beep-beep-two-beeps-honk-honk-6188.mp3
-COPY --from=rae-ros-downloader /git/rae-ros/horn_cucaracha.mp3 $WS/src/rae/horn_cucaracha.mp3
 
 
 RUN rosdep init
