@@ -27,6 +27,7 @@
   <depend>cv_bridge</depend>
   <depend>audio_msgs</depend>
   <depend>robot_localization</depend>
+  <depend>imu_tools</depend>
 
   <depend>libasound2-dev</depend> 
   <depend>libmpg123-dev</depend> 

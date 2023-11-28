@@ -56,7 +56,6 @@ namespace rae_hw
 
     float RaeMotor::calcSpeed()
     {
-    
         // Get current position and time different and caluclate the speed
             auto currTime = std::chrono::high_resolution_clock::now();
             float currPos = getPos();
@@ -108,10 +107,8 @@ namespace rae_hw
         {
             dutyCycleFile << dutyCycle;
             dutyCycleFile.close();
-        }}
-
-        
-
+        }
+            }
 
         if (dir == motDirection)
         {
@@ -139,7 +136,7 @@ namespace rae_hw
                 phPin.set_value(0);
             }
             enablePath = pwmName_ + "/pwm" + std::to_string(pwmPin) + "/enable"; 
-           std::ofstream enableFile2(enablePath);
+            std::ofstream enableFile2(enablePath);
             if (enableFile2.is_open())
             {
                 enableFile2 << "1";
@@ -162,7 +159,6 @@ namespace rae_hw
         std::ofstream dutyCycleFile(dutyCyclePath);
         dutyCycleFile << duty_cycle;
         dutyCycleFile.close();
-
         std::string enablePath = pwmName_ + "/pwm" + std::to_string(pwmPin) + "/enable";
         std::ofstream enableFile(enablePath);
         enableFile << 1;  // Enable PWM
@@ -171,21 +167,15 @@ namespace rae_hw
 
     void RaeMotor::disablePWM()
     {   
-
         std::string enablePath = pwmName_ + "/pwm" + std::to_string(pwmPin) + "/enable";
         std::ofstream enableFile(enablePath);
         enableFile << 0;  // Disable PWM
         enableFile.close();
     }
-
-    
-
-   
     void RaeMotor::readEncoders()
     {
         while (_running)
         {
-            
             int currA = enAPin.get_value();
             int currB = enBPin.get_value();
             State currS{currA, currB};
@@ -205,7 +195,6 @@ namespace rae_hw
                 }
                 else{
                     count= direction ? (count + 2) : (count - 2);
-
                 }
             }
             else if (currS == Halfway && currS != prevState)
@@ -216,11 +205,13 @@ namespace rae_hw
                     direction=true;
                 }
                 else if (prevState == Counter)
+
                 {
                     count--;
                     direction=false;
                 }
                 else{
+
                     count= direction ? (count + 2) : (count - 2);
                 }
             }
@@ -236,7 +227,8 @@ namespace rae_hw
                     count--;
                     direction=true;
                 }
-                else{
+                else
+                {
                     count= direction ? (count + 2) : (count - 2);
                 }
             }
@@ -261,8 +253,6 @@ namespace rae_hw
                 {
                     std::lock_guard<std::mutex> lck(posMtx);
                     rads = count * encRatio;
-                    
-
                 }
                 prevCount = count;
             }

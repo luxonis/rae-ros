@@ -19,6 +19,7 @@ Host ku 192.168.197.55
 The easiest way for accessing the file on Keembay, is to use VScode with Remote Containers extension by Ctrl + Shift + P -> connect to remote host.
 
 3. Currently date resets after each startup to set current - ssh root@192.168.11.1 sudo date -s @`( date -u +"%s" )`
+
 4. If you want to run ROS packages while bypassing RobotHub it would be advised to stop RH agent before starting docker containers, otherwise you can easily run into conflicts as they would be competing for same hardware resources - `robothub-ctl stop`. **Keep in mind** that since `wpa_supplicant` is a subproccess of the RH agent, the WiFi connection will get killed along with the agent. To resolve this we recommend you manually setup the WiFi connection as done in [this guide](https://docs-beta.luxonis.com/deploy/connect-device/rae/?v=Advanced+%28manual%29).
 
 
@@ -215,4 +216,6 @@ Microphone node expects audio messages and example of how to use that data (alon
 ```
 
 
+
 Speakers operate similarly, in that they output audio messages. In bringup package in scripts folder sound_test.py offers a decent example of how you can create audio messages. We will shortly create more demos for speakers and microphone. 
+
