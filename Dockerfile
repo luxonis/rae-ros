@@ -35,7 +35,8 @@ RUN apt-get update && apt-get -y install --no-install-recommends \
     ros-humble-rtabmap-slam \ 
     unzip \
     ffmpeg \
-    ros-humble-image-proc
+    ros-humble-image-proc \
+    git
 
 
 ENV WS=/ws
