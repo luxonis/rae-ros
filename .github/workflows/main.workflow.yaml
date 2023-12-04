@@ -58,6 +58,8 @@ jobs:
             ROS_DISTRO=${{ env.ROS_DISTRO }}
             USE_RVIZ=1
             SIM=1
+          secrets: |
+            "SPECTACULAR_AI_TOKEN=${{ secrets.SPECTACULAR_AI_TOKEN }}"
           platforms: |
             amd64
           push: ${{ env.PUSH }}
@@ -85,6 +87,8 @@ jobs:
             ROS_DISTRO=${{ env.ROS_DISTRO }}
             USE_RVIZ=0
             SIM=0
+          secrets: |
+            "SPECTACULAR_AI_TOKEN=${{ secrets.SPECTACULAR_AI_TOKEN }}"
           platforms: |
             arm64
           push: ${{ env.PUSH }}
