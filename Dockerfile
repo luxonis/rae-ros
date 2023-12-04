@@ -65,7 +65,7 @@ RUN --mount=type=secret,id=SPECTACULAR_AI_TOKEN rm -rf sai_ros \
       && ROS_DISTRO=$ROS_DISTRO DEPTHAI_WS=$UNDERLAY_WS GITHUB_RAE_PAT_TOKEN=$(cat /run/secrets/SPECTACULAR_AI_TOKEN) . ./scripts/download_and_build_static.sh \
       && apt-get -y remove unzip \
       && echo "if [ -f $(pwd)/spectacularai_ros2/install/setup.bash ]; then source $(pwd)/spectacularai_ros2/install/setup.bash; fi" >> $HOME/.bashrc \
-      && echo "if [ -f $(pwd)/spectacularai_ros2/install/setup.zsh ]; then source $(pwd)/spectacularai_ros2/install/setup.zsh; fi" >> $HOME/.zshrc; \
+      && echo "if [ -f $(pwd)/spectacularai_ros2/install/setup.zsh ]; then source $(pwd)/spectacularai_ros2/install/setup.zsh; fi" >> $HOME/.zshrc; 
 
 RUN cd .$WS/ && rosdep install --from-paths src --ignore-src -y --skip-keys depthai
 RUN cd .$WS/ && . /opt/ros/${ROS_DISTRO}/setup.sh && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
