@@ -59,7 +59,7 @@ RUN apt update && rosdep update
 RUN cd .$WS/src && git clone https://github.com/Serafadam/ira_laser_tools.git && git clone https://github.com/Serafadam/depth_nav_tools.git
 
 RUN --mount=type=secret,id=SPECTACULAR_AI_TOKEN rm -rf sai_ros \
-      && git clone --single-branch python-bindings https://github.com/Serafadam/sai_ros.git  sai_ros \
+      && git clone --single-branch --branch python-bindings https://github.com/Serafadam/sai_ros.git  sai_ros \
       && cd sai_ros \
       && apt-get -y install unzip --no-install-recommends \
       && ROS_DISTRO=$ROS_DISTRO DEPTHAI_WS=$UNDERLAY_WS GITHUB_RAE_PAT_TOKEN=$(cat /run/secrets/SPECTACULAR_AI_TOKEN) . ./scripts/download_and_build_static.sh \
