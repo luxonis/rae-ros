@@ -64,7 +64,7 @@ namespace rae_hw
 
         // Set ALSA parameters
 
-        snd_pcm_set_params(alsaHandle, SND_PCM_FORMAT_S16_LE, SND_PCM_ACCESS_RW_INTERLEAVED, channels, rate, 2, 50000);
+        snd_pcm_set_params(alsaHandle, SND_PCM_FORMAT_S16_LE, SND_PCM_ACCESS_RW_INTERLEAVED, channels, rate*channels, 2, 50000);
 
         // Read and play MP3 file
         size_t buffer_size = mpg123_outblock(mh) * 4;
