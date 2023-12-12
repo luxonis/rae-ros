@@ -48,7 +48,7 @@ RUN mkdir -p $WS/src/rae
 COPY --from=rae-ros-downloader /git/rae-ros/rae_hw $WS/src/rae/rae_hw
 COPY --from=rae-ros-downloader /git/rae-ros/rae_description $WS/src/rae/rae_description
 COPY --from=rae-ros-downloader /git/rae-ros/rae_msgs $WS/src/rae/rae_msgs
-COPY --from=rae-ros-downloader /git/rae-ros/rae_python_api $WS/src/rae/rae_python_api
+COPY --from=rae-ros-downloader /git/rae-ros/robot_py $WS/src/rae/robot_py
 
 
 RUN rosdep init
@@ -57,6 +57,14 @@ COPY --from=ros-gst-bridge-downloader /git/ros-gst-bridge $WS/src/ros-gst-bridge
 
 RUN apt update && rosdep update
 
+RUN pip3 install mypy
+RUN cd /tmp \
+   && git clone --recursive https://github.com/luxonis/depthai-python.git --branch rvc3_develop \
+   && cd /tmp/depthai-python && cmake -Hdepthai-core -Bdepthai-core/build -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr/local \
+   && cmake --build depthai-core/build --target install --parallel 8 \
+   && cd /tmp/depthai-python && python3 -m pip install . \
+   && cd /tmp \
+   && rm -rf depthai-python
 
 RUN cd .$WS/src && git clone https://github.com/Serafadam/ira_laser_tools.git && git clone https://github.com/Serafadam/depth_nav_tools.git
 RUN apt install curl
@@ -68,15 +76,11 @@ RUN --mount=type=secret,id=SPECTACULAR_AI_TOKEN rm -rf sai_ros \
       && apt-get -y remove unzip \
       && echo "if [ -f $(pwd)/spectacularai_ros2/install/setup.bash ]; then source $(pwd)/spectacularai_ros2/install/setup.bash; fi" >> $HOME/.bashrc \
       && echo "if [ -f $(pwd)/spectacularai_ros2/install/setup.zsh ]; then source $(pwd)/spectacularai_ros2/install/setup.zsh; fi" >> $HOME/.zshrc; 
-
+RUN cd ${WS}/src && git clone --branch dai_ros_py https://github.com/luxonis/depthai-ros.git
 RUN cd .$WS/ && rosdep install --from-paths src --ignore-src -y --skip-keys depthai
-RUN cd .$WS/ && . /opt/ros/${ROS_DISTRO}/setup.sh && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
+RUN cd .$WS/ && . /opt/ros/${ROS_DISTRO}/setup.sh && . /sai_ros/spectacularai_ros2/install/setup.sh && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
 RUN echo "if [ -f ${WS}/install/setup.bash ]; then source ${WS}/install/setup.bash; fi" >> $HOME/.bashrc
 RUN echo "if [ -f ${WS}/install/setup.zsh ]; then source ${WS}/install/setup.zsh; fi" >> $HOME/.zshrc
-COPY ./requirements.txt .$WS/src/requirements.txt
-COPY ./depthai-2.22.0.0.dev0+0d5e81f404a5d0fbe7a7eb3623ee0e85095e9c61-cp310-cp310-linux_aarch64.whl .$WS/src/depthai-2.22.0.0.dev0+0d5e81f404a5d0fbe7a7eb3623ee0e85095e9c61-cp310-cp310-linux_aarch64.whl
-RUN if [ "$SIM" = "0" ] ; then python3 -m pip install .$WS/src/depthai-2.22.0.0.dev0+0d5e81f404a5d0fbe7a7eb3623ee0e85095e9c61-cp310-cp310-linux_aarch64.whl ; fi
-RUN echo "export LD_LIBRARY_PATH=/usr/local/lib/python3.10/dist-packages${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" >> $HOME/.bashrc
 RUN chmod +x /ws/src/rae/entrypoint.sh
 
 ENTRYPOINT [ "/ws/src/rae/entrypoint.sh" ]
