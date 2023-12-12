@@ -20,12 +20,7 @@ endif()
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(MPG123 REQUIRED libmpg123)
 
-# Add GStreamer packages
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(GST REQUIRED gstreamer-1.0)
-
-include_directories(include
-                    ${GST_INCLUDE_DIRS}  )
+include_directories(include )
 
 ament_auto_add_library(
   ${PROJECT_NAME}
