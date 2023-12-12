@@ -71,3 +71,53 @@ def build_pipeline(front_socket: dai.CameraBoardSocket, front_stream_name, rear_
     add_side(front_socket, front_stream_name)
     add_side(rear_socket, rear_stream_name)
     return pipeline
+
+def rtabmap_pipeline():
+        pipeline = dai.Pipeline()
+
+        imu = pipeline.create(dai.node.IMU)
+        imu.enableIMUSensor(dai.IMUSensor.ACCELEROMETER_RAW, 400)
+        imu.enableIMUSensor(dai.IMUSensor.GYROSCOPE_RAW, 400)
+        imu.enableIMUSensor(dai.IMUSensor.ROTATION_VECTOR, 400)
+        imu.setBatchReportThreshold(1)
+        imu.setMaxBatchReports(10)
+        xout_imu = pipeline.create(dai.node.XLinkOut)
+        xout_imu.setStreamName("imu")
+        imu.out.link(xout_imu.input)
+
+        left = pipeline.create(dai.node.ColorCamera)
+        left.setBoardSocket(dai.CameraBoardSocket.CAM_B)
+        left.setResolution(dai.ColorCameraProperties.SensorResolution.THE_800_P)
+        left.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
+        left.setFps(30)
+        left.setVideoSize(640, 400)
+        # left.setPreviewSize(416, 416)
+        left.setInterleaved(False)
+
+        right = pipeline.create(dai.node.ColorCamera)
+        right.setBoardSocket(dai.CameraBoardSocket.CAM_C)
+        right.setResolution(dai.ColorCameraProperties.SensorResolution.THE_800_P)
+        right.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
+        right.setFps(30)
+        right.setVideoSize(640, 400)
+        right.setInterleaved(False)
+        right.initialControl.setMisc('stride-align', 1)
+        right.initialControl.setMisc('scanline-align', 1)
+        stereo = pipeline.create(dai.node.StereoDepth)
+        left.video.link(stereo.left)
+        right.video.link(stereo.right)
+
+        xout_stereo = pipeline.create(dai.node.XLinkOut)
+        xout_stereo.setStreamName("stereo")
+        xout_stereo.input.setBlocking(False)
+        stereo.depth.link(xout_stereo.input)
+
+        xout_left = pipeline.create(dai.node.XLinkOut)
+        xout_left.setStreamName("left")
+        xout_left.input.setBlocking(False)
+        stereo.rectifiedLeft.link(xout_left.input)
+        xout_right = pipeline.create(dai.node.XLinkOut)
+        xout_right.setStreamName("right")
+        xout_right.input.setBlocking(False)
+        right.video.link(xout_right.input)
+        return pipeline

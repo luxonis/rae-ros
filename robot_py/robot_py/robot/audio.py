@@ -11,7 +11,7 @@ class AudioController:
         self.audio_client = self.ros_manager.create_service_client(
             '/play_audio', PlayAudio)
         self.assets_path = os.path.join(
-            get_package_share_directory('rae_python_api'), 'assets')
+            get_package_share_directory('robot_py'), 'assets')
         print("Audio Controller ready")
 
     def create_and_send_request(self, audio_file_path):

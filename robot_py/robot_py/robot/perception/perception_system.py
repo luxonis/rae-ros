@@ -1,6 +1,6 @@
 import depthai as dai
 
-
+from .pipeline import rtabmap_pipeline
 class PerceptionSystem:
     """
     A class for managing camera functionalities in a robot, interfacing with both depthai and robothub libraries.
@@ -41,7 +41,6 @@ class PerceptionSystem:
                 print("RobotHub module is not available.")
         self.ros_context_manager = dai.ros.ROSContextManager()
         self.ros_context_manager.init([""], 'single_threaded')
-        self.dai_node = dai.ros.ROSNode("dai", dai.ros.ROSNodeOptions(False,'/dai', '', {}))
         if not self.robothub_available:
             self.device = dai.Device()
             self.cal_handler = self.device.readCalibration()
@@ -54,8 +53,8 @@ class PerceptionSystem:
         """
         Starts the ROS context manager and spins the ROS node.
         """
-        self.ros_context_manager.add_node(self.dai_node)
-        self.ros_context_manager.spin()
+        # self.ros_context_manager.add_node(self.dai_node)
+        # self.ros_context_manager.spin()
     def stop(self):
         """
         Closes the connection to the depthai device, ensuring a clean shutdown.
@@ -150,4 +149,89 @@ class PerceptionSystem:
             return dai.CameraBoardSocket.CAM_C
         elif stream_name == 'stream_back':
             return dai.CameraBoardSocket.CAM_D
-        
+    def setup_perception_rtabmap(self):
+        name='/rae'
+        pipeline = dai.Pipeline()
+
+        imu = pipeline.create(dai.node.IMU)
+        imu.enableIMUSensor(dai.IMUSensor.ACCELEROMETER_RAW, 400)
+        imu.enableIMUSensor(dai.IMUSensor.GYROSCOPE_RAW, 400)
+        imu.enableIMUSensor(dai.IMUSensor.ROTATION_VECTOR, 400)
+        imu.setBatchReportThreshold(1)
+        imu.setMaxBatchReports(10)
+        xout_imu = pipeline.create(dai.node.XLinkOut)
+        xout_imu.setStreamName("imu")
+        imu.out.link(xout_imu.input)
+
+        left = pipeline.create(dai.node.ColorCamera)
+        left.setBoardSocket(dai.CameraBoardSocket.CAM_B)
+        left.setResolution(dai.ColorCameraProperties.SensorResolution.THE_800_P)
+        left.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
+        left.setFps(30)
+        left.setVideoSize(640, 400)
+        # left.setPreviewSize(416, 416)
+        left.setInterleaved(False)
+
+        right = pipeline.create(dai.node.ColorCamera)
+        right.setBoardSocket(dai.CameraBoardSocket.CAM_C)
+        right.setResolution(dai.ColorCameraProperties.SensorResolution.THE_800_P)
+        left.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
+        right.setFps(30)
+        right.setVideoSize(640, 400)
+        right.setInterleaved(False)
+        right.initialControl.setMisc('stride-align', 1)
+        right.initialControl.setMisc('scanline-align', 1)
+        stereo = pipeline.create(dai.node.StereoDepth)
+        left.video.link(stereo.left)
+        right.video.link(stereo.right)
+
+        xout_stereo = pipeline.create(dai.node.XLinkOut)
+        xout_stereo.setStreamName("stereo")
+        xout_stereo.input.setBlocking(False)
+        stereo.depth.link(xout_stereo.input)
+
+        xout_left = pipeline.create(dai.node.XLinkOut)
+        xout_left.setStreamName("left")
+        xout_left.input.setBlocking(False)
+        stereo.rectifiedLeft.link(xout_left.input)
+        xout_right = pipeline.create(dai.node.XLinkOut)
+        xout_right.setStreamName("right")
+        xout_right.input.setBlocking(False)
+        right.video.link(xout_right.input)
+
+        self.start_pipeline(pipeline)
+        calHandler = self.device.readCalibration()
+        self.opts_rtabmap = dai.ros.ROSNodeOptions(False, "/rtabmap", "/workspaces/rae_ws/test_params.yaml", 
+                                              {"odom": "/diff_controller/odom",
+                                                "rgb/image": name+"/right/image_rect",
+                                                "rgb/camera_info": name+"/right/camera_info",
+                                                "depth/image": name+"/stereo/image_raw"})
+        # self.rtabmap = dai.ros.RTABMapCoreWrapper(self.opts_rtabmap)
+        self.opts = dai.ros.ROSNodeOptions(False, "/dai", "/workspaces/rae_ws/test_params.yaml", {"t":"t"})
+        self.dai_node = dai.ros.ROSNode("dai", self.opts)
+
+        self.ros_stream_handles['imu'] = dai.ros.ImuStreamer(self.dai_node, "/rae/imu/data", "rae_imu_frame", dai.ros.ImuSyncMethod.COPY, 0.0, 0.0, 0.0, 0.0, True, False, False)
+        self.ros_stream_handles['left'] = dai.ros.ImgStreamer(self.dai_node, calHandler, dai.CameraBoardSocket.CAM_B, "/rae/left/image_rect", "rae_left_camera_optical_frame", 640, 400)
+        self.ros_stream_handles['right'] = dai.ros.ImgStreamer(self.dai_node, calHandler, dai.CameraBoardSocket.CAM_C, "/rae/right/image_raw", "rae_right_camera_optical_frame", 640, 400)
+        self.ros_stream_handles['stereo'] = dai.ros.ImgStreamer(self.dai_node, calHandler, dai.CameraBoardSocket.CAM_C, "/rae/stereo/image_raw", "rae_right_camera_optical_frame", 640, 400)
+        self.device.getOutputQueue("imu", 8, False).addCallback(self.stream_callback_ros)
+        self.device.getOutputQueue("stereo", 8, False).addCallback(self.stream_callback_ros)
+        self.device.getOutputQueue("left", 8, False).addCallback(self.stream_callback_ros)
+        self.device.getOutputQueue("right", 8, False).addCallback(self.stream_callback_ros)
+        self.scan_front_opts = dai.ros.ROSNodeOptions(False, "/laserscan_kinect_front", "/workspaces/rae_ws/test_params.yaml", 
+                                                 {"laserscan_kinect:__node":"laserscan_kinect_front",
+                                                  "/image": name+"/stereo/image_raw",
+                                                  "/camera_info": name+"/stereo/camera_info",
+                                                  "/scan": name+"/scan_front",
+                                                  "/debug_image": name+"/debug_image_front",
+                                                  "/debug_image/compressed": name+"/debug_image_front/compressed"})
+        self.laserscan_front = dai.ros.LaserScanKinectNode(self.scan_front_opts)
+
+        self.opts_rectify = dai.ros.ROSNodeOptions(False, "/rectify", "/workspaces/rae_ws/test_params.yaml", {"image":"/rae/right/image_raw", "camera_info": "/rae/right/camera_info", "image_rect":"/rae/right/image_rect"})
+
+        self.rectify = dai.ros.ImageProcRectifyNode(self.opts_rectify)
+        self.ros_context_manager.add_node(self.dai_node)
+        self.ros_context_manager.add_node(self.laserscan_front)
+        self.ros_context_manager.add_node(self.rectify)
+        # self.ros_context_manager.add_node(self.rtabmap)
+        self.ros_context_manager.spin()

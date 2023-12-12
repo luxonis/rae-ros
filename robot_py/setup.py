@@ -2,8 +2,8 @@ import os
 from glob import glob
 from setuptools import find_packages, setup
 
-package_name = 'rae_python_api'
-submodules=['rae_python_api/robot', 'rae_python_api/api']
+package_name = 'robot_py'
+submodules=['robot_py/robot', 'robot_py/api']
 data_files=[
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
@@ -45,7 +45,7 @@ setup(
     zip_safe=True,
     maintainer='Adam Serafin',
     maintainer_email='adam.serafin@luxonis.com',
-    description='RAE Python API library',
+    description='Robot Python API library',
     license='MIT',
     tests_require=['pytest'],
     entry_points={

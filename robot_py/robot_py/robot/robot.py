@@ -60,7 +60,7 @@ class Robot:
         self.audio_controller = AudioController(self.ros_manager)
         self.ros_manager.create_subscriber(
             "/battery_status", BatteryState, self.battery_state_cb)
-        self.perception_system.start_ros()
+        self.perception_system.setup_perception_rtabmap()
 
     def stop(self):
         """
@@ -152,14 +152,16 @@ class Robot:
             audio_path: Path to mp3 file
         """
         self.audio_controller.play_audio(audio_path)
-    def get_perception_system(self):
+    def get_perception_system(self) -> PerceptionSystem:
         """
         Returns the robot's perception system.
         """
         return self.perception_system
 
-    def get_ros_interface(self):
+    def get_ros_interface(self) -> ROS2Manager:
         """
         Returns the robot's ROS2 interface manager.
         """
         return self.ros_manager
+    def setup_perception_rtabmap(self):
+        self.perception.setup_perception_rtabmap()

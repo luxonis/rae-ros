@@ -40,7 +40,7 @@ class DisplayController:
         self.screen_width = 160
         self.screen_height = 80
         self.assets_path = os.path.join(
-            get_package_share_directory('rae_python_api'), 'assets')
+            get_package_share_directory('robot_py'), 'assets')
         print("Display Controller ready")
 
     def stop(self):

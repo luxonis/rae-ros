@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>rae_python_api</name>
+  <name>robot_py</name>
   <version>0.0.0</version>
-  <description>RAE Python API library</description>
+  <description>Robot Python API library</description>
   <maintainer email="adam.serafin@luxonis.com">Adam Serafin</maintainer>
   <license>MIT</license>
 

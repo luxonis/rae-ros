@@ -70,7 +70,7 @@ class ROS2Manager:
         Starts RAE hardware drivers in a separate process.
         """
         env = dict(os.environ)
-        script_name = os.path.join(get_package_share_directory('rae_python_api'), 'scripts', 'start_ros.sh')
+        script_name = os.path.join(get_package_share_directory('robot_py'), 'scripts', 'start_ros.sh')
         self.ros_proc = subprocess.Popen(
             f"bash -c 'chmod +x {script_name} ; {script_name}'", shell=True, env=env, preexec_fn=os.setsid
         )
