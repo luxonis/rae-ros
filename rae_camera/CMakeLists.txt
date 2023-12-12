@@ -69,6 +69,7 @@ add_executable(perception_ipc_rtabmap src/perception_ipc_rtabmap)
 
 ament_target_dependencies(camera
 ${dependencies})
+target_link_libraries(camera depthai::core)
 
 install(TARGETS
 camera
@@ -76,7 +77,7 @@ DESTINATION lib/${PROJECT_NAME})
 
 ament_target_dependencies(stereo_depth
 ${dependencies})
-
+target_link_libraries(stereo_depth depthai::core)
 install(TARGETS
 stereo_depth
 DESTINATION lib/${PROJECT_NAME})
@@ -84,19 +85,20 @@ DESTINATION lib/${PROJECT_NAME})
 
 ament_target_dependencies(stereo_pair
 ${dependencies})
-
+target_link_libraries(stereo_pair depthai::core)
 install(TARGETS
 stereo_pair
 DESTINATION lib/${PROJECT_NAME})
 
 ament_target_dependencies(yolo
 ${dependencies})
-
+target_link_libraries(yolo depthai::core)
 install(TARGETS
 yolo
 DESTINATION lib/${PROJECT_NAME})
 
 ament_target_dependencies(perception_ipc_rtabmap ${IPC_DEPS_RTABMAP})
+target_link_libraries(perception_ipc_rtabmap depthai::core)
 install(TARGETS perception_ipc_rtabmap
 DESTINATION lib/${PROJECT_NAME})
 
