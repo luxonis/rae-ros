@@ -1,8 +1,9 @@
+import os
 import logging as log
 import depthai as dai
 import depthai_ros_py_bindings as dai_ros
 from .pipeline import rtabmap_pipeline
-
+from ament_index_python import get_package_share_directory
 
 class PerceptionSystem:
     """
@@ -38,19 +39,37 @@ class PerceptionSystem:
         try:
             import robothub
             self._robothub_available = True
-            self._device_mxid = robothub.DEVICES[0].oak["serialNumber"]
-            self._device_info = dai.DeviceInfo(self._device_mxid)
-            self._device = dai.Device(self._device_info)
-            self._rh_stream_handles = {}
         except ImportError:
             log.error("RobotHub module is not available.")
-        if not self.robothub_available:
-            self._device = dai.Device()
-            self._cal_handler = self._device.readCalibration()
 
         self._pipeline = None
         self._ros_stream_handles = {}
-        log.info("Perception module initialized. Now please set up the pipeline.")
+        self._queues = {}
+        self._config_path = os.path.join(
+            get_package_share_directory('robot_py'), 'config', 'example_config.yaml')
+        if self.connect_to_device():
+            log.info("Perception module initialized. Now please set up the pipeline.")
+        else:
+            log.error("Could not initialize perception module. You can try again by calling the connect_to_device() method.")
+
+    def connect_to_device(self) -> bool:
+        """
+        Connects to the depthai device.
+        """
+        try:
+            if not self.robothub_available:
+                self._device = dai.Device()
+                self._cal_handler = self._device.readCalibration()
+            else:
+                self._device_mxid = robothub.DEVICES[0].oak["serialNumber"]
+                self._device_info = dai.DeviceInfo(self._device_mxid)
+                self._device = dai.Device(self._device_info)
+                self._cal_handler = self._device.readCalibration()
+                self._rh_stream_handles = {}
+            return True
+        except RuntimeError as e:
+            log.error(f"Could not connect to the device. Reason: {e}")
+            return False
 
     def start(self):
         """
@@ -58,6 +77,8 @@ class PerceptionSystem:
         """
         if self._pipeline is not None:
             self.ros_context_manager.spin()
+        else:
+            log.error("Pipeline not set up. Please set up the pipeline.")
 
     def stop(self):
         """
@@ -118,7 +139,8 @@ class PerceptionSystem:
             callback (callable): The callback function to be added to the queue.
         """
         log.info(f'Adding queue {name}')
-        self._device.getOutputQueue(name, 1, False).addCallback(callback)
+        self._queues[name] = self._device.getOutputQueue(
+            name, 1, False).addCallback(callback)
 
     def start_pipeline(self, pipeline):
         """
@@ -218,14 +240,14 @@ class PerceptionSystem:
 
         self.start_pipeline(pipeline)
         calHandler = self._device.readCalibration()
-        self.opts_rtabmap = dai_ros.ROSNodeOptions(False, "/rtabmap", "/workspaces/rae_ws/test_params.yaml",
+        self.opts_rtabmap = dai_ros.ROSNodeOptions(False, "/rtabmap", self._config_path,
                                                    {"odom": "/diff_controller/odom",
                                                     "rgb/image": name+"/right/image_rect",
                                                     "rgb/camera_info": name+"/right/camera_info",
                                                     "depth/image": name+"/stereo/image_raw"})
         # self.rtabmap = dai_ros.RTABMapCoreWrapper(self.opts_rtabmap)
         self.opts = dai_ros.ROSNodeOptions(
-            False, "/dai", "/workspaces/rae_ws/test_params.yaml", {"t": "t"})
+            False, "/dai", self._config_path, {"t": "t"})
         self.dai_node = dai_ros.ROSNode("dai", self.opts)
 
         self._ros_stream_handles['imu'] = dai_ros.ImuStreamer(
@@ -244,7 +266,7 @@ class PerceptionSystem:
             "left", 8, False).addCallback(self.publish_ros)
         self._device.getOutputQueue(
             "right", 8, False).addCallback(self.publish_ros)
-        self.scan_front_opts = dai_ros.ROSNodeOptions(False, "/laserscan_kinect_front", "/workspaces/rae_ws/test_params.yaml",
+        self.scan_front_opts = dai_ros.ROSNodeOptions(False, "/laserscan_kinect_front", self._config_path,
                                                       {"laserscan_kinect:__node": "laserscan_kinect_front",
                                                        "/image": name+"/stereo/image_raw",
                                                        "/camera_info": name+"/stereo/camera_info",
@@ -254,7 +276,7 @@ class PerceptionSystem:
         self.laserscan_front = dai_ros.LaserScanKinectNode(
             self.scan_front_opts)
 
-        self.opts_rectify = dai_ros.ROSNodeOptions(False, "/rectify", "/workspaces/rae_ws/test_params.yaml", {
+        self.opts_rectify = dai_ros.ROSNodeOptions(False, "/rectify", self._config_path, {
                                                    "image": "/rae/right/image_raw", "camera_info": "/rae/right/camera_info", "image_rect": "/rae/right/image_rect"})
 
         self.rectify = dai_ros.ImageProcRectifyNode(self.opts_rectify)
