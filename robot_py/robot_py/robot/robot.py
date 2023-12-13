@@ -1,5 +1,5 @@
 from typing import Optional, List, Tuple
-
+import logging as log
 from .api.ros.ros_interface import ROSInterface
 from .display import DisplayController
 from .led import LEDController
@@ -8,7 +8,7 @@ from .audio import AudioController
 from sensor_msgs.msg import BatteryState
 from .perception.perception_system import PerceptionSystem
 
-
+log.basicConfig(level=log.INFO)
 class Robot:
     """
     A class representing a robot, integrating various controllers for movement, display, and LED management,
@@ -45,20 +45,20 @@ class Robot:
     def battery_state_cb(self, data):
         self.battery_state = data
 
-    def start(self, start_hardware=False):
+    def start(self, start_hardware=True):
         """
         Initializes and starts the robot's components and ROS2 communications.
         Sets up necessary controllers and subscribers for the robot's functionalities.
         """
-        self.ros_interface = ROSInterface("base_container")
-        self.ros_interface.start(start_hardware)
-        self.led_controller = LEDController(self.ros_interface)
-        self.display_controller = DisplayController(self.ros_interface)
-        self.movement_controller = MovementController(self.ros_interface)
-        self.audio_controller = AudioController(self.ros_interface)
-        self.ros_interface.create_subscriber(
+        self._ros_interface = ROSInterface("base_container")
+        self._ros_interface.start(start_hardware)
+        self._led_controller = LEDController(self._ros_interface)
+        self._display_controller = DisplayController(self._ros_interface)
+        self._movement_controller = MovementController(self._ros_interface)
+        self._audio_controller = AudioController(self._ros_interface)
+        self._ros_interface.create_subscriber(
             "/battery_status", BatteryState, self.battery_state_cb)
-        self.perception_system.setup_perception_rtabmap()
+        log.info('Robot ready')
 
     def stop(self):
         """

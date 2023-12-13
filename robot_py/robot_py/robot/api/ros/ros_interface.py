@@ -53,7 +53,7 @@ class ROSInterface:
         call_async_srv(srv_name, req): Calls a service asynchronously.
     """
 
-    def __init__(self, name: str, namespace: str) -> None:
+    def __init__(self, name: str, namespace='/rae') -> None:
         """
         Initializes the ROS2Manager instance.
 
