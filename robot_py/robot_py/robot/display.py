@@ -1,4 +1,5 @@
 import os
+import logging as log
 import cv2
 import numpy as np
 from sensor_msgs.msg import Image
@@ -33,25 +34,48 @@ def quaternion_to_rotation_matrix(q):
 
 
 class DisplayController:
-    def __init__(self, ros_manager):
-        self.ros_manager = ros_manager
-        self.ros_manager.create_publisher('/lcd', Image)
-        self.bridge = CvBridge()
-        self.screen_width = 160
-        self.screen_height = 80
-        self.assets_path = os.path.join(
+    """
+    A class for controlling the robot's display.
+
+    Attributes:
+        ros_interface (ROSInterface): An object for managing ROS2 communications and functionalities.
+        bridge (CvBridge): An object for converting between ROS2 and OpenCV image formats.
+        screen_width (int): The width of the robot's display.
+        screen_height (int): The height of the robot's display.
+        assets_path (str): The path to the robot's assets directory.
+
+    Methods:
+        stop(): Stops the display.
+        display_default(): Displays the default image on the robot's display.
+        display_face(payload): Displays a face on the robot's display.
+        display_image(image_data): Displays an image on the robot's display.
+        display_imu_data(imu_data): Displays IMU data on the robot's display.
+        display_animation(): Displays an animation on the robot's display.
+        ball_callback(): Callback method for displaying an animation on the robot's display.
+    """
+
+    def __init__(self, ros_interface):
+        self._ros_interface = ros_interface
+        self._ros_interface.create_publisher('/lcd', Image)
+        self._bridge = CvBridge()
+        self._screen_width = 160
+        self._screen_height = 80
+        self._assets_path = os.path.join(
             get_package_share_directory('robot_py'), 'assets')
-        print("Display Controller ready")
+        log.info("Display Controller ready")
 
     def stop(self):
         self.display_default()
+
+    def display_image(self, image_data):
+        ros_image = self.bridge._cv2_to_imgmsg(image_data, encoding='bgra8')
+        self._ros_interface.publish('/lcd', ros_image)
 
     def display_default(self):
         path = os.path.join(self.assets_path, 'img', 'rae-logo-white.jpg')
         image = cv2.imread(path)
         bgra_image = cv2.cvtColor(image, cv2.COLOR_BGR2BGRA)
-        ros_image = self.bridge.cv2_to_imgmsg(bgra_image, encoding='bgra8')
-        self.ros_manager.publish('/lcd', ros_image)
+        self.display_image(bgra_image)
 
     def display_face(self, payload):
         img_name = payload[1]['name']
@@ -79,12 +103,7 @@ class DisplayController:
             # Set the color of these pixels to the replacement color
             image[transparent_mask] = replacement_color + \
                 [255]  # Add full opacity to the color
-            ros_image = self.bridge.cv2_to_imgmsg(image, encoding='bgra8')
-            self.ros_manager.publish('/lcd', ros_image)
-
-    def display_image(self, image_data):
-        ros_image = self.bridge.cv2_to_imgmsg(image_data, encoding='bgra8')
-        self.ros_manager.publish('/lcd', ros_image)
+            self.display_image(image)
 
     def display_imu_data(self, imu_data):
         axis_length = 20
@@ -120,10 +139,12 @@ class DisplayController:
             cv2.line(image, tuple(axes_2d[3]), tuple(
                 axes_2d[2]), (255, 0, 0), 3)  # Z-axis in blue
             bgra_image = cv2.cvtColor(image, cv2.COLOR_BGR2BGRA)
-            ros_image = self.bridge.cv2_to_imgmsg(bgra_image, encoding='bgra8')
-            self.ros_manager.publish('/lcd', ros_image)
+            self.display_image(bgra_image)
 
-    def display_animation(self):
+    def display_animation(self, rate, callback):
+        self._ros_interface.create_timer('animation', rate, callback)
+
+    def ball_callback(self):
         # Ball properties
         self.ball_size = 20
         self.ball_color = (255, 0, 255)  # Red in BGR format
@@ -131,10 +152,6 @@ class DisplayController:
         # Ball initial position and velocity
         self.x, self.y = self.screen_width // 2, self.screen_height // 2
         self.vx, self.vy = 2, 3  # Speed of the ball in x and y direction
-        self.ros_manager.create_timer('animation', 0.05, self.ball_callback)
-
-    def ball_callback(self):
-
         image = np.zeros(
             (self.screen_height, self.screen_width, 3), dtype=np.uint8)
 
@@ -152,5 +169,4 @@ class DisplayController:
         if self.y <= self.ball_size // 2 or self.y >= self.screen_height - self.ball_size // 2:
             self.vy = -self.vy
         bgra_image = cv2.cvtColor(image, cv2.COLOR_BGR2BGRA)
-        ros_image = self.bridge.cv2_to_imgmsg(bgra_image, encoding='bgra8')
-        self.ros_manager.publish('/lcd', ros_image)
+        self.display_image(bgra_image)

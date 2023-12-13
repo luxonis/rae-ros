@@ -1,12 +1,22 @@
+import logging as log
 from rae_msgs.msg import LEDControl
 from std_msgs.msg import ColorRGBA
 
 
 class LEDController:
-    def __init__(self, ros_manager):
-        self.ros_manager = ros_manager
-        self.ros_manager.create_publisher("/leds", LEDControl)
-        print("LED Controller ready")
+    """
+    A class for controlling the robot's LEDs.
+
+    Attributes:
+        ros_interface (ROSInterface): An object for managing ROS2 communications and functionalities.
+
+    Methods:
+        set_leds(payload): Sets the robot's LEDs to a given color.
+    """
+    def __init__(self, ros_interface):
+        self._ros_interface = ros_interface
+        self._ros_interface.create_publisher("/leds", LEDControl)
+        log.info("LED Controller ready")
 
     def set_leds(self, payload):
         def hex_to_rgb(hex):
@@ -30,4 +40,4 @@ class LEDController:
         color_msg.b = normalize(b)
         led_msg.data = [color_msg]
         led_msg.control_type = led_msg.CTRL_TYPE_ALL
-        self.ros_manager.publish("/leds", led_msg)
+        self._ros_interface.publish("/leds", led_msg)

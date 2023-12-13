@@ -1,13 +1,31 @@
-from geometry_msgs.msg import Twist
+import logging as log
+from geometry_msgs.msg import Twist, TransformStamped
 
 
 class MovementController:
-    def __init__(self, ros_manager):
-        self.ros_manager = ros_manager
-        self.ros_manager.create_publisher("/cmd_vel", Twist)
-        print("Movement Controller ready")
+    """
+    A class for controlling the robot's movement.
+
+    Attributes:
+        ros_interface (ROSInterface): An object for managing ROS2 communications and functionalities.
+
+    Methods:
+        move(linear, angular): Moves the robot in a given direction.
+    """
+
+    def __init__(self, ros_interface):
+        self._ros_interface = ros_interface
+        self._ros_interface.create_publisher("/cmd_vel", Twist)
+        log.info("Movement Controller ready")
 
     def move(self, linear, angular):
+        """
+        Moves the robot in a given direction.
+
+        Args:
+            linear (float): The linear velocity.
+            angular (float): The angular velocity.
+        """
         twist_msg = Twist()
         twist_msg.linear.x = float(linear)
         twist_msg.linear.y = 0.0
@@ -15,4 +33,16 @@ class MovementController:
         twist_msg.angular.x = 0.0
         twist_msg.angular.y = 0.0
         twist_msg.angular.z = float(angular)
-        self.ros_manager.publish('/cmd_vel', twist_msg)
+        self._ros_interface.publish('/cmd_vel', twist_msg)
+
+    def get_odom_position(self) -> TransformStamped:
+        """
+        Gets the robot's current position relative to odom frame. Returns None if the robot's position is not available.
+
+        Returns:
+            TransformStamped: The robot's current position.
+
+        """
+        if self._ros_interface.get_frame_position('odom', 'base_footprint') is None:
+            return None
+        return self._ros_interface.get_frame_position('odom', 'base_footprint')
