@@ -68,7 +68,7 @@ class DisplayController:
         self.display_default()
 
     def display_image(self, image_data):
-        ros_image = self.bridge._cv2_to_imgmsg(image_data, encoding='bgra8')
+        ros_image = self._bridge._cv2_to_imgmsg(image_data, encoding='bgra8')
         self._ros_interface.publish('/lcd', ros_image)
 
     def display_default(self):
