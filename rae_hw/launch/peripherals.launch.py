@@ -27,6 +27,19 @@ def launch_setup(context, *args, **kwargs):
                     name='battery_node',
                     package='rae_hw',
                     plugin='rae_hw::BatteryNode',
+                ),
+                ComposableNode(
+                    name='lcd_node',
+                    package='rae_hw',
+                    plugin='rae_hw::LCDNode',
+                    parameters=[{
+                        'default_logo_path': LaunchConfiguration('default_logo_path')
+                    }],
+                ),
+                ComposableNode(
+                    name='led_node',
+                    package='rae_hw',
+                    plugin='rae_hw::LEDNode',
                 )
             ]),
         Node(

@@ -66,9 +66,10 @@ class Robot:
         Stops the ROS2 communications and deactivates the robot's controllers.
         Ensures a clean shutdown of all components.
         """
-        self.display_controller.stop()
-        self.ros_interface.stop()
         self.perception_system.stop()
+        if self._display_controller is not None:
+            self._display_controller.stop()
+            self._ros_interface.stop()
 
     @property
     def get_battery(self):
@@ -78,13 +79,13 @@ class Robot:
         Returns:
             BatteryState: The current state of the battery.
         """
-        return self.battery_state
+        return self._battery_state
     @property
     def perception_system(self) -> PerceptionSystem:
         """
         Returns the robot's perception system.
         """
-        return self.perception_system
+        return self._perception_system
     @property
     def ros_interface(self) -> ROSInterface:
         """

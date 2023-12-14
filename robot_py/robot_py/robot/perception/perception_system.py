@@ -5,6 +5,13 @@ import depthai_ros_py_bindings as dai_ros
 from .pipeline import rtabmap_pipeline
 from ament_index_python import get_package_share_directory
 
+ROBOTHUB_AVAILABLE=False
+try:
+    import robothub
+    ROBOTHUB_AVAILABLE = True
+except ImportError:
+    log.error("RobotHub module is not available.")
+
 class PerceptionSystem:
     """
     A class for managing camera functionalities in a robot, interfacing with both depthai and robothub libraries.
@@ -35,15 +42,10 @@ class PerceptionSystem:
         """
         Initializes the Camera instance. 
         """
-        self.robothub_available = False
-        try:
-            import robothub
-            self._robothub_available = True
-        except ImportError:
-            log.error("RobotHub module is not available.")
-
         self._pipeline = None
         self._ros_stream_handles = {}
+        self._dai_node = None
+        self._ros_context_manager = dai_ros.ROSContextManager()
         self._queues = {}
         self._config_path = os.path.join(
             get_package_share_directory('robot_py'), 'config', 'example_config.yaml')
@@ -57,7 +59,7 @@ class PerceptionSystem:
         Connects to the depthai device.
         """
         try:
-            if not self.robothub_available:
+            if not ROBOTHUB_AVAILABLE:
                 self._device = dai.Device()
                 self._cal_handler = self._device.readCalibration()
             else:
@@ -76,7 +78,7 @@ class PerceptionSystem:
         Starts the ROS context manager and spins the ROS node.
         """
         if self._pipeline is not None:
-            self.ros_context_manager.spin()
+            self._ros_context_manager.spin()
         else:
             log.error("Pipeline not set up. Please set up the pipeline.")
 
@@ -95,7 +97,7 @@ class PerceptionSystem:
             stream_name (str): The name of the stream to be added.
         """
 
-        if self.robothub_available:
+        if ROBOTHUB_AVAILABLE:
             self._rh_stream_handles[stream_name] = robothub.STREAMS.create_video(
                 self._device_mxid, stream_name, stream_name
             )
@@ -112,12 +114,10 @@ class PerceptionSystem:
         log.info(
             f'Adding ROS stream {stream_name} with socket {socket} and frame name {frame_name}')
         self._ros_stream_handles[stream_name] = dai_ros.ImgStreamer(
-            self.dai_node, self.cal_handler, socket, stream_name, frame_name)
+            self._dai_node, self._cal_handler, socket, stream_name, frame_name)
         if convertFromBitStream:
             self._ros_stream_handles[stream_name].convertFromBitStream(
                 frame_type)
-        self._ros_stream_handles[stream_name].convertFromBitStream(
-            dai.RawImgFrame.Type.BGR888i)
 
     def add_ros_imu_stream(self, stream_name, frame_name):
         """
@@ -128,7 +128,7 @@ class PerceptionSystem:
         """
         log.info(f'Adding ROS IMU stream {stream_name}')
         self._ros_stream_handles[stream_name] = dai_ros.ImuStreamer(
-            self.dai_node, stream_name, frame_name, dai_ros.ImuSyncMethod.COPY, 0.0, 0.0, 0.0, 0.0, True, False, False)
+            self._dai_node, stream_name, frame_name, dai_ros.ImuSyncMethod.COPY, 0.0, 0.0, 0.0, 0.0, True, False, False)
 
     def add_queue(self, name, callback):
         """
@@ -139,6 +139,9 @@ class PerceptionSystem:
             callback (callable): The callback function to be added to the queue.
         """
         log.info(f'Adding queue {name}')
+        if self._device is None:
+            log.error("Device is not connected. Cannot add queue.")
+            return
         self._queues[name] = self._device.getOutputQueue(
             name, 1, False).addCallback(callback)
 
@@ -150,8 +153,15 @@ class PerceptionSystem:
             pipeline: The pipeline configuration for the camera.
         """
         log.info("Starting pipeline...")
+        if (self._device is None):
+            log.error("Device is not connected. Cannot start pipeline.")
+            return
         self._device.startPipeline(pipeline)
-        self.pipeline = pipeline
+        self._pipeline = pipeline
+        self._ros_context_manager = dai_ros.ROSContextManager()
+        self._ros_context_manager.init([""], "single_threaded")
+        self.opts = dai_ros.ROSNodeOptions()
+        self._dai_node = dai_ros.ROSNode("dai", self.opts)
         log.info("Pipeline started.")
 
     def publish_rh(self, name, color_frame, timestamp, metadata):
@@ -164,7 +174,7 @@ class PerceptionSystem:
             timestamp: The timestamp associated with the frame.
             metadata: Additional metadata for the frame.
         """
-        if self.robothub_available:
+        if ROBOTHUB_AVAILABLE:
             self._rh_stream_handles[name].publish_video_data(
                 bytes(color_frame), timestamp, metadata)
         else:
@@ -207,7 +217,7 @@ class PerceptionSystem:
         left.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
         left.setFps(30)
         left.setVideoSize(640, 400)
-        # left.setPreviewSize(416, 416)
+        left.setPreviewSize(416, 416)
         left.setInterleaved(False)
 
         right = pipeline.create(dai.node.ColorCamera)
@@ -245,19 +255,19 @@ class PerceptionSystem:
                                                     "rgb/image": name+"/right/image_rect",
                                                     "rgb/camera_info": name+"/right/camera_info",
                                                     "depth/image": name+"/stereo/image_raw"})
-        # self.rtabmap = dai_ros.RTABMapCoreWrapper(self.opts_rtabmap)
+        self.rtabmap = dai_ros.RTABMapCoreWrapper(self.opts_rtabmap)
         self.opts = dai_ros.ROSNodeOptions(
             False, "/dai", self._config_path, {"t": "t"})
-        self.dai_node = dai_ros.ROSNode("dai", self.opts)
+        self._dai_node = dai_ros.ROSNode("dai", self.opts)
 
         self._ros_stream_handles['imu'] = dai_ros.ImuStreamer(
-            self.dai_node, "/rae/imu/data", "rae_imu_frame", dai_ros.ImuSyncMethod.COPY, 0.0, 0.0, 0.0, 0.0, True, False, False)
+            self._dai_node, "/rae/imu/data", "rae_imu_frame", dai_ros.ImuSyncMethod.COPY, 0.0, 0.0, 0.0, 0.0, True, False, False)
         self._ros_stream_handles['left'] = dai_ros.ImgStreamer(
-            self.dai_node, calHandler, dai.CameraBoardSocket.CAM_B, "/rae/left/image_rect", "rae_left_camera_optical_frame", 640, 400)
+            self._dai_node, calHandler, dai.CameraBoardSocket.CAM_B, "/rae/left/image_rect", "rae_left_camera_optical_frame", 640, 400)
         self._ros_stream_handles['right'] = dai_ros.ImgStreamer(
-            self.dai_node, calHandler, dai.CameraBoardSocket.CAM_C, "/rae/right/image_raw", "rae_right_camera_optical_frame", 640, 400)
+            self._dai_node, calHandler, dai.CameraBoardSocket.CAM_C, "/rae/right/image_raw", "rae_right_camera_optical_frame", 640, 400)
         self._ros_stream_handles['stereo'] = dai_ros.ImgStreamer(
-            self.dai_node, calHandler, dai.CameraBoardSocket.CAM_C, "/rae/stereo/image_raw", "rae_right_camera_optical_frame", 640, 400)
+            self._dai_node, calHandler, dai.CameraBoardSocket.CAM_C, "/rae/stereo/image_raw", "rae_right_camera_optical_frame", 640, 400)
         self._device.getOutputQueue(
             "imu", 8, False).addCallback(self.publish_ros)
         self._device.getOutputQueue(
@@ -280,8 +290,8 @@ class PerceptionSystem:
                                                    "image": "/rae/right/image_raw", "camera_info": "/rae/right/camera_info", "image_rect": "/rae/right/image_rect"})
 
         self.rectify = dai_ros.ImageProcRectifyNode(self.opts_rectify)
-        self.ros_context_manager.add_node(self.dai_node)
-        self.ros_context_manager.add_node(self.laserscan_front)
-        self.ros_context_manager.add_node(self.rectify)
-        # self.ros_context_manager.add_node(self.rtabmap)
-        self.ros_context_manager.spin()
+        # self._ros_context_manager.add_node(self._dai_node)
+        self._ros_context_manager.add_node(self.laserscan_front)
+        self._ros_context_manager.add_node(self.rectify)
+        self._ros_context_manager.add_node(self.rtabmap)
+        # self._ros_context_manager.spin()

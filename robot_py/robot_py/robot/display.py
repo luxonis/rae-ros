@@ -72,14 +72,14 @@ class DisplayController:
         self._ros_interface.publish('/lcd', ros_image)
 
     def display_default(self):
-        path = os.path.join(self.assets_path, 'img', 'rae-logo-white.jpg')
+        path = os.path.join(self._assets_path, 'img', 'rae-logo-white.jpg')
         image = cv2.imread(path)
         bgra_image = cv2.cvtColor(image, cv2.COLOR_BGR2BGRA)
         self.display_image(bgra_image)
 
     def display_face(self, payload):
         img_name = payload[1]['name']
-        image_path = f'/app/src/robot/assets/img/{img_name}.png'
+        image_path = os.path.join(self._assets_path, 'img', f'{img_name}.png')
 
         image = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
 
