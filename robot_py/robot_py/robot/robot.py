@@ -50,7 +50,7 @@ class Robot:
         Initializes and starts the robot's components and ROS2 communications.
         Sets up necessary controllers and subscribers for the robot's functionalities.
         """
-        self._ros_interface = ROSInterface("base_container")
+        self._ros_interface = ROSInterface("rae_api")
         self._ros_interface.start(start_hardware)
         self._led_controller = LEDController(self._ros_interface)
         self._display_controller = DisplayController(self._ros_interface)
