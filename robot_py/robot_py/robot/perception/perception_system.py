@@ -87,6 +87,8 @@ class PerceptionSystem:
         Closes the connection to the depthai device, ensuring a clean shutdown.
         """
         if self._device:
+            for queue in self._queues.values():
+                queue.close()
             self._device.close()
 
     def add_rh_stream(self, stream_name):
@@ -104,7 +106,7 @@ class PerceptionSystem:
         else:
             log.error("RobotHub is not available. Cannot add RobotHub stream.")
 
-    def add_ros_img_stream(self, stream_name, frame_name, socket, width, height, convertFromBitStream, frame_type):
+    def add_ros_img_stream(self, stream_name, topic_name, frame_name, socket, width=-1, height=-1, convertFromBitStream=False, frame_type=dai.RawImgFrame.Type.BGR888i):
         """
         Adds a ROS video stream with the specified name and sets up the necessary configurations.
 
@@ -114,7 +116,7 @@ class PerceptionSystem:
         log.info(
             f'Adding ROS stream {stream_name} with socket {socket} and frame name {frame_name}')
         self._ros_stream_handles[stream_name] = dai_ros.ImgStreamer(
-            self._dai_node, self._cal_handler, socket, stream_name, frame_name)
+            self._dai_node, self._cal_handler, socket, topic_name, frame_name, width, height)
         if convertFromBitStream:
             self._ros_stream_handles[stream_name].convertFromBitStream(
                 frame_type)
@@ -130,7 +132,7 @@ class PerceptionSystem:
         self._ros_stream_handles[stream_name] = dai_ros.ImuStreamer(
             self._dai_node, stream_name, frame_name, dai_ros.ImuSyncMethod.COPY, 0.0, 0.0, 0.0, 0.0, True, False, False)
 
-    def add_queue(self, name, callback):
+    def add_queue(self, name, callback=None):
         """
         Adds a queue to the depthai device for processing callbacks.
 
@@ -143,7 +145,9 @@ class PerceptionSystem:
             log.error("Device is not connected. Cannot add queue.")
             return
         self._queues[name] = self._device.getOutputQueue(
-            name, 1, False).addCallback(callback)
+            name, 1, False)
+        if callback is not None:
+            self._queues[name].addCallback(callback)
 
     def start_pipeline(self, pipeline):
         """
