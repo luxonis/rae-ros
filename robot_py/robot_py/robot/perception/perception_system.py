@@ -88,8 +88,6 @@ class PerceptionSystem:
         Closes the connection to the depthai device, ensuring a clean shutdown.
         """
         if self._device:
-            for queue in self._queues.values():
-                queue.close()
             self._device.close()
         if self._pipeline is not None:
             self._ros_context_manager.shutdown()
@@ -109,6 +107,7 @@ class PerceptionSystem:
         else:
             log.error("RobotHub is not available. Cannot add RobotHub stream.")
 
+    
     def add_ros_img_stream(self, stream_name, topic_name, frame_name, socket, width=-1, height=-1, convertFromBitStream=False, frame_type=dai.RawImgFrame.Type.BGR888i):
         """
         Adds a ROS video stream with the specified name and sets up the necessary configurations.
@@ -196,6 +195,9 @@ class PerceptionSystem:
             msg: The message to be published.
         """
         self._ros_stream_handles[name].publish(name, msg)
+
+    def get_image(self, stream_name):
+        return self._queues[stream_name].get().getCvFrame()
 
     def stream_name_to_socket(self, stream_name):
         if stream_name == 'stream_front':
