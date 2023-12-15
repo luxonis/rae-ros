@@ -297,12 +297,9 @@ class ROSInterface:
         result = future.result().result
         log.info(f'Result received: {result}')
 
-    def cancel_done(self, future):
-        cancel_response = future.result()
-        if len(cancel_response.goals_canceling) > 0:
-            self.get_logger().info('Goal successfully canceled')
-        else:
-            self.get_logger().info('Goal failed to cancel')
+    def cancel_action(self, action_name: str):
+        log.info(f"Cancelling action {action_name}")
+        self._action_clients[action_name]['goal_handle'].cancel_goal_async()
 
     def get_frame_position(self, source_frame, target_frame)-> TransformStamped:
         """
