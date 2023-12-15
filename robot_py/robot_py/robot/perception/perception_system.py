@@ -45,6 +45,7 @@ class PerceptionSystem:
         self._pipeline = None
         self._ros_stream_handles = {}
         self._dai_node = None
+        self._device = None
         self._ros_context_manager = dai_ros.ROSContextManager()
         self._queues = {}
         self._config_path = os.path.join(
@@ -90,6 +91,8 @@ class PerceptionSystem:
             for queue in self._queues.values():
                 queue.close()
             self._device.close()
+        if self._pipeline is not None:
+            self._ros_context_manager.shutdown()
 
     def add_rh_stream(self, stream_name):
         """

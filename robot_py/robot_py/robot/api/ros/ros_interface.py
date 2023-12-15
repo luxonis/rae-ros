@@ -5,12 +5,15 @@ import rclpy
 import subprocess
 from time import sleep
 import signal
+from functools import partial
 
 from typing import Any, Callable, Dict, Type
 from rclpy.executors import Executor, MultiThreadedExecutor, SingleThreadedExecutor
 from rclpy.publisher import Publisher
 from rclpy.subscription import Subscription
 from rclpy.client import Client
+from rclpy.action import ActionClient
+from rclpy.action.client import ClientGoalHandle
 from rclpy.timer import Timer
 from ament_index_python.packages import get_package_share_directory
 from tf2_ros import TransformException
@@ -20,6 +23,7 @@ from geometry_msgs.msg import TransformStamped
 
 QOS_PROFILE = 10
 
+log.basicConfig(level=log.INFO)
 
 class ROSInterface:
     """
@@ -35,6 +39,7 @@ class ROSInterface:
         _publishers (dict[str, Publisher]): Dictionary of ROS2 publishers.
         _subscribers (dict[str, Subscription]): Dictionary of ROS2 subscribers.
         _service_clients (dict[str, Client]): Dictionary of ROS2 service clients.
+        _action_clients (dict[str, dict[ActionClient]]): Dictionary of ROS2 action clients.
         _timers (dict[str, Timer]): Dictionary of ROS2 timers.
         _tf_buffer: The TF2 buffer.
         _tf_listener: The TF2 listener.
@@ -51,6 +56,9 @@ class ROSInterface:
         create_timer(timer_name, period, callback): Creates a timer for a given topic.
         create_service_client(srv_name, srv_type): Creates a service client for a given service.
         call_async_srv(srv_name, req): Calls a service asynchronously.
+        create_action_client(action_name, action_type): Creates an action client for a given action.
+        call_async_action_simple(action_name, goal): Calls an action asynchronously.
+        call_async_action(action_name, goal, goal_response_callback, goal_result_callback, goal_feedback_callback): Calls an action asynchronously.
     """
 
     def __init__(self, name: str, namespace='/rae') -> None:
@@ -68,6 +76,7 @@ class ROSInterface:
         self._publishers: dict[str, Publisher] = {}
         self._subscribers: dict[str, Subscription] = {}
         self._service_clients: dict[str, Client] = {}
+        self._action_clients: dict[str, ActionClient] = {}
         self._timers: dict[str, Timer] = {}
         self._tf_buffer = None
         self._tf_listener = None
@@ -136,16 +145,16 @@ class ROSInterface:
             log.info("ROS2 context is already stopped")
             return
 
-        if self._executor_thread:
-            self._executor.shutdown()
-            self._executor_thread.join()
-            self._executor_thread = None
-
         if self._node:
             log.info("Destroying ROS2 node...")
             self._destroy_interfaces()
             self._node.destroy_node()
             self._node = None
+
+        if self._executor_thread:
+            self._executor.shutdown()
+            self._executor_thread.join()
+            self._executor_thread = None
 
         if self._context:
             log.info("Shutting down ROS2 context...")
@@ -168,6 +177,11 @@ class ROSInterface:
         for timer_name, timer in self._timers.items():
             log.info(f"Destroying {timer_name} timer...")
             self._node.destroy_timer(timer)
+            
+        for action_name, action_client in self._action_clients.items():
+            log.info(f"Destroying {action_name} action client...")
+            action_client['goal_handle'].cancel_goal_async()
+            self._node.destroy_client(action_client['client'])
 
         self._publishers.clear()
         self._subscribers.clear()
@@ -229,6 +243,67 @@ class ROSInterface:
                     period, callback)
             else:
                 log.error(f"No callback function given for timer {timer_name}")
+
+    def create_action_client(self, action_name: str, action_type: Any) -> None:
+        if action_name not in self._action_clients:
+            if action_type is not None:
+                log.info(f"Creating {action_name} action client")
+                self._action_clients[action_name] = {}
+                self._action_clients[action_name]['client'] = ActionClient(
+                    self._node, action_type, action_name)
+            else:
+                log.warning(f"Unknown action type '{action_type}'")
+
+    def call_async_action_simple(self, action_name: str, goal: Any)-> ClientGoalHandle:
+        log.info(f"Calling action {action_name}")
+        self._action_clients[action_name]['client'].wait_for_server()
+        future = self._action_clients[action_name]['client'].send_goal_async(goal)
+        while not future.done():
+            log.info('Waiting for result...')
+            sleep(0.5)
+        return future.result()
+    
+    def call_async_action(self, action_name: str, goal: Any, goal_response_callback=None, goal_result_callback=None, goal_feedback_callback=None)-> ClientGoalHandle:
+        log.info(f"Calling action {action_name}")
+        if goal_response_callback is None:
+            self._action_clients[action_name]['goal_response_callback']=self._default_goal_response_callback
+        else:
+            self._action_clients[action_name]['goal_response_callback']=goal_response_callback
+        if goal_result_callback is None:
+            self._action_clients[action_name]['goal_result_callback']=self._default_goal_result_callback
+        else:
+            self._action_clients[action_name]['goal_result_callback']=goal_result_callback
+
+        self._action_clients[action_name]['client'].wait_for_server()
+
+        if goal_feedback_callback is None:
+            future = self._action_clients[action_name]['client'].send_goal_async(goal)
+        else:
+            future = self._action_clients[action_name]['client'].send_goal_async(goal, goal_feedback_callback)
+
+        future.add_done_callback(partial(self._action_clients[action_name]['goal_response_callback']))
+    
+    def _default_goal_response_callback(self, future):
+        action_name = '/fibonacci'
+        self._action_clients[action_name]['goal_handle'] = future.result()
+        if not self._action_clients[action_name]['goal_handle'].accepted:
+            log.info('Goal rejected :(')
+            return
+        log.info('Goal accepted :)')
+        get_result_future = self._action_clients[action_name]['goal_handle'].get_result_async()
+        get_result_future.add_done_callback(partial(self._action_clients[action_name]['goal_result_callback']))
+
+    def _default_goal_result_callback(self, future):
+        result = future.result().result
+        log.info(f'Result received: {result}')
+
+    def cancel_done(self, future):
+        cancel_response = future.result()
+        if len(cancel_response.goals_canceling) > 0:
+            self.get_logger().info('Goal successfully canceled')
+        else:
+            self.get_logger().info('Goal failed to cancel')
+
     def get_frame_position(self, source_frame, target_frame)-> TransformStamped:
         """
         Gets the position of a frame relative to another frame.

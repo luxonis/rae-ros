@@ -24,7 +24,7 @@ class AudioController:
     def __init__(self, ros_interface):
         self.ros_interface = ros_interface
         self.audio_client = self.ros_interface.create_service_client(
-            'play_audio', PlayAudio)
+            '/play_audio', PlayAudio)
         self.assets_path = os.path.join(
             get_package_share_directory('robot_py'), 'assets')
         log.info("Audio Controller ready")
@@ -32,7 +32,7 @@ class AudioController:
     def create_and_send_request(self, audio_file_path):
         req = PlayAudio.Request()
         req.mp3_file = audio_file_path
-        res = self.ros_interface.call_async_srv('play_audio', req)
+        res = self.ros_interface.call_async_srv('/play_audio', req)
         return res
 
     def play_audio_file(self, audio_file_path):
