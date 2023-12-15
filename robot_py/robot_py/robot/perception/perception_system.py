@@ -2,6 +2,7 @@ import os
 import logging as log
 import depthai as dai
 import depthai_ros_py_bindings as dai_ros
+import numpy as np
 from .pipeline import rtabmap_pipeline
 from ament_index_python import get_package_share_directory
 
@@ -31,11 +32,13 @@ class PerceptionSystem:
     Methods:
         stop(): Closes the depthai device connection.
         add_rh_stream(stream_name): Adds a RobotHub stream with the given name.
-        add_ros_stream(stream_name): Adds a ROS stream with the given name.
+        add_ros_img_stream(stream_name): Adds a ROS Image stream with the given name.
+        add_ros_imu_stream(stream_name): Adds a ROS IMU stream with the given name.
         add_queue(name, callback): Adds a queue to the device for handling callbacks.
         start_pipeline(pipeline): Starts the camera pipeline and initializes ROS node and context.
         publish_rh(name, color_frame, timestamp, metadata): Publishes video data to RobotHub.
         publish_ros(name, msg): Publishes a message to a ROS topic.
+        get_image(stream_name): Retrieves an image from the specified stream.
     """
 
     def __init__(self):
@@ -196,7 +199,16 @@ class PerceptionSystem:
         """
         self._ros_stream_handles[name].publish(name, msg)
 
-    def get_image(self, stream_name):
+    def get_image(self, stream_name) -> np.ndarray:
+        """
+        Retrieves an image from the specified stream.
+
+        Args:
+            stream_name (str): The name of the stream to retrieve the image from.
+
+        Returns:
+            Image: The image retrieved from the stream.
+        """
         return self._queues[stream_name].get().getCvFrame()
 
     def stream_name_to_socket(self, stream_name):
