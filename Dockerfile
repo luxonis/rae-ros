@@ -1,6 +1,5 @@
 FROM ghcr.io/luxonis/rae-base:2023.12.19
 
-ARG CORE_NUM=10
 ARG BUILD_TYPE="RelWithDebInfo"
 ARG SIM=0
 ENV DEBIAN_FRONTEND=noninteractive
