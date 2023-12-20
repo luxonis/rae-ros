@@ -90,11 +90,11 @@ class PerceptionSystem:
         """
         Closes the connection to the depthai device, ensuring a clean shutdown.
         """
-        if self._device:
-            self._device.close()
+
         if self._pipeline is not None:
             self._ros_context_manager.shutdown()
-
+        if self._device:
+            self._device.close()
     def add_rh_stream(self, stream_name):
         """
         Adds a video stream to RobotHub with the specified name.
@@ -276,7 +276,6 @@ class PerceptionSystem:
                                                     "rgb/image": name+"/right/image_rect",
                                                     "rgb/camera_info": name+"/right/camera_info",
                                                     "depth/image": name+"/stereo/image_raw"})
-        self.rtabmap = dai_ros.RTABMapCoreWrapper(self.opts_rtabmap)
         self.opts = dai_ros.ROSNodeOptions(
             False, "/dai", self._config_path, {"t": "t"})
         self._dai_node = dai_ros.ROSNode("dai", self.opts)
@@ -314,5 +313,3 @@ class PerceptionSystem:
         # self._ros_context_manager.add_node(self._dai_node)
         self._ros_context_manager.add_node(self.laserscan_front)
         self._ros_context_manager.add_node(self.rectify)
-        self._ros_context_manager.add_node(self.rtabmap)
-        # self._ros_context_manager.spin()
