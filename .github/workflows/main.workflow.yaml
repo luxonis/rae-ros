@@ -15,6 +15,9 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
+    permissions:
+      contents: read
+      packages: write
     env: 
       PUSH: ${{ (github.repository == 'luxonis/rae-ros') }}
     steps:
