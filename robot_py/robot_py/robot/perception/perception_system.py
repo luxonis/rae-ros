@@ -90,7 +90,6 @@ class PerceptionSystem:
         """
         Closes the connection to the depthai device, ensuring a clean shutdown.
         """
-
         if self._pipeline is not None:
             self._ros_context_manager.shutdown()
         if self._device:
