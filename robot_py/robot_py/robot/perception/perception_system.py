@@ -82,6 +82,7 @@ class PerceptionSystem:
         Starts the ROS context manager and spins the ROS node.
         """
         if self._pipeline is not None:
+            self._ros_context_manager.add_node(self._dai_node)
             self._ros_context_manager.spin()
         else:
             log.error("Pipeline not set up. Please set up the pipeline.")
