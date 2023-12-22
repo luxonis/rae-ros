@@ -5,8 +5,16 @@
       i_pipeline_type: rae
       i_enable_ir: false
       i_enable_imu: true
+      
       i_calibration_dump: false
       i_pipeline_dump: false
+    imu:
+      i_acc_cov: 0.1
+      i_gyro_cov: 0.001
+      i_batch_report_threshold: 5
+      i_max_batch_reports: 5
+      i_gyro_freq: 400
+      i_acc_freq: 65
     nn:
       i_nn_config_path: /workspaces/rae_ws/src/rae-ros/rae_camera/config/yolo.json
       i_disable_resize: true

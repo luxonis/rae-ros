@@ -27,6 +27,11 @@
   <depend>cv_bridge</depend>
   <depend>audio_msgs</depend>
   <depend>robot_localization</depend>
+  <depend>imu_tools</depend>
+  <depend>teleop_twist_keyboard</depend>
+
+  <depend>libasound2-dev</depend> 
+  <depend>libmpg123-dev</depend> 
 
   <depend>libasound2-dev</depend> 
   <depend>libmpg123-dev</depend> 
