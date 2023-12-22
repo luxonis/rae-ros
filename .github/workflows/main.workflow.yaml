@@ -5,7 +5,10 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - '*'
+      - humble
+  pull_request:
+    branches:
+      - humble
 env:
   ROS_DISTRO: humble
 
@@ -19,7 +22,7 @@ jobs:
       contents: read
       packages: write
     env: 
-      PUSH: ${{ (github.repository == 'luxonis/rae-ros') }}
+      PUSH:  ${{ (github.event_name != 'pull_request') && (github.repository == 'luxonis/rae-ros') && startsWith(github.ref, 'refs/tags/v') }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -40,6 +43,19 @@ jobs:
         if: env.PUSH == 'true'
         id: vars
         run: echo ::set-output name=short_ref::${GITHUB_REF#refs/*/}
+      - name: Build Robot
+        uses: docker/build-push-action@v3
+        if: env.PUSH == 'false'
+        with:
+          build-args: |
+            ROS_DISTRO=${{ env.ROS_DISTRO }}
+            USE_RVIZ=0
+            SIM=0
+          platforms: |
+            arm64
+            amd64
+          push: ${{ env.PUSH }}
+          no-cache: true
 
       - name: Build and Push Robot
         uses: docker/build-push-action@v3
@@ -55,4 +71,4 @@ jobs:
           push: ${{ env.PUSH }}
           no-cache: true
           tags: | 
-            ghcr.io/luxonis/rae-ros:${{ steps.vars.outputs.short_ref }}
+            ghcr.io/luxonis/rae-ros-humble:${{ steps.vars.outputs.short_ref }}
