@@ -73,4 +73,4 @@ jobs:
           push: ${{ env.PUSH }}
           no-cache: true
           tags: | 
-            ghcr.io/luxonis/rae-ros-humble:${{ steps.vars.outputs.short_ref }}
+            ghcr.io/luxonis/rae-ros:${{ steps.vars.outputs.short_ref }}
