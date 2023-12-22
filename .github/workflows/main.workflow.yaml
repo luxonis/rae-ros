@@ -6,6 +6,8 @@ on:
   push:
     branches:
       - humble
+    tags:
+      - 'v*'
   pull_request:
     branches:
       - humble
