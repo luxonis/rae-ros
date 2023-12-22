@@ -1,0 +1,85 @@
+/producer:
+  ros__parameters:
+    test_param1: 'other_value1'
+/consumer:
+  ros__parameters:
+    test_param2: 'other_value2'
+/rtabmap:
+  ros__parameters:
+    frame_id: "base_footprint"
+    subscribe_rgb: True
+    subscribe_depth: True
+    subscribe_scan: False
+    subscribe_odom_info: False
+    approx_sync: True
+    Grid/MaxGroundHeight: "0.1"
+    Grid/FromDepth: True
+    Grid/RangeMin: "0.4"
+    Grid/RangeMax: "8.0"
+    Kp/RoiRatio: "0 0 0 0.3"
+    Grid/MaxGroundAngle: "60.0"
+    Grid/FootprintHeight: "0.1"
+    Rtabmap/DetectionRate: "1.0"
+    RGBD/AngularUpdate: "0.01"
+    RGBD/LinearUpdate: "0.01"
+    # qos_scan: 2
+    # qos_image: 2
+    # qos_camera_info: 2
+    # qos_odom: 2
+    # qos_user_data: 2
+    latch: false
+    
+/spetacularAI:
+  ros__parameters:
+    # {"cam0_optical_frame_id": name + "_right_camera_optical_frame"},
+    #                     {"cam1_optical_frame_id": name + "_left_camera_optical_frame"},
+    #                     {"base_link_frame_id": LaunchConfiguration('parent_frame').perform(context)},
+    #                     {"depth_scale": 1.0/1000.0}, # Depth map values are multiplied with this to get distance in meters
+    #                     {"camera_input_type": "stereo_depth_features"},
+    #                     {"recording_folder": LaunchConfiguration('recording_folder').perform(context)},
+    #                     {"enable_mapping": True},
+    #                     {"enable_occupancy_grid": True},
+    #                     {"output_on_imu_samples": True},
+    #                     {"separate_odom_tf": True},
+    #                     {"device_model": "RAE"} # Used to fetch imu to camera transformation
+    cam0_optical_frame_id : 'rae_right_camera_optical_frame'
+    cam1_optical_frame_id : 'rae_left_camera_optical_frame'
+    base_link_frame_id : 'base_link'
+    depth_scale : 0.001
+    camera_input_type : 'stereo_depth_features'
+    recording_folder : '/tmp/spectacularAI'
+    enable_mapping : True
+    enable_occupancy_grid : True
+    output_on_imu_samples : True
+    separate_odom_tf : True
+    device_model : 'RAE'
+/laserscan_kinect_front:
+  ros__parameters:
+    # Frame id for the output laserscan.
+    output_frame_id: base_link
+    # Minimum sensor range (m).
+    range_min: 0.3
+    # Maximum sensor range (m).
+    range_max: 10.0
+    # Height of used part of depth img (px).
+    scan_height: 200
+    # Row step in depth image processing (px).
+    depth_img_row_step: 2
+    # If continously camera data update.
+    cam_model_update: false
+    # Offset in Y axis
+    vertical_offset: 180
+
+    # Height of sensor optical center mount (m).
+    sensor_mount_height: 0.8
+    # Sensor tilt angle compensation.
+    sensor_tilt_angle: -30.0
+    # Remove ground from scan.
+    ground_remove_en: false
+    # Ground margin (m).
+    ground_margin: 0.05
+    # Sensor tilt angle compensation.
+    tilt_compensation_en: true
+
+    publish_dbg_info: true
+    threads_num: 1
