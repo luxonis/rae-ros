@@ -27,10 +27,9 @@ class Robot:
         battery_state_cb(data): Callback method for updating battery state.
         start(): Initializes the robot's components and starts ROS2 communications.
         stop(): Stops the ROS2 communications and shuts down the robot's components.
-        get_battery(): Retrieves the current battery state.
     """
 
-    def __init__(self):
+    def __init__(self, name='rae_api', namespace='/rae'):
         """
         Initializes the Robot instance.
         """
@@ -41,16 +40,18 @@ class Robot:
         self._movement_controller = None
         self._audio_controller = None
         self._perception_system = PerceptionSystem()
+        self._name = name
+        self._namespace = namespace
 
     def battery_state_cb(self, data):
-        self.battery_state = data
+        self._battery_state = data
 
     def start(self, start_hardware=True):
         """
         Initializes and starts the robot's components and ROS2 communications.
         Sets up necessary controllers and subscribers for the robot's functionalities.
         """
-        self._ros_interface = ROSInterface("rae_api")
+        self._ros_interface = ROSInterface(self._name, self._namespace)
         self._ros_interface.start(start_hardware)
         self._led_controller = LEDController(self._ros_interface)
         self._display_controller = DisplayController(self._ros_interface)
@@ -72,7 +73,7 @@ class Robot:
             self._ros_interface.stop()
 
     @property
-    def get_battery(self):
+    def battery_state(self):
         """
         Retrieves the current state of the robot's battery.
 
