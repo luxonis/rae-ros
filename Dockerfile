@@ -42,7 +42,7 @@ RUN cd .$WS/src && git clone https://github.com/BrettRD/ros-gst-bridge && \
     git checkout 23980326ce8c0fefc0d5d590c2bfc9d308f35a73  # Pin latest master version at the time.
 RUN cd ${WS}/src && git clone --branch dai_ros_py https://github.com/luxonis/depthai-ros.git
 RUN cd .$WS/ && rosdep install --from-paths src --ignore-src  -y --skip-keys depthai --skip-keys depthai_bridge --skip-keys depthai_ros_driver --skip-keys audio_msgs --skip-keys laserscan_kinect --skip-keys ira_laser_tools
-RUN cd .$WS/ && . /opt/ros/${ROS_DISTRO}/setup.sh && . /sai_ros/spectacularai_ros2/install/setup.sh && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
+RUN cd .$WS/ && . /opt/ros/${ROS_DISTRO}/setup.sh && . /sai_ros/spectacularai_ros2/install/setup.sh && MAKEFLAGS="-j1 -l1" colcon build --executor sequential --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
 RUN echo "if [ -f ${WS}/install/setup.bash ]; then source ${WS}/install/setup.bash; fi" >> $HOME/.bashrc
 RUN echo "if [ -f ${WS}/install/setup.zsh ]; then source ${WS}/install/setup.zsh; fi" >> $HOME/.zshrc
 RUN chmod +x /ws/src/rae-ros/entrypoint.sh

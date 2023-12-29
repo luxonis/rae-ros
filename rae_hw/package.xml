@@ -32,7 +32,6 @@
 
   <depend>libasound2-dev</depend> 
   <depend>libmpg123-dev</depend>
-  <depend>libmp3lame-dev</depend>
   
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
