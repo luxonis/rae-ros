@@ -25,7 +25,8 @@ RUN apt-get update && apt-get -y install --no-install-recommends \
     ffmpeg \
     ros-humble-image-proc \
     git \
-    htop
+    htop \
+    lame
 
 ENV WS=/ws
 RUN mkdir -p $WS/src

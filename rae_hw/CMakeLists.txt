@@ -4,12 +4,16 @@ project(rae_hw)
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
+
 set(BUILD_SHARED_LIBS ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 # find dependencies
 find_package(ament_cmake_auto REQUIRED)
 ament_auto_find_build_dependencies()
 find_package(ALSA REQUIRED)
+find_package(std_srvs REQUIRED)
+
 
 find_library(GPIOD_LIBRARY NAMES libgpiodcxx.so)
 if(NOT GPIOD_LIBRARY)
@@ -20,7 +24,19 @@ endif()
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(MPG123 REQUIRED libmpg123)
 
-include_directories(include )
+# Find LAME library
+find_path(LAME_INCLUDE_DIR lame/lame.h)
+find_library(LAME_LIBRARY NAMES mp3lame)
+
+# Find SNDFILE library
+find_path(SNDFILE_INCLUDE_DIR sndfile.h)
+find_library(SNDFILE_LIBRARY NAMES sndfile)
+
+# Add GStreamer packages
+pkg_check_modules(GST REQUIRED gstreamer-1.0)
+
+
+include_directories(include ${GST_INCLUDE_DIRS} ${MPG123_INCLUDE_DIRS} ${LAME_INCLUDE_DIR} ${SNDFILE_INCLUDE_DIR})
 
 ament_auto_add_library(
   ${PROJECT_NAME}
@@ -31,16 +47,18 @@ ament_auto_add_library(
   src/peripherals/lcd.cpp
   src/peripherals/led.cpp
   src/peripherals/mic.cpp
+  src/audio_recorder_node.cpp
 )
-ament_target_dependencies(${PROJECT_NAME} ${DEPENDENCIES} ALSA)
 
-target_include_directories(
+ament_target_dependencies(${PROJECT_NAME} ${DEPENDENCIES} ALSA std_srvs)
+
+target_link_libraries(
   ${PROJECT_NAME}
-  ${MPG123_INCLUDE_DIRS}
-  PUBLIC
-  include
+  ${MPG123_LIBRARIES}
+  ${GPIOD_LIBRARY}
+  ${LAME_LIBRARY}
+  ${SNDFILE_LIBRARY}
 )
-target_link_libraries(${PROJECT_NAME} ${MPG123_LIBRARIES} ${GPIOD_LIBRARY})
 
 # prevent pluginlib from using boost
 target_compile_definitions(${PROJECT_NAME} PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
@@ -70,6 +88,12 @@ add_executable(speakers_node src/speakers_node.cpp)
 ament_target_dependencies(speakers_node rclcpp audio_msgs)
 target_link_libraries(speakers_node ${PROJECT_NAME})
 
+add_executable(audio_recorder_node src/audio_recorder_node.cpp)
+ament_target_dependencies(audio_recorder_node rclcpp audio_msgs)
+target_link_libraries(audio_recorder_node ${PROJECT_NAME})
+
+
+
 add_executable(test_motors test/test_motors.cpp src/rae_motors.cpp)
 target_link_libraries(test_motors ${GPIOD_LIBRARY})
 
@@ -87,7 +111,7 @@ ament_target_dependencies(test_speed rclcpp geometry_msgs)
 
 install(TARGETS
 
-  test_motors test_encoders test_max_speed test_speed mic_node speakers_node
+  test_motors test_encoders test_max_speed test_speed mic_node speakers_node audio_recorder_node
 
   DESTINATION lib/${PROJECT_NAME})
 
@@ -136,4 +160,3 @@ install(
 )
 
 ament_package()
-

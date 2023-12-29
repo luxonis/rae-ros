@@ -12,7 +12,10 @@ find_package(rosidl_default_generators REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/LEDControl.msg"
+  "msg/RAEAudio.msg"
+  "msg/ColorPeriod.msg"
   "srv/PlayAudio.srv"
+  "action/Recording.action"
   DEPENDENCIES std_msgs
 )
 

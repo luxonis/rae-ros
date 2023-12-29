@@ -40,12 +40,14 @@ def launch_setup(context, *args, **kwargs):
                     name='led_node',
                     package='rae_hw',
                     plugin='rae_hw::LEDNode',
-                )
+                ),
+                 ComposableNode(
+                    name='mic_node',
+                    package='rae_hw',
+                    plugin='rae_hw::MicNode',
+                ),
+
             ]),
-        Node(
-            package='rae_hw',
-            executable='mic_node'
-        ),
         Node(
             package='rae_hw',
             executable='speakers_node'
