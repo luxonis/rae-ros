@@ -26,7 +26,8 @@ RUN apt-get update && apt-get -y install --no-install-recommends \
     ros-humble-image-proc \
     git \
     htop \
-    lame
+    libsndfile1-dev \
+    libsndfile1
 
 ENV WS=/ws
 RUN mkdir -p $WS/src
@@ -47,7 +48,7 @@ RUN echo "if [ -f ${WS}/install/setup.bash ]; then source ${WS}/install/setup.ba
 RUN echo "if [ -f ${WS}/install/setup.zsh ]; then source ${WS}/install/setup.zsh; fi" >> $HOME/.zshrc
 RUN chmod +x /ws/src/rae-ros/entrypoint.sh
 
-ENTRYPOINT [ "/ws/src/rae/entrypoint.sh" ]
+ENTRYPOINT [ "/ws/src/rae-ros/entrypoint.sh" ]
 
 RUN rm -rf /usr/share/doc
 
