@@ -78,7 +78,7 @@ namespace rae_hw
             "leds", 10, std::bind(&LEDNode::topic_callback, this, std::placeholders::_1));
         setAllPixels(150, 10, 150, 0);
         transmitSPI();
-        timer_ = this->create_wall_timer(std::chrono::milliseconds(10), std::bind(&LEDNode::timer_callback, this));
+        timer_ = this->create_wall_timer(std::chrono::milliseconds(50), std::bind(&LEDNode::timer_callback, this));
         RCLCPP_INFO(this->get_logger(), "LED node running!");
     }
     LEDNode::~LEDNode()
@@ -89,8 +89,7 @@ namespace rae_hw
     void LEDNode::topic_callback(const rae_msgs::msg::LEDControl::SharedPtr msg) {   
     std::lock_guard<std::mutex> lock(mutex_);
     currentData_ = msg;
-    conditionVariable_.notify_one();  // Notify the LED control thread
- // Notify the LED control thread
+    conditionVariable_.notify_one();  // Notify the LED control 
 }
 
     void LEDNode::timer_callback () {
@@ -138,7 +137,6 @@ namespace rae_hw
         }
         transmitSPI();
         frame++;
-        usleep(10000);
         }}
     uint8_t LEDNode::convertColor(float num)
     {
