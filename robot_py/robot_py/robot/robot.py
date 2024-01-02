@@ -29,28 +29,17 @@ class Robot:
         stop(): Stops the ROS2 communications and shuts down the robot's components.
     """
 
-    def __init__(self, name='rae_api', namespace='/rae'):
+    def __init__(self, start_hardware=True, name='rae_api', namespace='/rae'):
         """
         Initializes the Robot instance.
+
+        Args:
+            start_hardware (bool, optional): If True, starts the robot's hardware components. Defaults to True.
+            name (str, optional): The name of the ROS2 node. Defaults to 'rae_api'.
+            namespace (str, optional): The namespace of the ROS2 node. Defaults to '/rae'.
         """
-        self._ros_interface = None
-        self._battery_state = None
-        self._led_controller = None
-        self._display_controller = None
-        self._movement_controller = None
-        self._audio_controller = None
-        self._perception_system = PerceptionSystem()
         self._name = name
         self._namespace = namespace
-
-    def battery_state_cb(self, data):
-        self._battery_state = data
-
-    def start(self, start_hardware=True):
-        """
-        Initializes and starts the robot's components and ROS2 communications.
-        Sets up necessary controllers and subscribers for the robot's functionalities.
-        """
         self._ros_interface = ROSInterface(self._name, self._namespace)
         self._ros_interface.start(start_hardware)
         self._led_controller = LEDController(self._ros_interface)
@@ -59,19 +48,24 @@ class Robot:
         self._audio_controller = AudioController(self._ros_interface)
         self._ros_interface.create_subscriber(
             "/battery_status", BatteryState, self.battery_state_cb)
-        self._perception_system.start()
+        # self._perception_system = PerceptionSystem()
+
         log.info('Robot ready')
+    def __del__(self) -> None:
+        self.stop()
 
     def stop(self):
         """
         Stops the ROS2 communications and deactivates the robot's controllers.
         Ensures a clean shutdown of all components.
         """
-        self.perception_system.stop()
+        # self._perception_system.stop()
         if self._display_controller is not None:
             self._display_controller.stop()
             self._ros_interface.stop()
 
+    def battery_state_cb(self, data):
+        self._battery_state = data
     @property
     def battery_state(self):
         """
