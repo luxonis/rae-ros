@@ -20,7 +20,7 @@ endif()
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(MPG123 REQUIRED libmpg123)
 
-include_directories(include )
+include_directories(include)
 
 ament_auto_add_library(
   ${PROJECT_NAME}
