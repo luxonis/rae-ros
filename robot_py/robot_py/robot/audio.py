@@ -36,18 +36,18 @@ class AudioController:
     def create_and_send_request(self, audio_file_path):
         req = PlayAudio.Request()
         req.mp3_file = audio_file_path
-        res = self.ros_interface.call_async_srv('/play_audio', req)
+        res = self._ros_interface.call_async_srv('/play_audio', req)
         return res
 
     def play_audio_file(self, audio_file_path):
         res = self.create_and_send_request(audio_file_path)
 
     def honk(self):
-        horn_path = os.path.join(self.assets_path, 'sfx', 'horn.mp3')
+        horn_path = os.path.join(self._assets_path, 'sfx', 'horn.mp3')
         res = self.create_and_send_request(horn_path)
 
     def play_random_sfx(self):
-        random_sfx_path = os.path.join(self.assets_path, 'sfx', 'voices')
+        random_sfx_path = os.path.join(self._assets_path, 'sfx', 'voices')
         file = random.choice(os.listdir(random_sfx_path))
         file_path = os.path.join(random_sfx_path, file)
         res = self.create_and_send_request(file_path)

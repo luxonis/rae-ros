@@ -2,34 +2,33 @@
 import sys
 del sys.path[0]
 sys.path.append('')
-
-import logging as log
-import os
-import threading
-import rclpy
-import subprocess
-import asyncio
-import multiprocessing
-from time import sleep
-import signal
-from functools import partial
-
 from typing import Any, Callable, Dict, Type
-from rclpy.executors import Executor, MultiThreadedExecutor, SingleThreadedExecutor
-from rclpy.publisher import Publisher
-from rclpy.subscription import Subscription
-from rclpy.client import Client
-from rclpy.action import ActionClient
-from rclpy.action.client import ClientGoalHandle
-from rclpy.timer import Timer
-from ament_index_python.packages import get_package_share_directory
-from tf2_ros import TransformException
-from tf2_ros.buffer import Buffer
-from tf2_ros.transform_listener import TransformListener
-from geometry_msgs.msg import TransformStamped
-from launch import LaunchDescription, LaunchService
-from launch.actions import IncludeLaunchDescription
+from functools import partial
+import signal
+from time import sleep
+import multiprocessing
+import asyncio
+import subprocess
+import rclpy
+import threading
+import os
+import logging as log
+
 from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.actions import IncludeLaunchDescription
+from launch import LaunchDescription, LaunchService
+from geometry_msgs.msg import TransformStamped
+from tf2_ros.transform_listener import TransformListener
+from tf2_ros.buffer import Buffer
+from tf2_ros import TransformException
+from ament_index_python.packages import get_package_share_directory
+from rclpy.timer import Timer
+from rclpy.action.client import ClientGoalHandle
+from rclpy.action import ActionClient
+from rclpy.client import Client
+from rclpy.subscription import Subscription
+from rclpy.publisher import Publisher
+from rclpy.executors import Executor, MultiThreadedExecutor, SingleThreadedExecutor
 
 QOS_PROFILE = 10
 
@@ -65,7 +64,6 @@ class ROSInterface:
 
     Methods
     -------
-        get_node(): Returns the current ROS2 node.
         start_hardware_process(): Starts the hardware process for ROS2.
         start(): Initializes and starts the ROS2 node and executor.
         stop_ros_process(): Stops the ROS2 hardware process.
@@ -79,10 +77,10 @@ class ROSInterface:
         create_action_client(action_name, action_type): Creates an action client for a given action.
         call_async_action_simple(action_name, goal): Calls an action asynchronously.
         call_async_action(action_name, goal, goal_response_callback, goal_result_callback, goal_feedback_callback): Calls an action asynchronously.
-    
+
     """
 
-    def __init__(self, name: str, namespace='/rae') -> None:
+    def __init__(self, name: str, namespace='', launch_mock=False) -> None:
         """
         Initialize the ROS2Manager instance.
 
@@ -90,10 +88,12 @@ class ROSInterface:
         ----
             name (str): The name of the ROS2 node.
             namespace (str): The namespace of the ROS2 node.
+            launch_mock (bool): Whether to launch the mock hardware or not.
 
         """
         self._namespace = namespace
         self._name = name
+        self._launch_mock = launch_mock
         self._launch_service = None
         self._stop_event = None
         self._process = None
@@ -107,14 +107,20 @@ class ROSInterface:
         self._tf_buffer = None
         self._tf_listener = None
 
-    def get_node(self):
+    @property
+    def node(self):
         return self._node
 
     def start_hardware_process(self):
         """Start RAE hardware drivers in a separate process."""
         self._launch_service = LaunchService(noninteractive=True)
-        ld = LaunchDescription([IncludeLaunchDescription(PythonLaunchDescriptionSource(
-            os.path.join(get_package_share_directory('rae_hw'), 'launch', 'control.launch.py')))])
+        launch_name = 'control.launch.py' if not self._launch_mock else 'control_mock.launch.py'
+        ld = LaunchDescription([
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(
+                    os.path.join(get_package_share_directory('rae_hw'), 'launch', launch_name)), 
+                    launch_arguments={'namespace': self._namespace}.items())
+        ])
         self._stop_event = multiprocessing.Event()
         self._process = multiprocessing.Process(
             target=self._run_process, args=(self._stop_event, ld), daemon=True)
@@ -133,7 +139,7 @@ class ROSInterface:
     def start(self, start_hardware) -> None:
         """
         Run RAE hardware drivers process.Initializes and starts the ROS2 node and executor. It sets up the ROS2 context and starts the ROS2 spin.
-        
+
         Args:
         ----
             start_hardware (bool): Whether to start the hardware process or not.

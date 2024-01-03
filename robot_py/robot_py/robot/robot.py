@@ -33,20 +33,22 @@ class Robot:
     
     """
 
-    def __init__(self, start_hardware=True, name='rae_api', namespace='/rae'):
+    def __init__(self, start_hardware=True, launch_mock=False, name='rae_api', namespace=''):
         """
         Initialize the Robot instance.
 
         Args:
         ----
             start_hardware (bool, optional): If True, starts the robot's hardware components. Defaults to True.
+            launch_mock (bool, optional): If True, launches mock nodes for the robot's hardware components. Defaults to False.
             name (str, optional): The name of the ROS2 node. Defaults to 'rae_api'.
-            namespace (str, optional): The namespace of the ROS2 node. Defaults to '/rae'.
+            namespace (str, optional): The namespace of the ROS2 node. Defaults to ''.
 
         """
         self._name = name
         self._namespace = namespace
-        self._ros_interface = ROSInterface(self._name, self._namespace)
+        self._launch_mock = launch_mock
+        self._ros_interface = ROSInterface(self._name, self._namespace, self._launch_mock)
         self._ros_interface.start(start_hardware)
         self._led_controller = LEDController(self._ros_interface)
         self._display_controller = DisplayController(self._ros_interface)
@@ -54,7 +56,7 @@ class Robot:
         self._audio_controller = AudioController(self._ros_interface)
         self._ros_interface.create_subscriber(
             "/battery_status", BatteryState, self.battery_state_cb)
-        # self._perception_system = PerceptionSystem()
+        self._perception_system = PerceptionSystem()
 
         log.info('Robot ready')
     def __del__(self) -> None:
@@ -66,7 +68,7 @@ class Robot:
 
         Ensures a clean shutdown of all components.
         """
-        # self._perception_system.stop()
+        self._perception_system.stop()
         if self._display_controller is not None:
             self._display_controller.stop()
             self._ros_interface.stop()
@@ -84,14 +86,14 @@ class Robot:
     def ros_interface(self) -> ROSInterface:
         return self._ros_interface
     @property
-    def led_controller(self) -> LEDController:
+    def led(self) -> LEDController:
         return self._led_controller
     @property
-    def display_controller(self) -> DisplayController:
+    def display(self) -> DisplayController:
         return self._display_controller
     @property
-    def movement_controller(self) -> MovementController:
+    def movement(self) -> MovementController:
         return self._movement_controller
     @property
-    def audio_controller(self) -> AudioController:
+    def audio(self) -> AudioController:
         return self._audio_controller
