@@ -1,4 +1,4 @@
-# needed by RH
+# needed by RH to import launch
 import sys
 del sys.path[0]
 sys.path.append('')
@@ -38,12 +38,15 @@ log.basicConfig(level=log.INFO)
 
 class ROSInterface:
     """
-    A class that manages ROS2 functionalities for a robot or a system. It includes initializing ROS2 context, 
-    creating and managing nodes, publishers, and subscribers. It also handles the startup and shutdown processes 
+    A class that manages ROS2 functionalities for a robot or a system.
+
+    It includes initializing ROS2 context, 
+    creating and managing nodes, publishers, and subscribers. 
+    It also handles the startup and shutdown processes 
     for ROS2.
 
-    Attributes:
-        ros_proc: Process for running ROS2 hardware-related commands.
+    Attributes
+    ----------
         _name (str): Name of the ROS2 node.
         _context (rclpy.context.Context | None): The ROS2 context.
         _node (rclpy.node.Node | None): The ROS2 node.
@@ -54,8 +57,14 @@ class ROSInterface:
         _timers (dict[str, Timer]): Dictionary of ROS2 timers.
         _tf_buffer: The TF2 buffer.
         _tf_listener: The TF2 listener.
+        _executor (Executor): The ROS2 executor.
+        _executor_thread (threading.Thread): The thread for the ROS2 executor.
+        _launch_service (LaunchService): The ROS2 launch service.
+        _stop_event (multiprocessing.Event): The event for stopping the ROS2 launch service.
+        _process (multiprocessing.Process): The process for running the ROS2 launch service.
 
-    Methods:
+    Methods
+    -------
         get_node(): Returns the current ROS2 node.
         start_hardware_process(): Starts the hardware process for ROS2.
         start(): Initializes and starts the ROS2 node and executor.
@@ -70,19 +79,24 @@ class ROSInterface:
         create_action_client(action_name, action_type): Creates an action client for a given action.
         call_async_action_simple(action_name, goal): Calls an action asynchronously.
         call_async_action(action_name, goal, goal_response_callback, goal_result_callback, goal_feedback_callback): Calls an action asynchronously.
+    
     """
 
     def __init__(self, name: str, namespace='/rae') -> None:
         """
-        Initializes the ROS2Manager instance.
+        Initialize the ROS2Manager instance.
 
         Args:
+        ----
             name (str): The name of the ROS2 node.
+            namespace (str): The namespace of the ROS2 node.
+
         """
         self._namespace = namespace
-        self._ros_proc = None
-        self._rs = None
         self._name = name
+        self._launch_service = None
+        self._stop_event = None
+        self._process = None
         self._context: rclpy.context.Context | None = None
         self._node: rclpy.node.Node | None = None
         self._publishers: dict[str, Publisher] = {}
@@ -97,22 +111,15 @@ class ROSInterface:
         return self._node
 
     def start_hardware_process(self):
-        """
-        Starts RAE hardware drivers in a separate process.
-        """
-        self._rs = LaunchService(noninteractive=True)
+        """Start RAE hardware drivers in a separate process."""
+        self._launch_service = LaunchService(noninteractive=True)
         ld = LaunchDescription([IncludeLaunchDescription(PythonLaunchDescriptionSource(
             os.path.join(get_package_share_directory('rae_hw'), 'launch', 'control.launch.py')))])
         self._stop_event = multiprocessing.Event()
-        self._process = multiprocessing.Process(target=self._run_process, args=(self._stop_event, ld), daemon=True)
+        self._process = multiprocessing.Process(
+            target=self._run_process, args=(self._stop_event, ld), daemon=True)
         self._process.start()
-        print('test')
-        # env = dict(os.environ)
-        # script_name = os.path.join(get_package_share_directory(
-        #     'robot_py'), 'scripts', 'start_ros.sh')
-        # self._ros_proc = subprocess.Popen(
-        #     f"bash -c 'chmod +x {script_name} ; {script_name}'", shell=True, env=env, preexec_fn=os.setsid
-        # )
+
     def _run_process(self, stop_event, launch_description):
         loop = asyncio.get_event_loop()
         launch_service = LaunchService()
@@ -122,9 +129,15 @@ class ROSInterface:
         if not launch_task.done():
             asyncio.ensure_future(launch_service.shutdown(), loop=loop)
             loop.run_until_complete(launch_task)
+
     def start(self, start_hardware) -> None:
         """
-        Runs RAE hardware drivers process.Initializes and starts the ROS2 node and executor. It sets up the ROS2 context and starts the ROS2 spin.
+        Run RAE hardware drivers process.Initializes and starts the ROS2 node and executor. It sets up the ROS2 context and starts the ROS2 spin.
+        
+        Args:
+        ----
+            start_hardware (bool): Whether to start the hardware process or not.
+
         """
         if start_hardware:
             self.start_hardware_process()
@@ -153,16 +166,15 @@ class ROSInterface:
         log.info("rlcpy thread> Done")
 
     def stop_ros_process(self):
-        """
-        Stops the ROS2 hardware process by terminating the related subprocess.
-        """
-
+        """Stop the ROS2 hardware process by terminating the related subprocess."""
         self._stop_event.set()
         self._process.join()
 
     def stop(self) -> None:
         """
-        Shuts down RAE drivers, ROS2 node and context. This includes stopping the executor, destroying publishers and subscribers,
+        Shut down RAE drivers, ROS2 node and context.
+
+        This includes stopping the executor, destroying publishers subscribers, service clients, action clients, timers
         and shutting down the ROS2 context.
         """
         self.stop_ros_process()
@@ -334,14 +346,17 @@ class ROSInterface:
 
     def get_frame_position(self, source_frame, target_frame) -> TransformStamped:
         """
-        Gets the position of a frame relative to another frame.
+        Get the position of a frame relative to another frame.
 
         Args:
+        ----
             source_frame (str): The source frame.
             target_frame (str): The target frame.
 
-        Returns:
+        Returns
+        -------
             TransformStamped: The position of the source frame relative to the target frame.
+
         """
         try:
             transform = self._tf_buffer.lookup_transform(

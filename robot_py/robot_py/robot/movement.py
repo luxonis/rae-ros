@@ -6,11 +6,14 @@ class MovementController:
     """
     A class for controlling the robot's movement.
 
-    Attributes:
+    Attributes
+    ----------
         ros_interface (ROSInterface): An object for managing ROS2 communications and functionalities.
 
-    Methods:
+    Methods
+    -------
         move(linear, angular): Moves the robot in a given direction.
+    
     """
 
     def __init__(self, ros_interface):
@@ -20,11 +23,13 @@ class MovementController:
 
     def move(self, linear, angular):
         """
-        Moves the robot in a given direction.
+        Move the robot in a given direction.
 
         Args:
+        ----
             linear (float): The linear velocity.
             angular (float): The angular velocity.
+
         """
         twist_msg = Twist()
         twist_msg.linear.x = float(linear)
@@ -37,9 +42,10 @@ class MovementController:
 
     def get_odom_position(self) -> TransformStamped:
         """
-        Gets the robot's current position relative to odom frame. Returns None if the robot's position is not available.
+        Get the robot's current position relative to odom frame. Returns None if the robot's position is not available.
 
-        Returns:
+        Returns
+        -------
             TransformStamped: The robot's current position.
 
         """

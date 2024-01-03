@@ -10,22 +10,26 @@ class AudioController:
     """
     A class for controlling the robot's audio.
 
-    Attributes:
+    Attributes
+    ----------
         ros_interface (ROSInterface): An object for managing ROS2 communications and functionalities.
         audio_client (Client): A ROS2 client for playing audio.
         assets_path (str): The path to the robot's assets directory.
 
-    Methods:
+    Methods
+    -------
         create_and_send_request(audio_file_path): Creates and sends a request to play an audio file.
         play_audio_file(audio_file_path): Plays an audio file.
         honk(): Plays a horn sound.
         play_random_sfx(): Plays a random sound effect.
+
     """
+    
     def __init__(self, ros_interface):
-        self.ros_interface = ros_interface
-        self.audio_client = self.ros_interface.create_service_client(
+        self._ros_interface = ros_interface
+        self._ros_interface.create_service_client(
             '/play_audio', PlayAudio)
-        self.assets_path = os.path.join(
+        self._assets_path = os.path.join(
             get_package_share_directory('robot_py'), 'assets')
         log.info("Audio Controller ready")
 

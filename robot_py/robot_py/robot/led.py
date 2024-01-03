@@ -7,12 +7,16 @@ class LEDController:
     """
     A class for controlling the robot's LEDs.
 
-    Attributes:
+    Attributes
+    ----------
         ros_interface (ROSInterface): An object for managing ROS2 communications and functionalities.
 
-    Methods:
+    Methods
+    -------
         set_leds(payload): Sets the robot's LEDs to a given color.
+    
     """
+    
     def __init__(self, ros_interface):
         self._ros_interface = ros_interface
         self._ros_interface.create_publisher("/leds", LEDControl)
