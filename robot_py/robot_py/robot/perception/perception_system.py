@@ -38,6 +38,7 @@ class PerceptionSystem:
         add_ros_img_stream(stream_name): Adds a ROS Image stream with the given name.
         add_ros_imu_stream(stream_name): Adds a ROS IMU stream with the given name.
         add_queue(name, callback): Adds a queue to the device for handling callbacks.
+        add_composable_node(package_name, plugin_name, options): Adds a composable node to the ROS context manager.
         start_pipeline(pipeline): Starts the camera pipeline and initializes ROS node and context.
         publish_rh(name, color_frame, timestamp, metadata): Publishes video data to RobotHub.
         publish_ros(name, msg): Publishes a message to a ROS topic.
@@ -168,6 +169,9 @@ class PerceptionSystem:
             name, 1, False)
         if callback is not None:
             self._queues[name].addCallback(callback)
+
+    def add_composable_node(self, package_name, plugin_name, options=dai_ros.ROSNodeOptions()):
+        self._ros_context_manager.add_composable_node(package_name, plugin_name, options)
 
     def start_pipeline(self, pipeline):
         """
