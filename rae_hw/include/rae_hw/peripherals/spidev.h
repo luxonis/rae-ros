@@ -18,7 +18,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-  */
+ */
 
 #ifndef SPIDEV_H
 #define SPIDEV_H
@@ -95,36 +95,32 @@
  * could send a different nine bit command (re-selecting the chip), and the
  * last transfer might write some register values.
  */
-struct spi_ioc_transfer
-{
-  __u64 tx_buf;
-  __u64 rx_buf;
+struct spi_ioc_transfer {
+    __u64 tx_buf;
+    __u64 rx_buf;
 
-  __u32 len;
-  __u32 speed_hz;
+    __u32 len;
+    __u32 speed_hz;
 
-  __u16 delay_usecs;
-  __u8 bits_per_word;
-  __u8 cs_change;
-  __u8 tx_nbits;
-  __u8 rx_nbits;
-  __u8 word_delay_usecs;
-  __u8 pad;
+    __u16 delay_usecs;
+    __u8 bits_per_word;
+    __u8 cs_change;
+    __u8 tx_nbits;
+    __u8 rx_nbits;
+    __u8 word_delay_usecs;
+    __u8 pad;
 
-  /* If the contents of 'struct spi_ioc_transfer' ever change
-	 * incompatibly, then the ioctl number (currently 0) must change;
-	 * ioctls with constant size fields get a bit more in the way of
-	 * error checking than ones (like this) where that field varies.
-	 *
-	 * NOTE: struct layout is the same in 64bit and 32bit userspace.
-	 */
+    /* If the contents of 'struct spi_ioc_transfer' ever change
+     * incompatibly, then the ioctl number (currently 0) must change;
+     * ioctls with constant size fields get a bit more in the way of
+     * error checking than ones (like this) where that field varies.
+     *
+     * NOTE: struct layout is the same in 64bit and 32bit userspace.
+     */
 };
 
 /* not all platforms use <asm-generic/ioctl.h> or _IOC_TYPECHECK() ... */
-#define SPI_MSGSIZE(N)                                                \
-  ((((N) * (sizeof(struct spi_ioc_transfer))) < (1 << _IOC_SIZEBITS)) \
-     ? ((N) * (sizeof(struct spi_ioc_transfer)))                      \
-     : 0)
+#define SPI_MSGSIZE(N) ((((N) * (sizeof(struct spi_ioc_transfer))) < (1 << _IOC_SIZEBITS)) ? ((N) * (sizeof(struct spi_ioc_transfer))) : 0)
 #define SPI_IOC_MESSAGE(N) _IOW(SPI_IOC_MAGIC, 0, char[SPI_MSGSIZE(N)])
 
 /* Read / Write of SPI mode (SPI_MODE_0..SPI_MODE_3) (limited to 8 bits) */
