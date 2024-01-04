@@ -101,39 +101,39 @@ namespace rae_hw
         
         if (currentData_->control_type == currentData_->CTRL_TYPE_ALL)
         {
-            uint8_t r = convertColor(currentData_->data[0].r);
-            uint8_t g = convertColor(currentData_->data[0].g);
-            uint8_t b = convertColor(currentData_->data[0].b);
+            uint8_t r = convertColor(currentData_->data[0].color.r);
+            uint8_t g = convertColor(currentData_->data[0].color.g);
+            uint8_t b = convertColor(currentData_->data[0].color.b);
             setAllPixels(r, g, b, currentData_-> data[0].frequency);
         }
         else if (currentData_->control_type == currentData_->CTRL_TYPE_SINGLE)
         {
-            uint8_t r = convertColor(currentData_->data[0].r);
-            uint8_t g = convertColor(currentData_->data[0].g);
-            uint8_t b = convertColor(currentData_->data[0].b);
+            uint8_t r = convertColor(currentData_->data[0].color.r);
+            uint8_t g = convertColor(currentData_->data[0].color.g);
+            uint8_t b = convertColor(currentData_->data[0].color.b);
             setSinglePixel(currentData_->single_led_n, r, g, b, currentData_-> data[0].frequency);
         }
         else if (currentData_->control_type == currentData_->CTRL_TYPE_SPINNER)
         {
-            uint8_t r = convertColor(currentData_->data[0].r);
-            uint8_t g = convertColor(currentData_->data[0].g);
-            uint8_t b = convertColor(currentData_->data[0].b);
+            uint8_t r = convertColor(currentData_->data[0].color.r);
+            uint8_t g = convertColor(currentData_->data[0].color.g);
+            uint8_t b = convertColor(currentData_->data[0].color.b);
             spinner(r, g, b, currentData_ -> animation_size, currentData_ -> animation_quantity, currentData_-> data[0].frequency);
         }
         else if (currentData_->control_type == currentData_->CTRL_TYPE_FAN)
         {
-            uint8_t r = convertColor(currentData_->data[0].r);
-            uint8_t g = convertColor(currentData_->data[0].g);
-            uint8_t b = convertColor(currentData_->data[0].b);
+            uint8_t r = convertColor(currentData_->data[0].color.r);
+            uint8_t g = convertColor(currentData_->data[0].color.g);
+            uint8_t b = convertColor(currentData_->data[0].color.b);
             fan(r, g, b, true, currentData_ -> animation_quantity, currentData_-> data[0].frequency);
         }
         else
         {
             for (int i = 0; i < WS2812B_NUM_LEDS; i++)
             {
-                uint8_t r = convertColor(currentData_->data[i].r);
-                uint8_t g = convertColor(currentData_->data[i].g);
-                uint8_t b = convertColor(currentData_->data[i].b);
+                uint8_t r = convertColor(currentData_->data[i].color.r);
+                uint8_t g = convertColor(currentData_->data[i].color.g);
+                uint8_t b = convertColor(currentData_->data[i].color.b);
                 setSinglePixel(i, r, g, b, currentData_-> data[i].frequency);
             }
         }

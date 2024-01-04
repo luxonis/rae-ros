@@ -129,11 +129,11 @@ namespace rae_hw
     sf_close(file);
 }
 
-void MicNode::startRecording(const rae_msgs::srv::RecordAudio::Request::SharedPtr request,
-                                       rae_msgs::srv::RecordAudio::Response::SharedPtr response) {
+void MicNode::startRecording(const std::shared_ptr<rae_msgs::srv::RecordAudio::Request> request,
+                             const std::shared_ptr<rae_msgs::srv::RecordAudio::Response> response) {
     // Start recording when the service is called
     recording_ = true;
-    wav_filename_ = request->filename;
+    wav_filename_ = request->file_location;
     stop_timer_ = this->create_wall_timer(std::chrono::seconds(5), std::bind(&MicNode::stopRecording, this));
     response->success = true;
     response->message = "Recording started. File will be saved to " + wav_filename_ + ".";

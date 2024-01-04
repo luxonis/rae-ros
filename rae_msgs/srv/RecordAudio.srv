@@ -1,3 +1,4 @@
 string file_location
 ---
 bool success
+string message

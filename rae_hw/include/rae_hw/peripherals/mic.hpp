@@ -8,6 +8,7 @@
 #include "rae_msgs/action/recording.hpp"
 #include "std_srvs/srv/trigger.hpp"
 #include <sndfile.h>
+#include <rae_msgs/srv/record_audio.hpp>
 
 namespace rae_hw {
 
@@ -27,10 +28,10 @@ private:
     snd_pcm_t *handle_;
     bool recording_;
     std::string wav_filename_;
-    rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr start_service_;
+    rclcpp::Service<rae_msgs::srv::RecordAudio>::SharedPtr start_service_;
     rclcpp::TimerBase::SharedPtr stop_timer_;
-    void startRecording(const std_srvs::srv::Trigger::Request::SharedPtr request,
-                        std_srvs::srv::Trigger::Response::SharedPtr response);
+    void startRecording(const std::shared_ptr<rae_msgs::srv::RecordAudio::Request> request,
+                        const std::shared_ptr<rae_msgs::srv::RecordAudio::Response> response);
     void stopRecording();
 
 };

@@ -32,7 +32,6 @@
 
   <depend>libasound2-dev</depend> 
   <depend>libmpg123-dev</depend>
-  <depend>libsndfile1</depend>
   <depend>libsndfile1-dev</depend>
   
   
