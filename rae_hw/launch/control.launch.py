@@ -60,7 +60,6 @@ def launch_setup(context, *args, **kwargs):
         Node(
             package='controller_manager',
             executable='ros2_control_node',
-            name='controller_manager',
             namespace=LaunchConfiguration('namespace'),
             parameters=[robot_description, controller_params],
             remappings=[('/diff_controller/cmd_vel_unstamped', 'cmd_vel')],
