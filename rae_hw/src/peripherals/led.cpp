@@ -79,7 +79,7 @@ namespace rae_hw
 
         setAllPixels(150, 10, 150, 0);
         transmitSPI();
-        
+
         timer_ = this->create_wall_timer(std::chrono::milliseconds(50), std::bind(&LEDNode::timer_callback, this));
         RCLCPP_INFO(this->get_logger(), "LED node running!");
     }
@@ -104,28 +104,28 @@ namespace rae_hw
             uint8_t r = convertColor(currentData_->data[0].r);
             uint8_t g = convertColor(currentData_->data[0].g);
             uint8_t b = convertColor(currentData_->data[0].b);
-            setAllPixels(r, g, b, currentData_-> data[0].f);
+            setAllPixels(r, g, b, currentData_-> data[0].frequency);
         }
         else if (currentData_->control_type == currentData_->CTRL_TYPE_SINGLE)
         {
             uint8_t r = convertColor(currentData_->data[0].r);
             uint8_t g = convertColor(currentData_->data[0].g);
             uint8_t b = convertColor(currentData_->data[0].b);
-            setSinglePixel(currentData_->single_led_n, r, g, b, currentData_-> data[0].f);
+            setSinglePixel(currentData_->single_led_n, r, g, b, currentData_-> data[0].frequency);
         }
         else if (currentData_->control_type == currentData_->CTRL_TYPE_SPINNER)
         {
             uint8_t r = convertColor(currentData_->data[0].r);
             uint8_t g = convertColor(currentData_->data[0].g);
             uint8_t b = convertColor(currentData_->data[0].b);
-            spinner(r, g, b, currentData_ -> animation_size, currentData_ -> animation_quantity, currentData_-> data[0].f);
+            spinner(r, g, b, currentData_ -> animation_size, currentData_ -> animation_quantity, currentData_-> data[0].frequency);
         }
         else if (currentData_->control_type == currentData_->CTRL_TYPE_FAN)
         {
             uint8_t r = convertColor(currentData_->data[0].r);
             uint8_t g = convertColor(currentData_->data[0].g);
             uint8_t b = convertColor(currentData_->data[0].b);
-            fan(r, g, b, true, currentData_ -> animation_quantity, currentData_-> data[0].f);
+            fan(r, g, b, true, currentData_ -> animation_quantity, currentData_-> data[0].frequency);
         }
         else
         {
@@ -134,7 +134,7 @@ namespace rae_hw
                 uint8_t r = convertColor(currentData_->data[i].r);
                 uint8_t g = convertColor(currentData_->data[i].g);
                 uint8_t b = convertColor(currentData_->data[i].b);
-                setSinglePixel(i, r, g, b, currentData_-> data[i].f);
+                setSinglePixel(i, r, g, b, currentData_-> data[i].frequency);
             }
         }
         transmitSPI();

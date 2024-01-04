@@ -1,5 +1,2 @@
-float32 r
-float32 g
-float32 b
-float32 a
-float32 f
+std_msgs/ColorRGBA color
+float32 frequency
