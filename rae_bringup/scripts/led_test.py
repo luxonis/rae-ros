@@ -31,10 +31,10 @@ class CarDemoNode(Node):
         # Set LEDs based on battery level
         # Define colors for LEDs
         colors = {
-            "white": ColorPeriod(r=1.0, g=1.0, b=1.0, a=1.0, p =2.0),
-            "yellow": ColorPeriod(r=1.0, g=1.0, b=0.0, a=1.0, p =8.0),
-            "red": ColorPeriod(r=1.0, g=0.0, b=0.0, a=1.0, p =0.0),
-            "blue": ColorPeriod(r=0.0, g=0.0, b=1.0, a=1.0, p =0.0)
+            "white": ColorPeriod(r=1.0, g=1.0, b=1.0, a=1.0, f =2.0),
+            "yellow": ColorPeriod(r=1.0, g=1.0, b=0.0, a=1.0, f =8.0),
+            "red": ColorPeriod(r=1.0, g=0.0, b=0.0, a=1.0, f =0.0),
+            "blue": ColorPeriod(r=0.0, g=0.0, b=1.0, a=1.0, f =0.0)
         }
 
 
@@ -42,7 +42,7 @@ class CarDemoNode(Node):
         # Create and publish LEDControl message for each LED
         led_msg = LEDControl()
         led_msg.header.stamp = self.get_clock().now().to_msg()
-        led_msg.data = [ColorPeriod(r=0.0, g=0.0, b=0.0, a=0.0, p =0.0)]*40
+        led_msg.data = [ColorPeriod(r=0.0, g=0.0, b=0.0, a=0.0, f =0.0)]*40
 
         for i in range(39):
             led_msg.single_led_n = 0

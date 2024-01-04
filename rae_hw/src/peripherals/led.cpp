@@ -76,8 +76,10 @@ namespace rae_hw
 
         subscription_ = this->create_subscription<rae_msgs::msg::LEDControl>(
             "leds", 10, std::bind(&LEDNode::topic_callback, this, std::placeholders::_1));
+
         setAllPixels(150, 10, 150, 0);
         transmitSPI();
+        
         timer_ = this->create_wall_timer(std::chrono::milliseconds(50), std::bind(&LEDNode::timer_callback, this));
         RCLCPP_INFO(this->get_logger(), "LED node running!");
     }
@@ -87,9 +89,9 @@ namespace rae_hw
         transmitSPI();
     }
     void LEDNode::topic_callback(const rae_msgs::msg::LEDControl::SharedPtr msg) {   
-    std::lock_guard<std::mutex> lock(mutex_);
-    currentData_ = msg;
-    conditionVariable_.notify_one();  // Notify the LED control 
+        std::lock_guard<std::mutex> lock(mutex_);
+        currentData_ = msg;
+        conditionVariable_.notify_one();  // Notify the LED control 
 }
 
     void LEDNode::timer_callback () {
@@ -102,28 +104,28 @@ namespace rae_hw
             uint8_t r = convertColor(currentData_->data[0].r);
             uint8_t g = convertColor(currentData_->data[0].g);
             uint8_t b = convertColor(currentData_->data[0].b);
-            setAllPixels(r, g, b, currentData_-> data[0].p);
+            setAllPixels(r, g, b, currentData_-> data[0].f);
         }
         else if (currentData_->control_type == currentData_->CTRL_TYPE_SINGLE)
         {
             uint8_t r = convertColor(currentData_->data[0].r);
             uint8_t g = convertColor(currentData_->data[0].g);
             uint8_t b = convertColor(currentData_->data[0].b);
-            setSinglePixel(currentData_->single_led_n, r, g, b, currentData_-> data[0].p);
+            setSinglePixel(currentData_->single_led_n, r, g, b, currentData_-> data[0].f);
         }
         else if (currentData_->control_type == currentData_->CTRL_TYPE_SPINNER)
         {
             uint8_t r = convertColor(currentData_->data[0].r);
             uint8_t g = convertColor(currentData_->data[0].g);
             uint8_t b = convertColor(currentData_->data[0].b);
-            spinner(r, g, b, currentData_ -> animation_size, currentData_ -> animation_quantity, currentData_-> data[0].p);
+            spinner(r, g, b, currentData_ -> animation_size, currentData_ -> animation_quantity, currentData_-> data[0].f);
         }
         else if (currentData_->control_type == currentData_->CTRL_TYPE_FAN)
         {
             uint8_t r = convertColor(currentData_->data[0].r);
             uint8_t g = convertColor(currentData_->data[0].g);
             uint8_t b = convertColor(currentData_->data[0].b);
-            fan(r, g, b, true, currentData_ -> animation_quantity, currentData_-> data[0].p);
+            fan(r, g, b, true, currentData_ -> animation_quantity, currentData_-> data[0].f);
         }
         else
         {
@@ -132,7 +134,7 @@ namespace rae_hw
                 uint8_t r = convertColor(currentData_->data[i].r);
                 uint8_t g = convertColor(currentData_->data[i].g);
                 uint8_t b = convertColor(currentData_->data[i].b);
-                setSinglePixel(i, r, g, b, currentData_-> data[i].p);
+                setSinglePixel(i, r, g, b, currentData_-> data[i].f);
             }
         }
         transmitSPI();
@@ -140,10 +142,7 @@ namespace rae_hw
         }}
     uint8_t LEDNode::convertColor(float num)
     {
-        
-            return static_cast<uint8_t>(round(num * 255.0));
-        
-        
+        return static_cast<uint8_t>(round(num * 255.0));
     }
     void LEDNode::transmitSPI()
     {
@@ -159,11 +158,12 @@ namespace rae_hw
         if (ret < 1)
             RCLCPP_ERROR(this->get_logger(), "can't send spi message");
     }
-    void LEDNode::fillBuffer(uint8_t color)
-    {
+    void LEDNode::fillBuffer(uint8_t color, float intensity)
+    {   
+        uint8_t scaledColor = static_cast<uint8_t>(round(color * intensity));
         for (uint8_t mask = 0x80; mask; mask >>= 1)
         {
-            if (color & mask)
+            if (scaledColor & mask)
             {
                 *ptr = 0xfc;
             }
@@ -174,9 +174,12 @@ namespace rae_hw
             ptr++;
         }
     }
-    void LEDNode::setSinglePixel(uint16_t pixel, uint8_t r, uint8_t g, uint8_t b, float period)
+    void LEDNode::setSinglePixel(uint16_t pixel, uint8_t r, uint8_t g, uint8_t b, float frequency)
     {   auto mapping_pair = logicalToPhysicalMapping.find(pixel);
-        const float intensity = (std::sin(frame / 7.85f * period + 3.14/4) + 1) / 2.0f;
+        const float phaseOffset = 3.14/4;  // Initial phase offset, if needed
+        const float amplitudeOffset = 1.0f;  // Add 1 to sine wave to avoid negative values
+        const float scaler = 2.0f;  // Scale the sine wave to 0-1
+        const float intensity = (std::sin(frame / (2 * M_PI) * frequency + phaseOffset) + amplitudeOffset) / scaler;
         if (mapping_pair != logicalToPhysicalMapping.end())
         {
             uint16_t physicalID = mapping_pair->second;
@@ -189,39 +192,42 @@ namespace rae_hw
             
         }
         
-        fillBuffer(g*intensity);
-        fillBuffer(r*intensity);
-        fillBuffer(b*intensity);
+        fillBuffer(g,intensity);
+        fillBuffer(r,intensity);
+        fillBuffer(b,intensity);
     }
 
-    void LEDNode::setAllPixels(uint8_t r, uint8_t g, uint8_t b, float period )
+    void LEDNode::setAllPixels(uint8_t r, uint8_t g, uint8_t b, float frequency )
     {
-        // printf("All pixels\n");
+        const float phaseOffset = 3.14/4;  // Initial phase offset, if needed
+        const float amplitudeOffset = 1.0f;  // Add 1 to sine wave to avoid negative values
+        const float scaler = 2.0f;  // Scale the sine wave to 0-1
+        const float intensity = (std::sin(frame / (2 * M_PI) * frequency + phaseOffset) + amplitudeOffset) / scaler;
         ptr = ws2812b_buffer;
-        const float intensity = (std::sin(frame / 7.85f * period + 3.14/4) + 1) / 2.0f;
+        
         for (uint16_t i = 0; i < WS2812B_NUM_LEDS; ++i)
         {
-            fillBuffer(g*intensity);
-            fillBuffer(r*intensity);
-            fillBuffer(b*intensity);
+            fillBuffer(g,intensity);
+            fillBuffer(r,intensity);
+            fillBuffer(b,intensity);
         }
     }
 
-    void LEDNode::spinner(uint8_t r, uint8_t g, uint8_t b,  uint8_t size, uint8_t blades, float period)
+    void LEDNode::spinner(uint8_t r, uint8_t g, uint8_t b,  uint8_t size, uint8_t blades, float frequency)
     {
         setAllPixels(0, 0, 0, 0);
         for (uint8_t i = 0; i < blades; i++)
         {
             for (uint32_t j = frame; j < frame + size; j++)
             {
-                setSinglePixel((j + i * (WS2812B_NUM_LEDS / blades)) % WS2812B_NUM_LEDS,r, g, b, period);
+                setSinglePixel((j + i * (WS2812B_NUM_LEDS / blades)) % WS2812B_NUM_LEDS,r, g, b, frequency);
             };
         };
         
         
     };
 
-    void LEDNode::fan(uint8_t r, uint8_t g, uint8_t b,  bool opening, uint8_t blades, float period)
+    void LEDNode::fan(uint8_t r, uint8_t g, uint8_t b,  bool opening, uint8_t blades, float frequency)
     {   uint8_t blade_length = WS2812B_NUM_LEDS / blades;
         uint8_t tip = frame % blade_length;
         setAllPixels(0, 0, 0, 0);
@@ -229,7 +235,7 @@ namespace rae_hw
         {
             for (uint32_t j = 0; j < (opening ? tip : blade_length - tip); j++)
             {
-                setSinglePixel((j + i * blade_length) % WS2812B_NUM_LEDS,r, g, b, period);
+                setSinglePixel((j + i * blade_length) % WS2812B_NUM_LEDS,r, g, b, frequency);
             };
         };
 

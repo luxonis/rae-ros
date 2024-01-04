@@ -2,4 +2,4 @@ float32 r
 float32 g
 float32 b
 float32 a
-float32 p
+float32 f
