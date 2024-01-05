@@ -288,6 +288,7 @@ class PerceptionSystem:
             return dai.CameraBoardSocket.CAM_D
         
     def setup_sai_slam(self):
+        self.set_executor_type("multi_threaded")
         self.start_pipeline(sai_pipeline())
         self.add_ros_imu_stream("imu", "imu/data", "rae_imu_frame")
         self.add_ros_feature_stream("trackedFeaturesRight", "right_rect_feature_tracker/tracked_features", "rae_right_camera_optical_frame")
