@@ -6,12 +6,13 @@ import numpy as np
 from .pipeline import rtabmap_pipeline
 from ament_index_python import get_package_share_directory
 
-ROBOTHUB_AVAILABLE=False
+ROBOTHUB_AVAILABLE = False
 try:
     import robothub
     ROBOTHUB_AVAILABLE = True
 except ImportError:
     log.error("RobotHub module is not available.")
+
 
 class PerceptionSystem:
     """
@@ -43,27 +44,41 @@ class PerceptionSystem:
         publish_rh(name, color_frame, timestamp, metadata): Publishes video data to RobotHub.
         publish_ros(name, msg): Publishes a message to a ROS topic.
         get_image(stream_name): Retrieves an image from the specified stream.
-        
+
     """
 
-    def __init__(self):
+    def __init__(self, namespace=''):
         """
         Initialize the Camera instance.
 
         Connect to the depthai device and initializes the ROS context manager.
+
+        Args:
+        ----
+            namespace (str, optional): The namespace for the ROS nodes. Defaults to ''.
         """
+        self._namespace = namespace
         self._pipeline = None
         self._ros_stream_handles = {}
         self._dai_node = None
         self._device = None
-        self._ros_context_manager = dai_ros.ROSContextManager()
+        self._ros_context_manager = None
+        self._executor_type = "single_threaded"
         self._queues = {}
         self._config_path = os.path.join(
             get_package_share_directory('robot_py'), 'config', 'example_config.yaml')
         if self.connect_to_device():
-            log.info("Perception module initialized. Now please set up the pipeline.")
+            log.info(
+                "Perception module initialized. Now please set up the pipeline.")
         else:
-            log.error("Could not initialize perception module. You can try again by calling the connect_to_device() method.")
+            log.error(
+                "Could not initialize perception module. You can try again by calling the connect_to_device() method.")
+
+    def __del__(self):
+        self.stop()
+
+    def set_executor_type(self, executor_type):
+        self._executor_type = executor_type
 
     def connect_to_device(self) -> bool:
         """Connect to the depthai device and initialize the calibration handler."""
@@ -96,6 +111,7 @@ class PerceptionSystem:
             self._ros_context_manager.shutdown()
         if self._device:
             self._device.close()
+
     def add_rh_stream(self, stream_name):
         """
         Add a video stream to RobotHub with the specified name.
@@ -103,7 +119,7 @@ class PerceptionSystem:
         Args:
         ----
             stream_name (str): The name of the stream to be added.
-        
+
         """
         if ROBOTHUB_AVAILABLE:
             self._rh_stream_handles[stream_name] = robothub.STREAMS.create_video(
@@ -112,7 +128,6 @@ class PerceptionSystem:
         else:
             log.error("RobotHub is not available. Cannot add RobotHub stream.")
 
-    
     def add_ros_img_stream(self, stream_name, topic_name, frame_name, socket, width=-1, height=-1, convertFromBitStream=False, frame_type=dai.RawImgFrame.Type.BGR888i):
         """
         Add a ROS video stream with the specified name and sets up the necessary configurations.
@@ -137,7 +152,7 @@ class PerceptionSystem:
             self._ros_stream_handles[stream_name].convertFromBitStream(
                 frame_type)
 
-    def add_ros_imu_stream(self, stream_name, frame_name):
+    def add_ros_imu_stream(self, stream_name, topic_name, frame_name):
         """
         Add a ROS IMU stream with the specified name and sets up the necessary configurations.
 
@@ -149,7 +164,22 @@ class PerceptionSystem:
         """
         log.info(f'Adding ROS IMU stream {stream_name}')
         self._ros_stream_handles[stream_name] = dai_ros.ImuStreamer(
-            self._dai_node, stream_name, frame_name, dai_ros.ImuSyncMethod.COPY, 0.0, 0.0, 0.0, 0.0, True, False, False)
+            self._dai_node, topic_name, frame_name, dai_ros.ImuSyncMethod.COPY, 0.0, 0.0, 0.0, 0.0, True, False, False)
+
+    def add_ros_feature_stream(self, stream_name, topic_name, frame_name):
+        """
+        Add a ROS feature stream with the specified name and sets up the necessary configurations.
+
+        Args:
+        ----
+            stream_name (str): The name of the ROS stream to be added.
+            topic_name (str): The name of the ROS topic to be published to.
+            frame_name (str): The name of the ROS frame.
+
+        """
+        log.info(f'Adding ROS feature stream {stream_name}')
+        self._ros_stream_handles[stream_name] = dai_ros.TrackedFeaturesStreamer(
+            self._dai_node, topic_name, frame_name)
 
     def add_queue(self, name, callback=None):
         """
@@ -171,7 +201,18 @@ class PerceptionSystem:
             self._queues[name].addCallback(callback)
 
     def add_composable_node(self, package_name, plugin_name, options=dai_ros.ROSNodeOptions()):
-        self._ros_context_manager.add_composable_node(package_name, plugin_name, options)
+        """
+        Add a composable node to the ROS context manager.
+
+        Args:
+        ----
+            package_name (str): The name of the ROS package.
+            plugin_name (str): The name of the ROS plugin.
+            options (dai_ros.ROSNodeOptions, optional): The options for the ROS node. Defaults to dai_ros.ROSNodeOptions().
+
+        """
+        self._ros_context_manager.add_composable_node(
+            package_name, plugin_name, options)
 
     def start_pipeline(self, pipeline):
         """
@@ -180,7 +221,7 @@ class PerceptionSystem:
         Args:
         ----
             pipeline: The pipeline configuration for the camera.
-        
+
         """
         log.info("Starting pipeline...")
         if (self._device is None):
@@ -189,8 +230,8 @@ class PerceptionSystem:
         self._device.startPipeline(pipeline)
         self._pipeline = pipeline
         self._ros_context_manager = dai_ros.ROSContextManager()
-        self._ros_context_manager.init([""], "single_threaded")
-        self.opts = dai_ros.ROSNodeOptions()
+        self._ros_context_manager.init([""], self._executor_type)
+        self.opts = dai_ros.ROSNodeOptions("dai", self._namespace)
         self._dai_node = dai_ros.ROSNode("dai", self.opts)
         log.info("Pipeline started.")
 
@@ -220,7 +261,7 @@ class PerceptionSystem:
         ----
             name (str): The name of the ROS topic.
             msg: The message to be published.
-        
+
         """
         self._ros_stream_handles[name].publish(name, msg)
 
@@ -234,7 +275,7 @@ class PerceptionSystem:
 
         Returns
         -------
-            Image: The image retrieved from the stream.
+            Image: The image retrieved from the stream in OpenCV format.
 
         """
         return self._queues[stream_name].get().getCvFrame()

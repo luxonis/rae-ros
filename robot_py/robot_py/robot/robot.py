@@ -56,7 +56,7 @@ class Robot:
         self._audio_controller = AudioController(self._ros_interface)
         self._ros_interface.create_subscriber(
             "/battery_status", BatteryState, self.battery_state_cb)
-        self._perception_system = PerceptionSystem()
+        self._perception_system = PerceptionSystem(self._namespace)
 
         log.info('Robot ready')
     def __del__(self) -> None:
