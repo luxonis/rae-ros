@@ -3,7 +3,7 @@ import logging as log
 import depthai as dai
 import depthai_ros_py_bindings as dai_ros
 import numpy as np
-from .pipeline import rtabmap_pipeline
+from .pipeline import rtabmap_pipeline, sai_pipeline
 from ament_index_python import get_package_share_directory
 
 ROBOTHUB_AVAILABLE = False
@@ -285,6 +285,32 @@ class PerceptionSystem:
             return dai.CameraBoardSocket.CAM_C
         elif stream_name == 'stream_back':
             return dai.CameraBoardSocket.CAM_D
+        
+    def setup_sai_slam(self):
+        self._robot.perception_system.start_pipeline(sai_pipeline())
+        self._robot.perception_system.add_ros_imu_stream("imu", "imu/data", "rae_imu_frame")
+        self._robot.perception_system.add_ros_feature_stream("trackedFeaturesRight", "right_rect_feature_tracker/tracked_features", "rae_right_camera_optical_frame")
+        self._robot.perception_system.add_ros_img_stream("left", "left/image_rect", "rae_left_camera_optical_frame", dai.CameraBoardSocket.CAM_B, 640, 400)
+        self._robot.perception_system.add_ros_img_stream("right", "right/image_rect", "rae_right_camera_optical_frame", dai.CameraBoardSocket.CAM_C, 640, 400)
+        self._robot.perception_system.add_ros_img_stream("stereo", "stereo/image_raw", "rae_right_camera_optical_frame", dai.CameraBoardSocket.CAM_C, 640, 400)
+        self._robot.perception_system.add_queue("imu", self._robot.perception_system.publish_ros)
+        self._robot.perception_system.add_queue("left", self._robot.perception_system.publish_ros)
+        self._robot.perception_system.add_queue("right", self._robot.perception_system.publish_ros)
+        self._robot.perception_system.add_queue("stereo", self._robot.perception_system.publish_ros)
+        self._robot.perception_system.add_queue("trackedFeaturesRight", self._robot.perception_system.publish_ros)
+
+
+        config_path = os.path.join(get_package_share_directory('robot_py'), 'config', 'example_config.yaml')
+        self.opts = dai_ros.ROSNodeOptions("spetacularAI", self._namespace, config_path, 
+                        {'input/imu': 'imu/data',
+                        '/input/cam0/image_rect': 'right/image_rect',
+                        '/input/cam1/image_rect': 'left/image_rect',
+                        '/input/cam0/camera_info': 'right/camera_info',
+                        '/input/cam1/camera_info':'left/camera_info',
+                        '/input/depth/image':'stereo/image_raw',
+                        '/input/cam0/features':'right_rect_feature_tracker/tracked_features'})
+
+        self._robot.perception_system.add_composable_node('spectacularai_ros2', 'spectacularAI::ros2::Node', self.opts)
 
     def setup_perception_rtabmap(self):
         name = '/rae'
