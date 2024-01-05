@@ -82,6 +82,7 @@ class PerceptionSystem:
 
     def connect_to_device(self) -> bool:
         """Connect to the depthai device and initialize the calibration handler."""
+        log.info("Connecting to the device...")
         try:
             if not ROBOTHUB_AVAILABLE:
                 self._device = dai.Device()
@@ -287,17 +288,17 @@ class PerceptionSystem:
             return dai.CameraBoardSocket.CAM_D
         
     def setup_sai_slam(self):
-        self._robot.perception_system.start_pipeline(sai_pipeline())
-        self._robot.perception_system.add_ros_imu_stream("imu", "imu/data", "rae_imu_frame")
-        self._robot.perception_system.add_ros_feature_stream("trackedFeaturesRight", "right_rect_feature_tracker/tracked_features", "rae_right_camera_optical_frame")
-        self._robot.perception_system.add_ros_img_stream("left", "left/image_rect", "rae_left_camera_optical_frame", dai.CameraBoardSocket.CAM_B, 640, 400)
-        self._robot.perception_system.add_ros_img_stream("right", "right/image_rect", "rae_right_camera_optical_frame", dai.CameraBoardSocket.CAM_C, 640, 400)
-        self._robot.perception_system.add_ros_img_stream("stereo", "stereo/image_raw", "rae_right_camera_optical_frame", dai.CameraBoardSocket.CAM_C, 640, 400)
-        self._robot.perception_system.add_queue("imu", self._robot.perception_system.publish_ros)
-        self._robot.perception_system.add_queue("left", self._robot.perception_system.publish_ros)
-        self._robot.perception_system.add_queue("right", self._robot.perception_system.publish_ros)
-        self._robot.perception_system.add_queue("stereo", self._robot.perception_system.publish_ros)
-        self._robot.perception_system.add_queue("trackedFeaturesRight", self._robot.perception_system.publish_ros)
+        self.start_pipeline(sai_pipeline())
+        self.add_ros_imu_stream("imu", "imu/data", "rae_imu_frame")
+        self.add_ros_feature_stream("trackedFeaturesRight", "right_rect_feature_tracker/tracked_features", "rae_right_camera_optical_frame")
+        self.add_ros_img_stream("left", "left/image_rect", "rae_left_camera_optical_frame", dai.CameraBoardSocket.CAM_B, 640, 400)
+        self.add_ros_img_stream("right", "right/image_rect", "rae_right_camera_optical_frame", dai.CameraBoardSocket.CAM_C, 640, 400)
+        self.add_ros_img_stream("stereo", "stereo/image_raw", "rae_right_camera_optical_frame", dai.CameraBoardSocket.CAM_C, 640, 400)
+        self.add_queue("imu", self.publish_ros)
+        self.add_queue("left", self.publish_ros)
+        self.add_queue("right", self.publish_ros)
+        self.add_queue("stereo", self.publish_ros)
+        self.add_queue("trackedFeaturesRight", self.publish_ros)
 
 
         config_path = os.path.join(get_package_share_directory('robot_py'), 'config', 'example_config.yaml')
@@ -310,7 +311,7 @@ class PerceptionSystem:
                         '/input/depth/image':'stereo/image_raw',
                         '/input/cam0/features':'right_rect_feature_tracker/tracked_features'})
 
-        self._robot.perception_system.add_composable_node('spectacularai_ros2', 'spectacularAI::ros2::Node', self.opts)
+        self.add_composable_node('spectacularai_ros2', 'spectacularAI::ros2::Node', self.opts)
 
     def setup_perception_rtabmap(self):
         name = '/rae'

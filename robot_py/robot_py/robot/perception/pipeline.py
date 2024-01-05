@@ -140,7 +140,7 @@ def sai_pipeline():
         left.setBoardSocket(dai.CameraBoardSocket.CAM_B)
         left.setResolution(dai.ColorCameraProperties.SensorResolution.THE_800_P)
         left.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
-        left.setFps(25)
+        left.setFps(30)
         left.setVideoSize(640, 400)
         # left.setPreviewSize(416, 416)
         left.setInterleaved(False)
@@ -149,7 +149,7 @@ def sai_pipeline():
         right.setBoardSocket(dai.CameraBoardSocket.CAM_C)
         right.setResolution(dai.ColorCameraProperties.SensorResolution.THE_800_P)
         left.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
-        right.setFps(25)
+        right.setFps(30)
         right.setVideoSize(640, 400)
         right.setInterleaved(False)
 
