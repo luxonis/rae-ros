@@ -1,0 +1,9 @@
+# Recording.action
+# Goal
+string file_location
+---
+# Feedback 
+string status_update
+---
+# Result
+bool success

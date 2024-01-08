@@ -1,15 +1,14 @@
-# This message contains uncompressed audio
+# This message contains LED data for a single LED or a group of LEDs
 
 std_msgs/Header header  
-std_msgs/ColorRGBA[] data
+rae_msgs/ColorPeriod[] data
 uint8 single_led_n
 uint8 control_type
-uint8 display_type
+uint8 animation_size
+uint8 animation_quantity
 
 uint8 CTRL_TYPE_ALL=0
 uint8 CTRL_TYPE_SINGLE=1
-uint8 CTRL_TYPE_CUSTOM=2
-
-uint8 DISP_TYPE_STD=0
-uint8 DISP_TYPE_FLASH=1
-uint8 DISP_TYPE_CIRCLE=2
+uint8 CTRL_TYPE_SPINNER=2
+uint8 CTRL_TYPE_FAN=3
+uint8 CTRL_TYPE_CUSTOM=4

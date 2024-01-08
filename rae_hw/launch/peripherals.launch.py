@@ -41,14 +41,15 @@ def launch_setup(context, *args, **kwargs):
                     package='rae_hw',
                     plugin='rae_hw::LEDNode',
                 )
+
             ]),
         Node(
             package='rae_hw',
-            executable='mic_node'
+            executable='speakers_node'
         ),
         Node(
             package='rae_hw',
-            executable='speakers_node'
+            executable='mic_node'
         ),
     ]
 

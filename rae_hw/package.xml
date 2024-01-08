@@ -31,7 +31,9 @@
   <depend>teleop_twist_keyboard</depend>
 
   <depend>libasound2-dev</depend> 
-  <depend>libmpg123-dev</depend> 
+  <depend>libmpg123-dev</depend>
+  <depend>libsndfile1-dev</depend>
+  
   
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
