@@ -1,8 +1,8 @@
 #include <iostream>
 
 // Inludes common necessary includes for development using depthai library
-#include "depthai/depthai.hpp"
 #include "cv_bridge/cv_bridge.h"
+#include "depthai/depthai.hpp"
 #include "opencv2/opencv.hpp"
 
 // Closer-in minimum depth, disparity range is doubled (from 95 to 190):
@@ -12,8 +12,7 @@ static std::atomic<bool> subpixel{false};
 // Better handling for occlusions:
 static std::atomic<bool> lr_check{true};
 
-int main()
-{
+int main() {
     // Create pipeline
     dai::Pipeline pipeline;
 
@@ -26,7 +25,6 @@ int main()
     auto depthBack = pipeline.create<dai::node::StereoDepth>();
     auto xoutFront = pipeline.create<dai::node::XLinkOut>();
     auto xoutBack = pipeline.create<dai::node::XLinkOut>();
-
 
     xoutFront->setStreamName("depth_front");
     xoutBack->setStreamName("depth_back");
@@ -76,7 +74,6 @@ int main()
     monoRightBack->video.link(depthBack->right);
     depthBack->depth.link(xoutBack->input);
 
-
     // Connect to device and start pipeline
     dai::Device device(pipeline);
 
@@ -84,8 +81,7 @@ int main()
     auto q_f = device.getOutputQueue("depth_front", 4, false);
     auto q_b = device.getOutputQueue("depth_back", 4, false);
 
-    while (true)
-    {
+    while(true) {
         auto inDepthF = q_f->get<dai::ImgFrame>();
 
         auto frameF = cv::Mat(cv::Size(inDepthF->getWidth(), inDepthF->getHeight()), CV_16UC1, inDepthF->getData().data());
@@ -115,8 +111,7 @@ int main()
         cv::imshow("depth_f", depthFrameColorF);
         cv::imshow("depth_b", depthFrameColorB);
         int key = cv::waitKey(1);
-        if (key == 'q' || key == 'Q')
-        {
+        if(key == 'q' || key == 'Q') {
             return 0;
         }
     }

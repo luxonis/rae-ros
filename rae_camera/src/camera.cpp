@@ -18,100 +18,96 @@
 #include "depthai_bridge/BridgePublisher.hpp"
 #include "depthai_bridge/ImageConverter.hpp"
 
-dai::Pipeline createPipeline(bool enable_rgb, bool enable_depth)
-{
+dai::Pipeline createPipeline(bool enable_rgb, bool enable_depth) {
     dai::Pipeline pipeline;
-    if (enable_rgb)
-    {
+    if(enable_rgb) {
         auto camRgb = pipeline.create<dai::node::ColorCamera>();
         camRgb->setResolution(dai::node::ColorCamera::Properties::SensorResolution::THE_1080_P);
         auto xoutRgb = pipeline.create<dai::node::XLinkOut>();
         camRgb->setBoardSocket(dai::CameraBoardSocket::RGB);
         camRgb->setColorOrder(dai::ColorCameraProperties::ColorOrder::BGR);
         camRgb->setInterleaved(false);
-        camRgb->setVideoSize(1280,800);
+        camRgb->setVideoSize(1280, 800);
         // camRgb->initialControl.setMisc("stride-align", 1);
         // camRgb->initialControl.setMisc("scanline-align", 1);
         xoutRgb->setStreamName("rgb");
         camRgb->video.link(xoutRgb->input);
     }
-    if (enable_depth)
-    {
-    auto leftFront = pipeline.create<dai::node::ColorCamera>();
-    auto rightFront = pipeline.create<dai::node::ColorCamera>();
-    auto leftBack = pipeline.create<dai::node::ColorCamera>();
-    auto rightBack = pipeline.create<dai::node::ColorCamera>();
-    auto depthFront = pipeline.create<dai::node::StereoDepth>();
-    auto depthBack = pipeline.create<dai::node::StereoDepth>();
-    auto xoutFront = pipeline.create<dai::node::XLinkOut>();
-    auto xoutBack = pipeline.create<dai::node::XLinkOut>();
-    auto xoutRightFront = pipeline.create<dai::node::XLinkOut>();
+    if(enable_depth) {
+        auto leftFront = pipeline.create<dai::node::ColorCamera>();
+        auto rightFront = pipeline.create<dai::node::ColorCamera>();
+        auto leftBack = pipeline.create<dai::node::ColorCamera>();
+        auto rightBack = pipeline.create<dai::node::ColorCamera>();
+        auto depthFront = pipeline.create<dai::node::StereoDepth>();
+        auto depthBack = pipeline.create<dai::node::StereoDepth>();
+        auto xoutFront = pipeline.create<dai::node::XLinkOut>();
+        auto xoutBack = pipeline.create<dai::node::XLinkOut>();
+        auto xoutRightFront = pipeline.create<dai::node::XLinkOut>();
 
-    xoutFront->setStreamName("depth_front");
-    xoutRightFront->setStreamName("right_front");
-    xoutBack->setStreamName("depth_back");
-    // rightFront->initialControl.setMisc("stride-align", 1);
-    // rightFront->initialControl.setMisc("scanline-align", 1);
+        xoutFront->setStreamName("depth_front");
+        xoutRightFront->setStreamName("right_front");
+        xoutBack->setStreamName("depth_back");
+        // rightFront->initialControl.setMisc("stride-align", 1);
+        // rightFront->initialControl.setMisc("scanline-align", 1);
 
-    // Properties
-    leftFront->setResolution(dai::node::ColorCamera::Properties::SensorResolution::THE_800_P);
-    leftFront->setBoardSocket(dai::CameraBoardSocket::LEFT);
-    rightFront->setResolution(dai::node::ColorCamera::Properties::SensorResolution::THE_800_P);
-    rightFront->setBoardSocket(dai::CameraBoardSocket::RIGHT);
-    leftFront->setVideoSize(640, 400);
-    rightFront->setVideoSize(640,400);
-    // leftFront->setFps(15.0);
-    // rightFront->setFps(15.0);
+        // Properties
+        leftFront->setResolution(dai::node::ColorCamera::Properties::SensorResolution::THE_800_P);
+        leftFront->setBoardSocket(dai::CameraBoardSocket::LEFT);
+        rightFront->setResolution(dai::node::ColorCamera::Properties::SensorResolution::THE_800_P);
+        rightFront->setBoardSocket(dai::CameraBoardSocket::RIGHT);
+        leftFront->setVideoSize(640, 400);
+        rightFront->setVideoSize(640, 400);
+        // leftFront->setFps(15.0);
+        // rightFront->setFps(15.0);
 
-    leftBack->setResolution(dai::node::ColorCamera::Properties::SensorResolution::THE_800_P);
-    leftBack->setBoardSocket(dai::CameraBoardSocket::CAM_D);
-    rightBack->setResolution(dai::node::ColorCamera::Properties::SensorResolution::THE_800_P);
-    rightBack->setBoardSocket(dai::CameraBoardSocket::CAM_E);
-    leftBack->setVideoSize(640,400);
-    rightBack->setVideoSize(640, 400);
-    // leftBack->setFps(15.0);
-    // rightBack->setFps(15.0);
+        leftBack->setResolution(dai::node::ColorCamera::Properties::SensorResolution::THE_800_P);
+        leftBack->setBoardSocket(dai::CameraBoardSocket::CAM_D);
+        rightBack->setResolution(dai::node::ColorCamera::Properties::SensorResolution::THE_800_P);
+        rightBack->setBoardSocket(dai::CameraBoardSocket::CAM_E);
+        leftBack->setVideoSize(640, 400);
+        rightBack->setVideoSize(640, 400);
+        // leftBack->setFps(15.0);
+        // rightBack->setFps(15.0);
 
-    // Create a node that will produce the depth map (using disparity output as it's easier to visualize depth this way)
-    depthFront->setDefaultProfilePreset(dai::node::StereoDepth::PresetMode::HIGH_DENSITY);
-    depthFront->initialConfig.setMedianFilter(dai::MedianFilter::KERNEL_7x7);
-    depthFront->setLeftRightCheck(10);
-    depthFront->setExtendedDisparity(false);
-    depthFront->setSubpixel(true);
-    auto config = depthFront->initialConfig.get();
-    config.postProcessing.speckleFilter.enable = false;
-    config.postProcessing.speckleFilter.speckleRange = 50;
-    config.postProcessing.temporalFilter.enable = false;
-    config.postProcessing.spatialFilter.enable = false;
-    config.postProcessing.spatialFilter.holeFillingRadius = 2;
-    config.postProcessing.spatialFilter.numIterations = 1;
-    config.postProcessing.thresholdFilter.minRange = 400;
-    config.postProcessing.thresholdFilter.maxRange = 15000;
-    config.postProcessing.decimationFilter.decimationFactor = 1;
-    depthFront->initialConfig.set(config);
+        // Create a node that will produce the depth map (using disparity output as it's easier to visualize depth this way)
+        depthFront->setDefaultProfilePreset(dai::node::StereoDepth::PresetMode::HIGH_DENSITY);
+        depthFront->initialConfig.setMedianFilter(dai::MedianFilter::KERNEL_7x7);
+        depthFront->setLeftRightCheck(10);
+        depthFront->setExtendedDisparity(false);
+        depthFront->setSubpixel(true);
+        auto config = depthFront->initialConfig.get();
+        config.postProcessing.speckleFilter.enable = false;
+        config.postProcessing.speckleFilter.speckleRange = 50;
+        config.postProcessing.temporalFilter.enable = false;
+        config.postProcessing.spatialFilter.enable = false;
+        config.postProcessing.spatialFilter.holeFillingRadius = 2;
+        config.postProcessing.spatialFilter.numIterations = 1;
+        config.postProcessing.thresholdFilter.minRange = 400;
+        config.postProcessing.thresholdFilter.maxRange = 15000;
+        config.postProcessing.decimationFilter.decimationFactor = 1;
+        depthFront->initialConfig.set(config);
 
-    depthBack->setDefaultProfilePreset(dai::node::StereoDepth::PresetMode::HIGH_DENSITY);
-    depthBack->initialConfig.setMedianFilter(dai::MedianFilter::KERNEL_7x7);
-    depthBack->setLeftRightCheck(10);
-    depthBack->setExtendedDisparity(false);
-    depthBack->setSubpixel(true);
-    depthBack->initialConfig.set(config);
+        depthBack->setDefaultProfilePreset(dai::node::StereoDepth::PresetMode::HIGH_DENSITY);
+        depthBack->initialConfig.setMedianFilter(dai::MedianFilter::KERNEL_7x7);
+        depthBack->setLeftRightCheck(10);
+        depthBack->setExtendedDisparity(false);
+        depthBack->setSubpixel(true);
+        depthBack->initialConfig.set(config);
 
-    // Linking
-    leftFront->video.link(depthFront->left);
-    rightFront->video.link(depthFront->right);
-    rightFront->video.link(xoutRightFront->input);
-    depthFront->depth.link(xoutFront->input);
+        // Linking
+        leftFront->video.link(depthFront->left);
+        rightFront->video.link(depthFront->right);
+        rightFront->video.link(xoutRightFront->input);
+        depthFront->depth.link(xoutFront->input);
 
-    leftBack->video.link(depthBack->left);
-    rightBack->video.link(depthBack->right);
-    depthBack->depth.link(xoutBack->input);
+        leftBack->video.link(depthBack->left);
+        rightBack->video.link(depthBack->right);
+        depthBack->depth.link(xoutBack->input);
     }
     return pipeline;
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char** argv) {
     rclcpp::init(argc, argv);
     auto node = rclcpp::Node::make_shared("rae_camera");
     bool enable_rgb = node->declare_parameter<bool>("enable_rgb", true);
@@ -140,8 +136,7 @@ int main(int argc, char **argv)
     dai::rosBridge::ImageConverter stereoBackConverter(tfPrefix + "_right_back_camera_optical_frame", true);
     dai::rosBridge::ImageConverter rgbConverter(tfPrefix + "_rgb_camera_optical_frame", false);
 
-    if (enable_depth)
-    {
+    if(enable_depth) {
         auto depthFrontCameraInfo = stereoFrontConverter.calibrationToCameraInfo(calibrationHandler, dai::CameraBoardSocket::CAM_C, width, height);
 
         auto stereoFrontQueue = device->getOutputQueue("depth_front", 8, false);
@@ -150,8 +145,8 @@ int main(int argc, char **argv)
             node,
             std::string("/rae/stereo_front/image_raw"),
             std::bind(&dai::rosBridge::ImageConverter::toRosMsg,
-                      &stereoFrontConverter, // since the converter has the same frame name
-                                       // and image type is also same we can reuse it
+                      &stereoFrontConverter,  // since the converter has the same frame name
+                                              // and image type is also same we can reuse it
                       std::placeholders::_1,
                       std::placeholders::_2),
             30,
@@ -165,15 +160,14 @@ int main(int argc, char **argv)
             node,
             std::string("/rae/right_front/image_raw"),
             std::bind(&dai::rosBridge::ImageConverter::toRosMsg,
-                      &stereoFrontConverter, // since the converter has the same frame name
-                                       // and image type is also same we can reuse it
+                      &stereoFrontConverter,  // since the converter has the same frame name
+                                              // and image type is also same we can reuse it
                       std::placeholders::_1,
                       std::placeholders::_2),
             30,
             depthFrontCameraInfo,
             "/rae/right_front");
         rightFrontPublish->addPublisherCallback();
-
 
         auto depthBackCameraInfo = stereoBackConverter.calibrationToCameraInfo(calibrationHandler, dai::CameraBoardSocket::CAM_E, width, height);
 
@@ -183,19 +177,18 @@ int main(int argc, char **argv)
             node,
             std::string("/rae/stereo_back/image_raw"),
             std::bind(&dai::rosBridge::ImageConverter::toRosMsg,
-                      &stereoBackConverter, // since the converter has the same frame name
-                                       // and image type is also same we can reuse it
+                      &stereoBackConverter,  // since the converter has the same frame name
+                                             // and image type is also same we can reuse it
                       std::placeholders::_1,
                       std::placeholders::_2),
             30,
             depthBackCameraInfo,
             "/rae/stereo_back");
         depthBackPublish->addPublisherCallback();
-
     }
-    if (enable_rgb)
-    {
-        sensor_msgs::msg::CameraInfo rgbCameraInfo = rgbConverter.calibrationToCameraInfo(calibrationHandler, dai::CameraBoardSocket::RIGHT, width, height);;
+    if(enable_rgb) {
+        sensor_msgs::msg::CameraInfo rgbCameraInfo = rgbConverter.calibrationToCameraInfo(calibrationHandler, dai::CameraBoardSocket::RIGHT, width, height);
+        ;
         auto imgQueue = device->getOutputQueue("rgb", 30, false);
         rgbPublish = std::make_shared<dai::rosBridge::BridgePublisher<sensor_msgs::msg::Image, dai::ImgFrame>>(
             imgQueue,

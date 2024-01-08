@@ -3,8 +3,7 @@
 // Includes common necessary includes for development using depthai library
 #include "depthai/depthai.hpp"
 #include "opencv2/opencv.hpp"
-int main()
-{
+int main() {
     // Create pipeline
     dai::Pipeline pipeline;
 
@@ -40,24 +39,21 @@ int main()
     auto qLeft = device.getOutputQueue("left", 30, false);
     auto qRight = device.getOutputQueue("right", 4, false);
 
-    while (true)
-    {
+    while(true) {
         // Instead of get (blocking), we use tryGet (non-blocking) which will return the available data or None otherwise
         auto inLeft = qLeft->get<dai::ImgFrame>();
         auto inRight = qRight->get<dai::ImgFrame>();
-            cv::Mat leftFrame;
-            cv::Size s(inLeft->getWidth(), inLeft->getHeight());
-            std::vector<cv::Mat> channelsL;
-            // // BGR
-            channelsL.push_back(cv::Mat(s, CV_8UC1, inLeft->getData().data() + s.area() * 0));
-            // channelsL.push_back(cv::Mat(s, CV_8UC1, inLeft->getData().data() + s.area() * 1));
-            // channelsL.push_back(cv::Mat(s, CV_8UC1, inLeft->getData().data() + s.area() * 2));
-            cv::merge(channelsL, leftFrame);
-            cv::imshow("left", leftFrame);
-        
+        cv::Mat leftFrame;
+        cv::Size s(inLeft->getWidth(), inLeft->getHeight());
+        std::vector<cv::Mat> channelsL;
+        // // BGR
+        channelsL.push_back(cv::Mat(s, CV_8UC1, inLeft->getData().data() + s.area() * 0));
+        // channelsL.push_back(cv::Mat(s, CV_8UC1, inLeft->getData().data() + s.area() * 1));
+        // channelsL.push_back(cv::Mat(s, CV_8UC1, inLeft->getData().data() + s.area() * 2));
+        cv::merge(channelsL, leftFrame);
+        cv::imshow("left", leftFrame);
 
-        if (inRight)
-        {
+        if(inRight) {
             cv::Mat rightFrame;
             cv::Size s(inRight->getWidth(), inRight->getHeight());
             std::vector<cv::Mat> channelsR;
@@ -68,8 +64,7 @@ int main()
         }
 
         int key = cv::waitKey(1);
-        if (key == 'q' || key == 'Q')
-        {
+        if(key == 'q' || key == 'Q') {
             return 0;
         }
     }

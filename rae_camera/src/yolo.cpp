@@ -10,33 +10,30 @@ The blob was compiled following this tutorial: https://github.com/TNTWEN/OpenVIN
 */
 
 static const std::vector<std::string> labelMap = {
-    "person", "bicycle", "car", "motorbike", "aeroplane", "bus", "train", "truck", "boat",
-    "traffic light", "fire hydrant", "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse",
-    "sheep", "cow", "elephant", "bear", "zebra", "giraffe", "backpack", "umbrella", "handbag",
-    "tie", "suitcase", "frisbee", "skis", "snowboard", "sports ball", "kite", "baseball bat", "baseball glove",
-    "skateboard", "surfboard", "tennis racket", "bottle", "wine glass", "cup", "fork", "knife", "spoon",
-    "bowl", "banana", "apple", "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza",
-    "donut", "cake", "chair", "sofa", "pottedplant", "bed", "diningtable", "toilet", "tvmonitor",
-    "laptop", "mouse", "remote", "keyboard", "cell phone", "microwave", "oven", "toaster", "sink",
-    "refrigerator", "book", "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush"};
+    "person",        "bicycle",      "car",           "motorbike",     "aeroplane",   "bus",         "train",       "truck",        "boat",
+    "traffic light", "fire hydrant", "stop sign",     "parking meter", "bench",       "bird",        "cat",         "dog",          "horse",
+    "sheep",         "cow",          "elephant",      "bear",          "zebra",       "giraffe",     "backpack",    "umbrella",     "handbag",
+    "tie",           "suitcase",     "frisbee",       "skis",          "snowboard",   "sports ball", "kite",        "baseball bat", "baseball glove",
+    "skateboard",    "surfboard",    "tennis racket", "bottle",        "wine glass",  "cup",         "fork",        "knife",        "spoon",
+    "bowl",          "banana",       "apple",         "sandwich",      "orange",      "broccoli",    "carrot",      "hot dog",      "pizza",
+    "donut",         "cake",         "chair",         "sofa",          "pottedplant", "bed",         "diningtable", "toilet",       "tvmonitor",
+    "laptop",        "mouse",        "remote",        "keyboard",      "cell phone",  "microwave",   "oven",        "toaster",      "sink",
+    "refrigerator",  "book",         "clock",         "vase",          "scissors",    "teddy bear",  "hair drier",  "toothbrush"};
 
 static std::atomic<bool> syncNN{false};
 
-int main(int argc, char **argv)
-{
+int main(int argc, char** argv) {
     using namespace std;
     using namespace std::chrono;
     std::string nnPath("/workspaces/rae_ws/yolov6n_416x416_openvino2022.1_vpux.blob");
 
     // If path to blob specified, use that
-    if (argc > 1)
-    {
+    if(argc > 1) {
         nnPath = std::string(argv[1]);
     }
 
     // Print which blob we are using
     printf("Using blob at path: %s\n", nnPath.c_str());
-
 
     // Create pipeline
     dai::Pipeline pipeline;
@@ -68,7 +65,6 @@ int main(int argc, char **argv)
     monoLeft->setBoardSocket(dai::CameraBoardSocket::LEFT);
     monoRight->setResolution(dai::ColorCameraProperties::SensorResolution::THE_800_P);
     monoRight->setBoardSocket(dai::CameraBoardSocket::RIGHT);
-
 
     // setting node configs
     stereo->setDefaultProfilePreset(dai::node::StereoDepth::PresetMode::HIGH_DENSITY);
@@ -143,9 +139,7 @@ int main(int argc, char **argv)
     float fps = 0;
     auto color = cv::Scalar(255, 255, 255);
     bool printOutputLayersOnce = true;
-    while (true)
-    {
-
+    while(true) {
         auto imgFrame = previewQueue->get<dai::ImgFrame>();
         auto inDet = detectionNNQueue->get<dai::SpatialImgDetections>();
         auto depth = depthQueue->get<dai::ImgFrame>();
@@ -161,12 +155,12 @@ int main(int argc, char **argv)
         }
         cv::Mat frame;
         cv::Size s(imgFrame->getWidth(), imgFrame->getHeight());
-            std::vector<cv::Mat> channels;
-            // BGR
-            channels.push_back(cv::Mat(s, CV_8UC1, imgFrame->getData().data() + s.area() * 0));
-            channels.push_back(cv::Mat(s, CV_8UC1, imgFrame->getData().data() + s.area() * 1));
-            channels.push_back(cv::Mat(s, CV_8UC1, imgFrame->getData().data() + s.area() * 2));
-            cv::merge(channels, frame);
+        std::vector<cv::Mat> channels;
+        // BGR
+        channels.push_back(cv::Mat(s, CV_8UC1, imgFrame->getData().data() + s.area() * 0));
+        channels.push_back(cv::Mat(s, CV_8UC1, imgFrame->getData().data() + s.area() * 1));
+        channels.push_back(cv::Mat(s, CV_8UC1, imgFrame->getData().data() + s.area() * 2));
+        cv::merge(channels, frame);
         cv::Mat depthFrame = cv::Mat(cv::Size(depth->getWidth(), depth->getHeight()), CV_16UC1, depth->getData().data());
 
         cv::Mat depthFrameColor;
@@ -238,5 +232,4 @@ int main(int argc, char **argv)
         }
     }
     return 0;
-
 }
