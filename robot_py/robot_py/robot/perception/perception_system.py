@@ -286,127 +286,73 @@ class PerceptionSystem:
             return dai.CameraBoardSocket.CAM_C
         elif stream_name == 'stream_back':
             return dai.CameraBoardSocket.CAM_D
-        
+
     def setup_sai_slam(self):
         self.set_executor_type("multi_threaded")
         self.start_pipeline(sai_pipeline())
         self.add_ros_imu_stream("imu", "imu/data", "rae_imu_frame")
-        self.add_ros_feature_stream("trackedFeaturesRight", "right_rect_feature_tracker/tracked_features", "rae_right_camera_optical_frame")
-        self.add_ros_img_stream("left", "left/image_rect", "rae_left_camera_optical_frame", dai.CameraBoardSocket.CAM_B, 640, 400)
-        self.add_ros_img_stream("right", "right/image_rect", "rae_right_camera_optical_frame", dai.CameraBoardSocket.CAM_C, 640, 400)
-        self.add_ros_img_stream("stereo", "stereo/image_raw", "rae_right_camera_optical_frame", dai.CameraBoardSocket.CAM_C, 640, 400)
+        self.add_ros_feature_stream(
+            "trackedFeaturesRight", "right_rect_feature_tracker/tracked_features", "rae_right_camera_optical_frame")
+        self.add_ros_img_stream(
+            "left", "left/image_rect", "rae_left_camera_optical_frame", dai.CameraBoardSocket.CAM_B, 640, 400)
+        self.add_ros_img_stream("right", "right/image_rect",
+                                "rae_right_camera_optical_frame", dai.CameraBoardSocket.CAM_C, 640, 400)
+        self.add_ros_img_stream("stereo", "stereo/image_raw",
+                                "rae_right_camera_optical_frame", dai.CameraBoardSocket.CAM_C, 640, 400)
         self.add_queue("imu", self.publish_ros)
         self.add_queue("left", self.publish_ros)
         self.add_queue("right", self.publish_ros)
         self.add_queue("stereo", self.publish_ros)
         self.add_queue("trackedFeaturesRight", self.publish_ros)
 
+        config_path = os.path.join(get_package_share_directory(
+            'robot_py'), 'config', 'example_config.yaml')
+        self.opts = dai_ros.ROSNodeOptions("spetacularAI", self._namespace, config_path,
+                                           {'input/imu': 'imu/data',
+                                            '/input/cam0/image_rect': 'right/image_rect',
+                                            '/input/cam1/image_rect': 'left/image_rect',
+                                            '/input/cam0/camera_info': 'right/camera_info',
+                                            '/input/cam1/camera_info': 'left/camera_info',
+                                            '/input/depth/image': 'stereo/image_raw',
+                                            '/input/cam0/features': 'right_rect_feature_tracker/tracked_features'})
 
-        config_path = os.path.join(get_package_share_directory('robot_py'), 'config', 'example_config.yaml')
-        self.opts = dai_ros.ROSNodeOptions("spetacularAI", self._namespace, config_path, 
-                        {'input/imu': 'imu/data',
-                        '/input/cam0/image_rect': 'right/image_rect',
-                        '/input/cam1/image_rect': 'left/image_rect',
-                        '/input/cam0/camera_info': 'right/camera_info',
-                        '/input/cam1/camera_info':'left/camera_info',
-                        '/input/depth/image':'stereo/image_raw',
-                        '/input/cam0/features':'right_rect_feature_tracker/tracked_features'})
+        self.add_composable_node('spectacularai_ros2',
+                                 'spectacularAI::ros2::Node', self.opts)
 
-        self.add_composable_node('spectacularai_ros2', 'spectacularAI::ros2::Node', self.opts)
+    def setup_rtabmap(self):
+        self.set_executor_type("multi_threaded")
 
-    def setup_perception_rtabmap(self):
-        name = '/rae'
-        pipeline = dai.Pipeline()
+        self.start_pipeline(rtabmap_pipeline())
 
-        imu = pipeline.create(dai.node.IMU)
-        imu.enableIMUSensor(dai.IMUSensor.ACCELEROMETER_RAW, 400)
-        imu.enableIMUSensor(dai.IMUSensor.GYROSCOPE_RAW, 400)
-        imu.enableIMUSensor(dai.IMUSensor.ROTATION_VECTOR, 400)
-        imu.setBatchReportThreshold(1)
-        imu.setMaxBatchReports(10)
-        xout_imu = pipeline.create(dai.node.XLinkOut)
-        xout_imu.setStreamName("imu")
-        imu.out.link(xout_imu.input)
+        self.add_ros_imu_stream("imu", "imu/data", "rae_imu_frame")
 
-        left = pipeline.create(dai.node.ColorCamera)
-        left.setBoardSocket(dai.CameraBoardSocket.CAM_B)
-        left.setResolution(
-            dai.ColorCameraProperties.SensorResolution.THE_800_P)
-        left.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
-        left.setFps(30)
-        left.setVideoSize(640, 400)
-        left.setPreviewSize(416, 416)
-        left.setInterleaved(False)
+        self.add_ros_img_stream(
+            "left", "left/image_rect", "rae_left_camera_optical_frame", dai.CameraBoardSocket.CAM_B, 640, 400)
 
-        right = pipeline.create(dai.node.ColorCamera)
-        right.setBoardSocket(dai.CameraBoardSocket.CAM_C)
-        right.setResolution(
-            dai.ColorCameraProperties.SensorResolution.THE_800_P)
-        left.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
-        right.setFps(30)
-        right.setVideoSize(640, 400)
-        right.setInterleaved(False)
-        right.initialControl.setMisc('stride-align', 1)
-        right.initialControl.setMisc('scanline-align', 1)
-        stereo = pipeline.create(dai.node.StereoDepth)
-        left.video.link(stereo.left)
-        right.video.link(stereo.right)
+        self.add_ros_img_stream(
+            "right", "right/image_rect", "rae_right_camera_optical_frame", dai.CameraBoardSocket.CAM_C, 640, 400)
 
-        xout_stereo = pipeline.create(dai.node.XLinkOut)
-        xout_stereo.setStreamName("stereo")
-        xout_stereo.input.setBlocking(False)
-        stereo.depth.link(xout_stereo.input)
+        self.add_ros_img_stream("stereo", "stereo/image_raw",
+                                "rae_right_camera_optical_frame", dai.CameraBoardSocket.CAM_C, 640, 400)
 
-        xout_left = pipeline.create(dai.node.XLinkOut)
-        xout_left.setStreamName("left")
-        xout_left.input.setBlocking(False)
-        stereo.rectifiedLeft.link(xout_left.input)
-        xout_right = pipeline.create(dai.node.XLinkOut)
-        xout_right.setStreamName("right")
-        xout_right.input.setBlocking(False)
-        right.video.link(xout_right.input)
+        self.add_queue("imu", self.publish_ros)
+        self.add_queue("left", self.publish_ros)
+        self.add_queue("right", self.publish_ros)
+        self.add_queue("stereo", self.publish_ros)
+        self.scan_front_opts = dai_ros.ROSNodeOptions("laserscan_kinect_front", self._namespace, self._config_path,
+                                                      {"/image": "stereo/image_raw",
+                                                       "/camera_info": "stereo/camera_info",
+                                                       "/scan": "scan_front",
+                                                       "/debug_image": "debug_image_front",
+                                                       "/debug_image/compressed": "debug_image_front/compressed"})
 
-        self.start_pipeline(pipeline)
-        calHandler = self._device.readCalibration()
-        self.opts_rtabmap = dai_ros.ROSNodeOptions(False, "/rtabmap", self._config_path,
-                                                   {"odom": "/diff_controller/odom",
-                                                    "rgb/image": name+"/right/image_rect",
-                                                    "rgb/camera_info": name+"/right/camera_info",
-                                                    "depth/image": name+"/stereo/image_raw"})
-        self.opts = dai_ros.ROSNodeOptions(
-            False, "/dai", self._config_path, {"t": "t"})
-        self._dai_node = dai_ros.ROSNode("dai", self.opts)
+        self.add_composable_node(
+            'laserscan_kinect', 'laserscan_kinect::LaserScanKinectNode', self.scan_front_opts)
 
-        self._ros_stream_handles['imu'] = dai_ros.ImuStreamer(
-            self._dai_node, "/rae/imu/data", "rae_imu_frame", dai_ros.ImuSyncMethod.COPY, 0.0, 0.0, 0.0, 0.0, True, False, False)
-        self._ros_stream_handles['left'] = dai_ros.ImgStreamer(
-            self._dai_node, calHandler, dai.CameraBoardSocket.CAM_B, "/rae/left/image_rect", "rae_left_camera_optical_frame", 640, 400)
-        self._ros_stream_handles['right'] = dai_ros.ImgStreamer(
-            self._dai_node, calHandler, dai.CameraBoardSocket.CAM_C, "/rae/right/image_raw", "rae_right_camera_optical_frame", 640, 400)
-        self._ros_stream_handles['stereo'] = dai_ros.ImgStreamer(
-            self._dai_node, calHandler, dai.CameraBoardSocket.CAM_C, "/rae/stereo/image_raw", "rae_right_camera_optical_frame", 640, 400)
-        self._device.getOutputQueue(
-            "imu", 8, False).addCallback(self.publish_ros)
-        self._device.getOutputQueue(
-            "stereo", 8, False).addCallback(self.publish_ros)
-        self._device.getOutputQueue(
-            "left", 8, False).addCallback(self.publish_ros)
-        self._device.getOutputQueue(
-            "right", 8, False).addCallback(self.publish_ros)
-        self.scan_front_opts = dai_ros.ROSNodeOptions(False, "/laserscan_kinect_front", self._config_path,
-                                                      {"laserscan_kinect:__node": "laserscan_kinect_front",
-                                                       "/image": name+"/stereo/image_raw",
-                                                       "/camera_info": name+"/stereo/camera_info",
-                                                       "/scan": name+"/scan_front",
-                                                       "/debug_image": name+"/debug_image_front",
-                                                       "/debug_image/compressed": name+"/debug_image_front/compressed"})
-        self.laserscan_front = dai_ros.LaserScanKinectNode(
-            self.scan_front_opts)
 
-        self.opts_rectify = dai_ros.ROSNodeOptions(False, "/rectify", self._config_path, {
-                                                   "image": "/rae/right/image_raw", "camera_info": "/rae/right/camera_info", "image_rect": "/rae/right/image_rect"})
-
-        self.rectify = dai_ros.ImageProcRectifyNode(self.opts_rectify)
-        # self._ros_context_manager.add_node(self._dai_node)
-        self._ros_context_manager.add_node(self.laserscan_front)
-        self._ros_context_manager.add_node(self.rectify)
+        self.opts_rtabmap = dai_ros.ROSNodeOptions("rtabmap", self._namespace, self._config_path,
+                                                   {
+                                                    "rgb/image": "right/image_rect",
+                                                    "rgb/camera_info": "right/camera_info",
+                                                    "depth/image": "stereo/image_raw"})
+        self.add_composable_node("rtabmap_slam", "rtabmap_slam::CoreWrapper", self.opts_rtabmap)

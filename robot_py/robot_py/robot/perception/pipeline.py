@@ -101,8 +101,6 @@ def rtabmap_pipeline():
         right.setFps(30)
         right.setVideoSize(640, 400)
         right.setInterleaved(False)
-        right.initialControl.setMisc('stride-align', 1)
-        right.initialControl.setMisc('scanline-align', 1)
         stereo = pipeline.create(dai.node.StereoDepth)
         left.video.link(stereo.left)
         right.video.link(stereo.right)
@@ -119,7 +117,7 @@ def rtabmap_pipeline():
         xout_right = pipeline.create(dai.node.XLinkOut)
         xout_right.setStreamName("right")
         xout_right.input.setBlocking(False)
-        right.video.link(xout_right.input)
+        stereo.rectifiedRight.link(xout_right.input)
         return pipeline
 
 def sai_pipeline():
