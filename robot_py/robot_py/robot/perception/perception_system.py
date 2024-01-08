@@ -56,6 +56,7 @@ class PerceptionSystem:
         Args:
         ----
             namespace (str, optional): The namespace for the ROS nodes. Defaults to ''.
+
         """
         self._namespace = namespace
         self._pipeline = None
@@ -160,6 +161,7 @@ class PerceptionSystem:
         Args:
         ----
             stream_name (str): The name of the ROS stream to be added.
+            topic_name (str): The name of the ROS topic to be published to.
             frame_name (str): The name of the ROS frame.
 
         """
@@ -325,12 +327,8 @@ class PerceptionSystem:
         self.start_pipeline(rtabmap_pipeline())
 
         self.add_ros_imu_stream("imu", "imu/data", "rae_imu_frame")
-
         self.add_ros_img_stream(
-            "left", "left/image_rect", "rae_left_camera_optical_frame", dai.CameraBoardSocket.CAM_B, 640, 400)
-
-        self.add_ros_img_stream(
-            "right", "right/image_rect", "rae_right_camera_optical_frame", dai.CameraBoardSocket.CAM_C, 640, 400)
+            "right", "right/image_raw", "rae_right_camera_optical_frame", dai.CameraBoardSocket.CAM_C, 640, 400)
 
         self.add_ros_img_stream("stereo", "stereo/image_raw",
                                 "rae_right_camera_optical_frame", dai.CameraBoardSocket.CAM_C, 640, 400)
@@ -349,9 +347,13 @@ class PerceptionSystem:
         self.add_composable_node(
             'laserscan_kinect', 'laserscan_kinect::LaserScanKinectNode', self.scan_front_opts)
 
+        self.opts_rectify = dai_ros.ROSNodeOptions("RectifyNode", self._namespace, self._config_path, {
+                                                   "image": "right/image_raw", "camera_info": "right/camera_info", "image_rect": "right/image_rect"})
 
+        self.add_composable_node(
+            'depthai_filters', 'depthai_filters::Rectify', self.opts_rectify)
         self.opts_rtabmap = dai_ros.ROSNodeOptions("rtabmap", self._namespace, self._config_path,
-                                                   {
+                                                   {"odom": "diff_controller/odom",
                                                     "rgb/image": "right/image_rect",
                                                     "rgb/camera_info": "right/camera_info",
                                                     "depth/image": "stereo/image_raw"})

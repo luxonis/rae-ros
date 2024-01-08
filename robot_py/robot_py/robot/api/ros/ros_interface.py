@@ -173,8 +173,9 @@ class ROSInterface:
 
     def stop_ros_process(self):
         """Stop the ROS2 hardware process by terminating the related subprocess."""
-        self._stop_event.set()
-        self._process.join()
+        if self._launch_service:
+            self._stop_event.set()
+            self._process.join()
 
     def stop(self) -> None:
         """
