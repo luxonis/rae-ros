@@ -4,12 +4,15 @@ project(rae_hw)
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
+
 set(BUILD_SHARED_LIBS ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 # find dependencies
 find_package(ament_cmake_auto REQUIRED)
 ament_auto_find_build_dependencies()
 find_package(ALSA REQUIRED)
+find_package(std_srvs REQUIRED)
 
 find_library(GPIOD_LIBRARY NAMES libgpiodcxx.so)
 if(NOT GPIOD_LIBRARY)
@@ -20,7 +23,11 @@ endif()
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(MPG123 REQUIRED libmpg123)
 
-include_directories(include)
+# Find SNDFILE library
+find_path(SNDFILE_INCLUDE_DIR sndfile.h)
+find_library(SNDFILE_LIBRARY NAMES sndfile)
+
+include_directories(include ${GST_INCLUDE_DIRS} ${MPG123_INCLUDE_DIRS} ${SNDFILE_INCLUDE_DIR})
 
 ament_auto_add_library(
   ${PROJECT_NAME}
@@ -30,17 +37,16 @@ ament_auto_add_library(
   src/peripherals/battery.cpp
   src/peripherals/lcd.cpp
   src/peripherals/led.cpp
-  src/peripherals/mic.cpp
 )
-ament_target_dependencies(${PROJECT_NAME} ${DEPENDENCIES} ALSA)
 
-target_include_directories(
+ament_target_dependencies(${PROJECT_NAME} ${DEPENDENCIES} ALSA std_srvs)
+
+target_link_libraries(
   ${PROJECT_NAME}
-  ${MPG123_INCLUDE_DIRS}
-  PUBLIC
-  include
+  ${MPG123_LIBRARIES}
+  ${GPIOD_LIBRARY}
+  ${SNDFILE_LIBRARY}
 )
-target_link_libraries(${PROJECT_NAME} ${MPG123_LIBRARIES} ${GPIOD_LIBRARY})
 
 # prevent pluginlib from using boost
 target_compile_definitions(${PROJECT_NAME} PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
@@ -48,7 +54,6 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNC
 rclcpp_components_register_nodes(${PROJECT_NAME} "${PROJECT_NAME}::BatteryNode")
 rclcpp_components_register_nodes(${PROJECT_NAME} "${PROJECT_NAME}::LCDNode")
 rclcpp_components_register_nodes(${PROJECT_NAME} "${PROJECT_NAME}::LEDNode")
-rclcpp_components_register_nodes(${PROJECT_NAME} "${PROJECT_NAME}::MicNode")
 rclcpp_components_register_nodes(${PROJECT_NAME} "${PROJECT_NAME}::SpeakersNode")
 
 pluginlib_export_plugin_description_file(
@@ -87,7 +92,7 @@ ament_target_dependencies(test_speed rclcpp geometry_msgs)
 
 install(TARGETS
 
-  test_motors test_encoders test_max_speed test_speed mic_node speakers_node
+  test_motors test_encoders test_max_speed test_speed mic_node speakers_node 
 
   DESTINATION lib/${PROJECT_NAME})
 
@@ -95,8 +100,6 @@ install(
   DIRECTORY include/
   DESTINATION include
 )
-
-
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
