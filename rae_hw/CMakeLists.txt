@@ -12,7 +12,6 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 find_package(ament_cmake_auto REQUIRED)
 ament_auto_find_build_dependencies()
 find_package(ALSA REQUIRED)
-find_package(std_srvs REQUIRED)
 
 find_library(GPIOD_LIBRARY NAMES libgpiodcxx.so)
 if(NOT GPIOD_LIBRARY)
@@ -88,7 +87,6 @@ add_executable(test_speed test/test_speed.cpp src/rae_motors.cpp)
 target_link_libraries(test_speed ${GPIOD_LIBRARY})
 ament_target_dependencies(test_speed rclcpp geometry_msgs)
 
-# ament_target_dependencies(battery rclcpp sensor_msgs)
 
 install(TARGETS
 
