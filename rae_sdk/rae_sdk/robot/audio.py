@@ -24,13 +24,13 @@ class AudioController:
         play_random_sfx(): Plays a random sound effect.
 
     """
-    
+
     def __init__(self, ros_interface):
         self._ros_interface = ros_interface
         self._ros_interface.create_service_client(
             '/play_audio', PlayAudio)
         self._assets_path = os.path.join(
-            get_package_share_directory('robot_py'), 'assets')
+            get_package_share_directory('rae_sdk'), 'assets')
         log.info("Audio Controller ready")
 
     def create_and_send_request(self, audio_file_path):

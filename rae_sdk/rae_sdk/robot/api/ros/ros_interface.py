@@ -80,7 +80,7 @@ class ROSInterface:
 
     """
 
-    def __init__(self, name: str, namespace='', launch_mock=False) -> None:
+    def __init__(self, name: str, namespace='', launch_mock=False, start_hardware=True) -> None:
         """
         Initialize the ROS2Manager instance.
 
@@ -94,6 +94,7 @@ class ROSInterface:
         self._namespace = namespace
         self._name = name
         self._launch_mock = launch_mock
+        self._start_hardware = start_hardware
         self._launch_service = None
         self._stop_event = None
         self._process = None
@@ -136,7 +137,7 @@ class ROSInterface:
             asyncio.ensure_future(launch_service.shutdown(), loop=loop)
             loop.run_until_complete(launch_task)
 
-    def start(self, start_hardware) -> None:
+    def start(self) -> None:
         """
         Run RAE hardware drivers process.Initializes and starts the ROS2 node and executor. It sets up the ROS2 context and starts the ROS2 spin.
 
@@ -145,7 +146,7 @@ class ROSInterface:
             start_hardware (bool): Whether to start the hardware process or not.
 
         """
-        if start_hardware:
+        if self._start_hardware:
             self.start_hardware_process()
         self._context = rclpy.Context()
         self._context.init()

@@ -2,13 +2,13 @@ import os
 from glob import glob
 from setuptools import find_packages, setup
 
-package_name = 'robot_py'
-submodules=['robot_py/robot', 'robot_py/api']
-data_files=[
-        ('share/ament_index/resource_index/packages',
-            ['resource/' + package_name]),
-        ('share/' + package_name, ['package.xml']),
-    ]
+package_name = 'rae_sdk'
+submodules = ['rae_sdk/robot', 'rae_sdk/api']
+data_files = [
+    ('share/ament_index/resource_index/packages',
+     ['resource/' + package_name]),
+    ('share/' + package_name, ['package.xml']),
+]
 
 
 def package_files(data_files, directory_list):

@@ -67,7 +67,7 @@ class PerceptionSystem:
         self._executor_type = "single_threaded"
         self._queues = {}
         self._config_path = os.path.join(
-            get_package_share_directory('robot_py'), 'config', 'example_config.yaml')
+            get_package_share_directory('rae_sdk'), 'config', 'example_config.yaml')
         if self.connect_to_device():
             log.info(
                 "Perception module initialized. Now please set up the pipeline.")
@@ -308,7 +308,7 @@ class PerceptionSystem:
         self.add_queue("trackedFeaturesRight", self.publish_ros)
 
         config_path = os.path.join(get_package_share_directory(
-            'robot_py'), 'config', 'example_config.yaml')
+            'rae_sdk'), 'config', 'example_config.yaml')
         self.opts = dai_ros.ROSNodeOptions("spetacularAI", self._namespace, config_path,
                                            {'input/imu': 'imu/data',
                                             '/input/cam0/image_rect': 'right/image_rect',
@@ -357,4 +357,5 @@ class PerceptionSystem:
                                                     "rgb/image": "right/image_rect",
                                                     "rgb/camera_info": "right/camera_info",
                                                     "depth/image": "stereo/image_raw"})
-        self.add_composable_node("rtabmap_slam", "rtabmap_slam::CoreWrapper", self.opts_rtabmap)
+        self.add_composable_node(
+            "rtabmap_slam", "rtabmap_slam::CoreWrapper", self.opts_rtabmap)

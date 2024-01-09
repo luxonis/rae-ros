@@ -50,7 +50,7 @@ jobs:
         linter: ${{ matrix.linter }}
         package-name: |
           rae_hw
-          robot_py
+          rae_sdk
           rae_description
           rae_bringup
   docker-build:
