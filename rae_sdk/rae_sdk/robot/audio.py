@@ -18,7 +18,6 @@ class AudioController:
 
     Methods
     -------
-        create_and_send_request(audio_file_path): Creates and sends a request to play an audio file.
         play_audio_file(audio_file_path): Plays an audio file.
         honk(): Plays a horn sound.
         play_random_sfx(): Plays a random sound effect.
@@ -33,21 +32,19 @@ class AudioController:
             get_package_share_directory('rae_sdk'), 'assets')
         log.info("Audio Controller ready")
 
-    def create_and_send_request(self, audio_file_path):
+
+    def play_audio_file(self, audio_file_path):
         req = PlayAudio.Request()
         req.mp3_file = audio_file_path
         res = self._ros_interface.call_async_srv('/play_audio', req)
         return res
 
-    def play_audio_file(self, audio_file_path):
-        res = self.create_and_send_request(audio_file_path)
-
     def honk(self):
         horn_path = os.path.join(self._assets_path, 'sfx', 'horn.mp3')
-        res = self.create_and_send_request(horn_path)
+        res = self.play_audio_file(horn_path)
 
     def play_random_sfx(self):
         random_sfx_path = os.path.join(self._assets_path, 'sfx', 'voices')
         file = random.choice(os.listdir(random_sfx_path))
         file_path = os.path.join(random_sfx_path, file)
-        res = self.create_and_send_request(file_path)
+        res = self.play_audio_file(file_path)
