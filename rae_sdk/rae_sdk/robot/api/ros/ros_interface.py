@@ -29,6 +29,8 @@ from rclpy.client import Client
 from rclpy.subscription import Subscription
 from rclpy.publisher import Publisher
 from rclpy.executors import Executor, MultiThreadedExecutor, SingleThreadedExecutor
+from ...robot_options import RobotOptions
+
 
 QOS_PROFILE = 10
 
@@ -80,21 +82,19 @@ class ROSInterface:
 
     """
 
-    def __init__(self, name: str, namespace='', launch_mock=False, start_hardware=True) -> None:
+    def __init__(self, robot_options: RobotOptions=RobotOptions()):
         """
         Initialize the ROS2Manager instance.
 
         Args:
         ----
-            name (str): The name of the ROS2 node.
-            namespace (str): The namespace of the ROS2 node.
-            launch_mock (bool): Whether to launch the mock hardware or not.
+            robot_options (RobotOptions): An object containing the robot's options.
 
         """
-        self._namespace = namespace
-        self._name = name
-        self._launch_mock = launch_mock
-        self._start_hardware = start_hardware
+        self._namespace = robot_options.namespace
+        self._name = robot_options.name
+        self._launch_mock = robot_options.launch_mock
+        self._start_hardware = robot_options.start_hardware
         self._launch_service = None
         self._stop_event = None
         self._process = None
@@ -146,7 +146,7 @@ class ROSInterface:
             start_hardware (bool): Whether to start the hardware process or not.
 
         """
-        if self._start_hardware:
+        if self._start_hardware or self._launch_mock:
             self.start_hardware_process()
         self._context = rclpy.Context()
         self._context.init()

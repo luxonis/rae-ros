@@ -322,7 +322,6 @@ class PerceptionSystem:
                                  'spectacularAI::ros2::Node', self.opts)
 
     def setup_rtabmap(self):
-        self.set_executor_type("multi_threaded")
 
         self.start_pipeline(rtabmap_pipeline())
 
@@ -334,7 +333,6 @@ class PerceptionSystem:
                                 "rae_right_camera_optical_frame", dai.CameraBoardSocket.CAM_C, 640, 400)
 
         self.add_queue("imu", self.publish_ros)
-        self.add_queue("left", self.publish_ros)
         self.add_queue("right", self.publish_ros)
         self.add_queue("stereo", self.publish_ros)
         self.scan_front_opts = dai_ros.ROSNodeOptions("laserscan_kinect_front", self._namespace, self._config_path,
