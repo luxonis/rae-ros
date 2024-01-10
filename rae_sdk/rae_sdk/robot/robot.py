@@ -67,7 +67,7 @@ class Robot:
         self._perception_system.stop()
         if self._display_controller is not None:
             self._display_controller.stop()
-            self._ros_interface.stop()
+        self._ros_interface.stop()
 
     def battery_state_cb(self, data):
         self._battery_state = data
