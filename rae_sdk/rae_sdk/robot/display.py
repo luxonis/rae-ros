@@ -11,11 +11,14 @@ def quaternion_to_rotation_matrix(q):
     """
     Convert a quaternion into a rotation matrix.
 
-    Parameters:
+    Arguments
+    -----------
     q (tuple): A quaternion represented as (q_w, q_x, q_y, q_z).
 
-    Returns:
+    Returns
+    -------
     numpy.ndarray: A 3x3 rotation matrix.
+
     """
     q_w, q_x, q_y, q_z = q
     sq_w, sq_x, sq_y, sq_z = q_w ** 2, q_x ** 2, q_y ** 2, q_z ** 2
@@ -37,14 +40,16 @@ class DisplayController:
     """
     A class for controlling the robot's display.
 
-    Attributes:
-        ros_interface (ROSInterface): An object for managing ROS2 communications and functionalities.
-        bridge (CvBridge): An object for converting between ROS2 and OpenCV image formats.
-        screen_width (int): The width of the robot's display.
-        screen_height (int): The height of the robot's display.
-        assets_path (str): The path to the robot's assets directory.
+    Attributes
+    ----------
+        _ros_interface (ROSInterface): An object for managing ROS2 communications and functionalities.
+        _bridge (CvBridge): An object for converting between ROS2 and OpenCV image formats.
+        _screen_width (int): The width of the robot's display.
+        _screen_height (int): The height of the robot's display.
+        _assets_path (str): The path to the robot's assets directory.
 
-    Methods:
+    Methods
+    -------
         stop(): Stops the display.
         display_default(): Displays the default image on the robot's display.
         display_face(payload): Displays a face on the robot's display.
@@ -52,6 +57,7 @@ class DisplayController:
         display_imu_data(imu_data): Displays IMU data on the robot's display.
         display_animation(): Displays an animation on the robot's display.
         ball_callback(): Callback method for displaying an animation on the robot's display.
+
     """
 
     def __init__(self, ros_interface):
@@ -61,7 +67,7 @@ class DisplayController:
         self._screen_width = 160
         self._screen_height = 80
         self._assets_path = os.path.join(
-            get_package_share_directory('robot_py'), 'assets')
+            get_package_share_directory('rae_sdk'), 'assets')
         log.info("Display Controller ready")
 
     def stop(self):

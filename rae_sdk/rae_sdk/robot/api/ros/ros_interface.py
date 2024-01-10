@@ -1,38 +1,53 @@
-import logging as log
-import os
-import threading
-import rclpy
-import subprocess
-from time import sleep
-import signal
-from functools import partial
-
+# needed by RH to import launch
+import sys
+del sys.path[0]
+sys.path.append('')
 from typing import Any, Callable, Dict, Type
-from rclpy.executors import Executor, MultiThreadedExecutor, SingleThreadedExecutor
-from rclpy.publisher import Publisher
-from rclpy.subscription import Subscription
-from rclpy.client import Client
-from rclpy.action import ActionClient
-from rclpy.action.client import ClientGoalHandle
-from rclpy.timer import Timer
-from ament_index_python.packages import get_package_share_directory
-from tf2_ros import TransformException
-from tf2_ros.buffer import Buffer
-from tf2_ros.transform_listener import TransformListener
+from functools import partial
+import signal
+from time import sleep
+import multiprocessing
+import asyncio
+import subprocess
+import rclpy
+import threading
+import os
+import logging as log
+
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.actions import IncludeLaunchDescription
+from launch import LaunchDescription, LaunchService
 from geometry_msgs.msg import TransformStamped
+from tf2_ros.transform_listener import TransformListener
+from tf2_ros.buffer import Buffer
+from tf2_ros import TransformException
+from ament_index_python.packages import get_package_share_directory
+from rclpy.timer import Timer
+from rclpy.action.client import ClientGoalHandle
+from rclpy.action import ActionClient
+from rclpy.client import Client
+from rclpy.subscription import Subscription
+from rclpy.publisher import Publisher
+from rclpy.executors import Executor, MultiThreadedExecutor, SingleThreadedExecutor
+from ...robot_options import RobotOptions
+
 
 QOS_PROFILE = 10
 
 log.basicConfig(level=log.INFO)
 
+
 class ROSInterface:
     """
-    A class that manages ROS2 functionalities for a robot or a system. It includes initializing ROS2 context, 
-    creating and managing nodes, publishers, and subscribers. It also handles the startup and shutdown processes 
+    A class that manages ROS2 functionalities for a robot or a system.
+
+    It includes initializing ROS2 context, 
+    creating and managing nodes, publishers, and subscribers. 
+    It also handles the startup and shutdown processes 
     for ROS2.
 
-    Attributes:
-        ros_proc: Process for running ROS2 hardware-related commands.
+    Attributes
+    ----------
         _name (str): Name of the ROS2 node.
         _context (rclpy.context.Context | None): The ROS2 context.
         _node (rclpy.node.Node | None): The ROS2 node.
@@ -43,9 +58,14 @@ class ROSInterface:
         _timers (dict[str, Timer]): Dictionary of ROS2 timers.
         _tf_buffer: The TF2 buffer.
         _tf_listener: The TF2 listener.
+        _executor (Executor): The ROS2 executor.
+        _executor_thread (threading.Thread): The thread for the ROS2 executor.
+        _launch_service (LaunchService): The ROS2 launch service.
+        _stop_event (multiprocessing.Event): The event for stopping the ROS2 launch service.
+        _process (multiprocessing.Process): The process for running the ROS2 launch service.
 
-    Methods:
-        get_node(): Returns the current ROS2 node.
+    Methods
+    -------
         start_hardware_process(): Starts the hardware process for ROS2.
         start(): Initializes and starts the ROS2 node and executor.
         stop_ros_process(): Stops the ROS2 hardware process.
@@ -59,18 +79,25 @@ class ROSInterface:
         create_action_client(action_name, action_type): Creates an action client for a given action.
         call_async_action_simple(action_name, goal): Calls an action asynchronously.
         call_async_action(action_name, goal, goal_response_callback, goal_result_callback, goal_feedback_callback): Calls an action asynchronously.
+
     """
 
-    def __init__(self, name: str, namespace='/rae') -> None:
+    def __init__(self, robot_options: RobotOptions=RobotOptions()):
         """
-        Initializes the ROS2Manager instance.
+        Initialize the ROS2Manager instance.
 
         Args:
-            name (str): The name of the ROS2 node.
+        ----
+            robot_options (RobotOptions): An object containing the robot's options.
+
         """
-        self._namespace = namespace
-        self._ros_proc = None
-        self._name = name
+        self._namespace = robot_options.namespace
+        self._name = robot_options.name
+        self._launch_mock = robot_options.launch_mock
+        self._start_hardware = robot_options.start_hardware
+        self._launch_service = None
+        self._stop_event = None
+        self._process = None
         self._context: rclpy.context.Context | None = None
         self._node: rclpy.node.Node | None = None
         self._publishers: dict[str, Publisher] = {}
@@ -81,27 +108,46 @@ class ROSInterface:
         self._tf_buffer = None
         self._tf_listener = None
 
-    def get_node(self):
+    @property
+    def node(self):
         return self._node
 
     def start_hardware_process(self):
-        """
-        Starts RAE hardware drivers in a separate process.
-        """
-        env = dict(os.environ)
-        script_name = os.path.join(get_package_share_directory(
-            'robot_py'), 'scripts', 'start_ros.sh')
-        self._ros_proc = subprocess.Popen(
-            f"bash -c 'chmod +x {script_name} ; {script_name}'", shell=True, env=env, preexec_fn=os.setsid
-        )
+        """Start RAE hardware drivers in a separate process."""
+        self._launch_service = LaunchService(noninteractive=True)
+        launch_name = 'control.launch.py' if not self._launch_mock else 'control_mock.launch.py'
+        ld = LaunchDescription([
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(
+                    os.path.join(get_package_share_directory('rae_hw'), 'launch', launch_name)), 
+                    launch_arguments={'namespace': self._namespace}.items())
+        ])
+        self._stop_event = multiprocessing.Event()
+        self._process = multiprocessing.Process(
+            target=self._run_process, args=(self._stop_event, ld), daemon=True)
+        self._process.start()
 
-    def start(self, start_hardware) -> None:
+    def _run_process(self, stop_event, launch_description):
+        loop = asyncio.get_event_loop()
+        launch_service = LaunchService()
+        launch_service.include_launch_description(launch_description)
+        launch_task = loop.create_task(launch_service.run_async())
+        loop.run_until_complete(loop.run_in_executor(None, stop_event.wait))
+        if not launch_task.done():
+            asyncio.ensure_future(launch_service.shutdown(), loop=loop)
+            loop.run_until_complete(launch_task)
+
+    def start(self) -> None:
         """
-        Runs RAE hardware drivers process.Initializes and starts the ROS2 node and executor. It sets up the ROS2 context and starts the ROS2 spin.
+        Run RAE hardware drivers process.Initializes and starts the ROS2 node and executor. It sets up the ROS2 context and starts the ROS2 spin.
+
+        Args:
+        ----
+            start_hardware (bool): Whether to start the hardware process or not.
+
         """
-        if start_hardware:
+        if self._start_hardware or self._launch_mock:
             self.start_hardware_process()
-            sleep(2)
         self._context = rclpy.Context()
         self._context.init()
         log.info("ROS2 context initialized.")
@@ -127,17 +173,16 @@ class ROSInterface:
         log.info("rlcpy thread> Done")
 
     def stop_ros_process(self):
-        """
-        Stops the ROS2 hardware process by terminating the related subprocess.
-        """
-
-        if self._ros_proc is not None:
-            pgid = os.getpgid(self._ros_proc.pid)
-            os.killpg(pgid, signal.SIGTERM)
+        """Stop the ROS2 hardware process by terminating the related subprocess."""
+        if self._launch_service:
+            self._stop_event.set()
+            self._process.join()
 
     def stop(self) -> None:
         """
-        Shuts down RAE drivers, ROS2 node and context. This includes stopping the executor, destroying publishers and subscribers,
+        Shut down RAE drivers, ROS2 node and context.
+
+        This includes stopping the executor, destroying publishers subscribers, service clients, action clients, timers
         and shutting down the ROS2 context.
         """
         self.stop_ros_process()
@@ -177,7 +222,7 @@ class ROSInterface:
         for timer_name, timer in self._timers.items():
             log.info(f"Destroying {timer_name} timer...")
             self._node.destroy_timer(timer)
-            
+
         for action_name, action_client in self._action_clients.items():
             log.info(f"Destroying {action_name} action client...")
             action_client['goal_handle'].cancel_goal_async()
@@ -254,35 +299,39 @@ class ROSInterface:
             else:
                 log.warning(f"Unknown action type '{action_type}'")
 
-    def call_async_action_simple(self, action_name: str, goal: Any)-> ClientGoalHandle:
+    def call_async_action_simple(self, action_name: str, goal: Any) -> ClientGoalHandle:
         log.info(f"Calling action {action_name}")
         self._action_clients[action_name]['client'].wait_for_server()
-        future = self._action_clients[action_name]['client'].send_goal_async(goal)
+        future = self._action_clients[action_name]['client'].send_goal_async(
+            goal)
         while not future.done():
             log.info('Waiting for result...')
             sleep(0.5)
         return future.result()
-    
-    def call_async_action(self, action_name: str, goal: Any, goal_response_callback=None, goal_result_callback=None, goal_feedback_callback=None)-> ClientGoalHandle:
+
+    def call_async_action(self, action_name: str, goal: Any, goal_response_callback=None, goal_result_callback=None, goal_feedback_callback=None) -> ClientGoalHandle:
         log.info(f"Calling action {action_name}")
         if goal_response_callback is None:
-            self._action_clients[action_name]['goal_response_callback']=self._default_goal_response_callback
+            self._action_clients[action_name]['goal_response_callback'] = self._default_goal_response_callback
         else:
-            self._action_clients[action_name]['goal_response_callback']=goal_response_callback
+            self._action_clients[action_name]['goal_response_callback'] = goal_response_callback
         if goal_result_callback is None:
-            self._action_clients[action_name]['goal_result_callback']=self._default_goal_result_callback
+            self._action_clients[action_name]['goal_result_callback'] = self._default_goal_result_callback
         else:
-            self._action_clients[action_name]['goal_result_callback']=goal_result_callback
+            self._action_clients[action_name]['goal_result_callback'] = goal_result_callback
 
         self._action_clients[action_name]['client'].wait_for_server()
 
         if goal_feedback_callback is None:
-            future = self._action_clients[action_name]['client'].send_goal_async(goal)
+            future = self._action_clients[action_name]['client'].send_goal_async(
+                goal)
         else:
-            future = self._action_clients[action_name]['client'].send_goal_async(goal, goal_feedback_callback)
+            future = self._action_clients[action_name]['client'].send_goal_async(
+                goal, goal_feedback_callback)
 
-        future.add_done_callback(partial(self._action_clients[action_name]['goal_response_callback']))
-    
+        future.add_done_callback(
+            partial(self._action_clients[action_name]['goal_response_callback']))
+
     def _default_goal_response_callback(self, future):
         action_name = '/fibonacci'
         self._action_clients[action_name]['goal_handle'] = future.result()
@@ -290,8 +339,10 @@ class ROSInterface:
             log.info('Goal rejected :(')
             return
         log.info('Goal accepted :)')
-        get_result_future = self._action_clients[action_name]['goal_handle'].get_result_async()
-        get_result_future.add_done_callback(partial(self._action_clients[action_name]['goal_result_callback']))
+        get_result_future = self._action_clients[action_name]['goal_handle'].get_result_async(
+        )
+        get_result_future.add_done_callback(
+            partial(self._action_clients[action_name]['goal_result_callback']))
 
     def _default_goal_result_callback(self, future):
         result = future.result().result
@@ -301,16 +352,19 @@ class ROSInterface:
         log.info(f"Cancelling action {action_name}")
         self._action_clients[action_name]['goal_handle'].cancel_goal_async()
 
-    def get_frame_position(self, source_frame, target_frame)-> TransformStamped:
+    def get_frame_position(self, source_frame, target_frame) -> TransformStamped:
         """
-        Gets the position of a frame relative to another frame.
+        Get the position of a frame relative to another frame.
 
         Args:
+        ----
             source_frame (str): The source frame.
             target_frame (str): The target frame.
 
-        Returns:
+        Returns
+        -------
             TransformStamped: The position of the source frame relative to the target frame.
+
         """
         try:
             transform = self._tf_buffer.lookup_transform(

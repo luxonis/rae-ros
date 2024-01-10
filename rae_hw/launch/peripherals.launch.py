@@ -14,7 +14,7 @@ def launch_setup(context, *args, **kwargs):
         ComposableNodeContainer(
             condition=IfCondition(run_container),
             name=name+'_container',
-            namespace='',
+            namespace=LaunchConfiguration('namespace'),
             package='rclcpp_components',
             executable='component_container',
             composable_node_descriptions=[],
@@ -25,11 +25,13 @@ def launch_setup(context, *args, **kwargs):
             composable_node_descriptions=[
                 ComposableNode(
                     name='battery_node',
+                    namespace=LaunchConfiguration('namespace'),
                     package='rae_hw',
                     plugin='rae_hw::BatteryNode',
                 ),
                 ComposableNode(
                     name='lcd_node',
+                    namespace=LaunchConfiguration('namespace'),
                     package='rae_hw',
                     plugin='rae_hw::LCDNode',
                     parameters=[{
@@ -38,6 +40,7 @@ def launch_setup(context, *args, **kwargs):
                 ),
                 ComposableNode(
                     name='led_node',
+                    namespace=LaunchConfiguration('namespace'),
                     package='rae_hw',
                     plugin='rae_hw::LEDNode',
                 )
@@ -57,6 +60,7 @@ def launch_setup(context, *args, **kwargs):
 def generate_launch_description():
     declared_arguments = [
         DeclareLaunchArgument('name', default_value='rae'),
+        DeclareLaunchArgument('namespace', default_value=''),
         DeclareLaunchArgument('run_container', default_value='true'),
         DeclareLaunchArgument('default_logo_path', default_value='/usr/share/rae-logo-white.jpg'),
     ]

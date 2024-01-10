@@ -15,6 +15,44 @@ env:
   ROS_DISTRO: humble
 
 jobs:
+  clang-format-lint:
+      name: ament_clang_format
+      runs-on: ubuntu-22.04
+      strategy:
+        fail-fast: false
+      steps:
+      - uses: actions/checkout@v3.3.0
+      - uses: ros-tooling/setup-ros@0.7.1
+        with:
+          required-ros-distributions: ${{ env.ROS_DISTRO }}
+      - uses: ros-tooling/action-ros2-lint@0.1.3
+        with:
+          distribution: ${{ env.ROS_DISTRO }}
+          linter: clang_format
+          arguments: --config ./.clang-format
+          package-name: |
+            rae_hw
+  linting:
+    name: ament_${{ matrix.linter }}
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false 
+      matrix:
+        linter: [xmllint, pep257, lint_cmake]
+    steps:
+    - uses: actions/checkout@v3.3.0
+    - uses: ros-tooling/setup-ros@0.7.1
+      with:
+        required-ros-distributions: ${{ env.ROS_DISTRO }}
+    - uses: ros-tooling/action-ros2-lint@0.1.3
+      with:
+        distribution: ${{ env.ROS_DISTRO }}
+        linter: ${{ matrix.linter }}
+        package-name: |
+          rae_hw
+          rae_sdk
+          rae_description
+          rae_bringup
   docker-build:
     name: Build and Upload to Docker Hub
     runs-on: ubuntu-22.04

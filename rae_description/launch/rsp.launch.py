@@ -19,6 +19,7 @@ def launch_setup(context, *args, **kwargs):
             package='robot_state_publisher',
             executable='robot_state_publisher',
             name='robot_state_publisher',
+            namespace=LaunchConfiguration('namespace'),
             parameters=[{
                 'robot_description': Command(['xacro ', xacro_path, ' sim_mode:=', use_sim_time]),
                 'use_sim_time': use_sim_time
@@ -40,9 +41,9 @@ def generate_launch_description():
             description='Use sim time'
         ),
         DeclareLaunchArgument(
-            'use_sim_time',
-            default_value='false',
-            description='Use sim time'
+            'namespace',
+            default_value='',
+            description='Namespace'
         ),
         DeclareLaunchArgument(
             'run_container',

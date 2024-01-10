@@ -12,7 +12,6 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 find_package(ament_cmake_auto REQUIRED)
 ament_auto_find_build_dependencies()
 find_package(ALSA REQUIRED)
-find_package(std_srvs REQUIRED)
 
 find_library(GPIOD_LIBRARY NAMES libgpiodcxx.so)
 if(NOT GPIOD_LIBRARY)
@@ -88,11 +87,10 @@ add_executable(test_speed test/test_speed.cpp src/rae_motors.cpp)
 target_link_libraries(test_speed ${GPIOD_LIBRARY})
 ament_target_dependencies(test_speed rclcpp geometry_msgs)
 
-# ament_target_dependencies(battery rclcpp sensor_msgs)
 
 install(TARGETS
 
-  test_motors test_encoders test_max_speed test_speed mic_node speakers_node 
+  test_motors test_encoders test_max_speed test_speed mic_node speakers_node
 
   DESTINATION lib/${PROJECT_NAME})
 
@@ -138,4 +136,18 @@ install(
     DESTINATION include
 )
 
+
+ament_python_install_package(${PROJECT_NAME})
+# Install Python executables
+install(
+  PROGRAMS
+  scripts/mock_battery.py
+  scripts/mock_lcd.py
+  scripts/mock_leds.py
+  scripts/mock_mic.py
+  scripts/mock_speakers.py
+  scripts/mock_wheels.py
+  DESTINATION lib/${PROJECT_NAME}
+)
 ament_package()
+

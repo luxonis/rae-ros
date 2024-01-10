@@ -1,40 +1,38 @@
-#include "rae_hw/rae_motors.hpp"
-#include <thread>
 #include <chrono>
+#include <cstring>
 #include <iostream>
 #include <memory>
-#include <cstring>
+#include <thread>
+
+#include "rae_hw/rae_motors.hpp"
 
 using namespace std::chrono_literals;
 
-int main(int argc, char *argv[]){
+int main(int argc, char* argv[]) {
     float duration = 5.0;
     int encRatioL = 756;
     int encRatioR = 756;
 
-    if(argc == 2 && std::strcmp( argv[1], "-h" ) == 0 ){
+    if(argc == 2 && std::strcmp(argv[1], "-h") == 0) {
         std::cout << "Help:\n";
         std::cout << "Positional arguments only for now.\n";
         std::cout << "ros2 run rae_hw test_encoders duration encRatioL encRatioR.\n";
         std::cout << "With default arguments ros2 run rae_hw test_encoders 5.0 756 756" << std::endl;
         return 0;
     }
-    if(argc > 1 && argc < 4){
+    if(argc > 1 && argc < 4) {
         std::cout << "Please input all arguments in following form: \n";
         std::cout << "ros2 run rae_hw test_encoders duration encRatioL encRatioR.\n";
         std::cout << "ros2 run rae_hw test_encoders 5.0 756 756" << std::endl;
-    }
-    else if(argc == 4){
+    } else if(argc == 4) {
         duration = atof(argv[1]);
         encRatioL = atoi(argv[2]);
         encRatioR = atoi(argv[3]);
     }
-    std::cout << "Starting test procedure. Duration: " <<  duration  << "s.\n";
+    std::cout << "Starting test procedure. Duration: " << duration << "s.\n";
     std::cout << "Enc ratios - L: " << encRatioL << " R: " << encRatioR << " counts/rev." << std::endl;
-    auto motorR = std::make_unique<rae_hw::RaeMotor>("right_wheel_name",
-                                        "gpiochip0", "/sys/class/pwm/pwmchip0", 2, 45, 46, 47, encRatioR, 32, false);
-    auto motorL = std::make_unique<rae_hw::RaeMotor>("left_wheel_name",
-                                        "gpiochip0", "/sys/class/pwm/pwmchip0", 1, 41, 42, 43, encRatioL, 32, true);
+    auto motorR = std::make_unique<rae_hw::RaeMotor>("right_wheel_name", "gpiochip0", "/sys/class/pwm/pwmchip0", 2, 45, 46, 47, encRatioR, 32, false);
+    auto motorL = std::make_unique<rae_hw::RaeMotor>("left_wheel_name", "gpiochip0", "/sys/class/pwm/pwmchip0", 1, 41, 42, 43, encRatioL, 32, true);
     motorL->run();
     motorR->run();
     float prevMaxVelL = 0.0;
@@ -44,7 +42,7 @@ int main(int argc, char *argv[]){
     auto startTime = std::chrono::high_resolution_clock::now();
     auto prevTime = startTime;
     bool timePassed = false;
-    while(!timePassed){
+    while(!timePassed) {
         motorL->setPWM(100000);
         motorR->setPWM(100000);
         auto currTime = std::chrono::high_resolution_clock::now();
@@ -58,14 +56,14 @@ int main(int argc, char *argv[]){
         leftPos = currLeftPos;
         rightPos = currRightPos;
 
-        if(leftVel > prevMaxVelL){
+        if(leftVel > prevMaxVelL) {
             prevMaxVelL = leftVel;
         }
-        if(rightVel > prevMaxVelR){
+        if(rightVel > prevMaxVelR) {
             prevMaxVelR = rightVel;
         }
         float startTimeDiff = std::chrono::duration<float>(currTime - startTime).count();
-        if (startTimeDiff > duration){
+        if(startTimeDiff > duration) {
             timePassed = true;
         }
         std::this_thread::sleep_for(20ms);

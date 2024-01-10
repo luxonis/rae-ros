@@ -1,14 +1,16 @@
+#include "rae_hw/rae_hw.hpp"
+
+#include <fstream>
 #include <limits>
 #include <vector>
-#include <fstream>
-#include "rae_hw/rae_hw.hpp"
+
 #include "hardware_interface/types/hardware_interface_type_values.hpp"
 #include "rclcpp/rclcpp.hpp"
 
 namespace rae_hw {
 
-hardware_interface::CallbackReturn RaeHW::on_init(const hardware_interface::HardwareInfo &info) {
-    if (hardware_interface::SystemInterface::on_init(info) != CallbackReturn::SUCCESS) {
+hardware_interface::CallbackReturn RaeHW::on_init(const hardware_interface::HardwareInfo& info) {
+    if(hardware_interface::SystemInterface::on_init(info) != CallbackReturn::SUCCESS) {
         return CallbackReturn::ERROR;
     }
     leftWheelName = info_.hardware_parameters["left_wheel_name"];
@@ -23,7 +25,7 @@ hardware_interface::CallbackReturn RaeHW::on_init(const hardware_interface::Hard
     float maxVelL = std::stof(info_.hardware_parameters["maxVelL"]);
     bool closedLoopL = static_cast<bool>(std::stoi(info_.hardware_parameters["closed_loopL"]));
     PID pidL{std::stof(info_.hardware_parameters["PID_P_L"]), std::stof(info_.hardware_parameters["PID_I_L"]), std::stof(info_.hardware_parameters["PID_D_L"])};
-    motorL = std::make_unique<RaeMotor>(leftWheelName, chipName,pwmName, pwmL, phL, enLA, enLB, encTicsPerRevL, maxVelL, true, closedLoopL, pidL);
+    motorL = std::make_unique<RaeMotor>(leftWheelName, chipName, pwmName, pwmL, phL, enLA, enLB, encTicsPerRevL, maxVelL, true, closedLoopL, pidL);
 
     int pwmR = std::stoi(info_.hardware_parameters["pwmR"]);
     int phR = std::stoi(info_.hardware_parameters["phR"]);
@@ -33,12 +35,12 @@ hardware_interface::CallbackReturn RaeHW::on_init(const hardware_interface::Hard
     float maxVelR = std::stof(info_.hardware_parameters["maxVelR"]);
     bool closedLoopR = static_cast<bool>(std::stoi(info_.hardware_parameters["closed_loopR"]));
     PID pidR{std::stof(info_.hardware_parameters["PID_P_R"]), std::stof(info_.hardware_parameters["PID_I_R"]), std::stof(info_.hardware_parameters["PID_D_R"])};
-    motorR = std::make_unique<RaeMotor>(rightWheelName, chipName,pwmName, pwmR, phR, enRA, enRB, encTicsPerRevR, maxVelR, false, closedLoopR, pidR);
+    motorR = std::make_unique<RaeMotor>(rightWheelName, chipName, pwmName, pwmR, phR, enRA, enRB, encTicsPerRevR, maxVelR, false, closedLoopR, pidR);
 
     return CallbackReturn::SUCCESS;
 }
 
-hardware_interface::CallbackReturn RaeHW::on_configure(const rclcpp_lifecycle::State & /*previous state*/) {
+hardware_interface::CallbackReturn RaeHW::on_configure(const rclcpp_lifecycle::State& /*previous state*/) {
     motorL->run();
     motorR->run();
 
@@ -65,25 +67,25 @@ std::vector<hardware_interface::CommandInterface> RaeHW::export_command_interfac
     return command_interfaces;
 }
 
-hardware_interface::CallbackReturn RaeHW::on_activate(const rclcpp_lifecycle::State & /*previous_state*/) {
+hardware_interface::CallbackReturn RaeHW::on_activate(const rclcpp_lifecycle::State& /*previous_state*/) {
     return CallbackReturn::SUCCESS;
 }
 
-hardware_interface::CallbackReturn RaeHW::on_deactivate(const rclcpp_lifecycle::State & /*previous_state*/) {
+hardware_interface::CallbackReturn RaeHW::on_deactivate(const rclcpp_lifecycle::State& /*previous_state*/) {
     motorL->stop();
     motorR->stop();
 
     return CallbackReturn::SUCCESS;
 }
 
-hardware_interface::CallbackReturn RaeHW::on_shutdown(const rclcpp_lifecycle::State & /*previous_state*/) {
+hardware_interface::CallbackReturn RaeHW::on_shutdown(const rclcpp_lifecycle::State& /*previous_state*/) {
     motorL->stop();
     motorR->stop();
 
     return CallbackReturn::SUCCESS;
 }
 
-hardware_interface::return_type RaeHW::read(const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/) {
+hardware_interface::return_type RaeHW::read(const rclcpp::Time& /*time*/, const rclcpp::Duration& /*period*/) {
     float currLeftPos = motorL->getPos();
     float currRightPos = motorR->getPos();
     leftVel = motorL->getSpeed();
@@ -94,14 +96,14 @@ hardware_interface::return_type RaeHW::read(const rclcpp::Time & /*time*/, const
     return hardware_interface::return_type::OK;
 }
 
-hardware_interface::return_type RaeHW::write(const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/) {
+hardware_interface::return_type RaeHW::write(const rclcpp::Time& /*time*/, const rclcpp::Duration& /*period*/) {
     motorL->motorSet(leftMotorCMD);
     motorR->motorSet(rightMotorCMD);
 
     return hardware_interface::return_type::OK;
 }
 
-} // namespace rae_hw
+}  // namespace rae_hw
 
 #include "pluginlib/class_list_macros.hpp"
 

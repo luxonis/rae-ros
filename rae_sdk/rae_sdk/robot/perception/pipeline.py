@@ -112,10 +112,6 @@ def rtabmap_pipeline():
         xout_stereo.input.setBlocking(False)
         stereo.depth.link(xout_stereo.input)
 
-        xout_left = pipeline.create(dai.node.XLinkOut)
-        xout_left.setStreamName("left")
-        xout_left.input.setBlocking(False)
-        stereo.rectifiedLeft.link(xout_left.input)
         xout_right = pipeline.create(dai.node.XLinkOut)
         xout_right.setStreamName("right")
         xout_right.input.setBlocking(False)
@@ -142,7 +138,7 @@ def sai_pipeline():
         left.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
         left.setFps(30)
         left.setVideoSize(640, 400)
-        left.setPreviewSize(416, 416)
+        # left.setPreviewSize(416, 416)
         left.setInterleaved(False)
 
         right = pipeline.create(dai.node.ColorCamera)
