@@ -103,7 +103,7 @@ class DisplayController:
             b_channel, g_channel, r_channel, alpha_channel = cv2.split(image)
             # Define the color to replace the transparent parts (purple in this case)
             # OpenCV uses BGR format, so purple is (128, 0, 128)
-            replacement_color = [r, g, b]
+            replacement_color = [b, g, r]
             # Find all pixels where the alpha channel is zero
             transparent_mask = alpha_channel < 150
             # Set the color of these pixels to the replacement color
