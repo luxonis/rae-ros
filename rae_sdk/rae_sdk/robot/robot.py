@@ -51,7 +51,8 @@ class Robot:
             self._audio_controller = AudioController(self._ros_interface)
             self._ros_interface.create_subscriber(
                 "/battery_status", BatteryState, self.battery_state_cb)
-        self._perception_system = PerceptionSystem(self._robot_options.namespace)
+        if robot_options.launch_perception_system:
+            self._perception_system = PerceptionSystem(self._robot_options.namespace)
 
         log.info('Robot ready')
 
@@ -64,7 +65,8 @@ class Robot:
 
         Ensures a clean shutdown of all components.
         """
-        self._perception_system.stop()
+        if self._perception_system is not None:
+            self._perception_system.stop()
         if self._display_controller is not None:
             self._display_controller.stop()
         self._ros_interface.stop()

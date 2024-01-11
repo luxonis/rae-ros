@@ -12,12 +12,13 @@ class RobotOptions:
 
     """
 
-    def __init__(self, name='rae_api', namespace='', launch_controllers=True, start_hardware=True, launch_mock=False):
+    def __init__(self, name='rae_api', namespace='', launch_controllers=True, start_hardware=True, launch_mock=False, launch_perception_system=False):
         self._start_hardware = start_hardware
         self._launch_mock = launch_mock
         self._name = name
         self._namespace = namespace
         self._launch_controllers = launch_controllers
+        self._launch_perception_system = launch_perception_system
 
     @property
     def start_hardware(self):
@@ -38,3 +39,7 @@ class RobotOptions:
     @property
     def launch_controllers(self):
         return self._launch_controllers
+    
+    @property
+    def launch_perception_system(self):
+        return self._launch_perception_system
