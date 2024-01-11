@@ -12,7 +12,7 @@ class RobotOptions:
 
     """
 
-    def __init__(self, name='rae_api', namespace='', launch_controllers=True, start_hardware=True, launch_mock=False, launch_perception_system=False):
+    def __init__(self, name='rae_api', namespace='', launch_controllers=True, start_hardware=True, launch_mock=False, launch_perception_system=True):
         self._start_hardware = start_hardware
         self._launch_mock = launch_mock
         self._name = name
