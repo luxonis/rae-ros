@@ -79,6 +79,7 @@ class Robot:
 
     @property
     def perception_system(self) -> PerceptionSystem:
+        """Creates perception system if it doesn't exist and returns it."""
         if self._perception_system is None:
             self._perception_system = PerceptionSystem(self._robot_options.namespace)
         return self._perception_system
