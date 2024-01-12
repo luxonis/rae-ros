@@ -5,9 +5,9 @@ from .display import DisplayController
 from .led import LEDController
 from .navigation import NavigationController
 from .audio import AudioController
+from .state import StateController
 from .perception.perception_system import PerceptionSystem
 from .robot_options import RobotOptions
-from sensor_msgs.msg import BatteryState
 
 
 class Robot:
@@ -17,16 +17,15 @@ class Robot:
     Attributes
     ----------
         ros_interface (ROSInterface): An object for managing ROS2 communications and functionalities.
-        battery_state (BatteryState): Stores the current state of the robot's battery.
         led (LEDController): Controls the robot's LEDs.
         display (DisplayController): Manages the robot's display.
         navigation (NavigationController): Handles the robot's movement.
         audio (AudioController): Controls the robot's audio.
+        state (StateController): Manages the robot's state information.
         perception (PerceptionSystem): Handles the robot's perception system.
 
     Methods
     -------
-        battery_state_cb(data): Callback method for updating battery state.
         start(): Initializes the robot's components and starts ROS2 communications.
         stop(): Stops the ROS2 communications and shuts down the robot's components.
 
@@ -49,8 +48,7 @@ class Robot:
             self._display_controller = DisplayController(self._ros_interface)
             self._navigation_controller = NavigationController(self._ros_interface)
             self._audio_controller = AudioController(self._ros_interface)
-            self._ros_interface.create_subscriber(
-                "/battery_status", BatteryState, self.battery_state_cb)
+            self._state_controller = StateController(self._ros_interface)
 
         self._perception_system = None
         log.info('Robot ready')
@@ -70,12 +68,9 @@ class Robot:
             self._display_controller.stop()
         self._ros_interface.stop()
 
-    def battery_state_cb(self, data):
-        self._battery_state = data
-
     @property
-    def battery_state(self) -> BatteryState:
-        return self._battery_state
+    def state(self) -> StateController:
+        return self._state_controller
 
     @property
     def perception(self) -> PerceptionSystem:
