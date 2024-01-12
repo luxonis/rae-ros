@@ -2,7 +2,7 @@ import logging as log
 from geometry_msgs.msg import Twist, TransformStamped
 
 
-class MovementController:
+class NavigationController:
     """
     A class for controlling the robot's movement.
 
@@ -19,7 +19,7 @@ class MovementController:
     def __init__(self, ros_interface):
         self._ros_interface = ros_interface
         self._ros_interface.create_publisher("/cmd_vel", Twist)
-        log.info("Movement Controller ready")
+        log.info("Navigation Controller ready")
 
     def move(self, linear, angular):
         """

@@ -3,7 +3,7 @@ import logging as log
 from .api.ros.ros_interface import ROSInterface
 from .display import DisplayController
 from .led import LEDController
-from .movement import MovementController
+from .navigation import NavigationController
 from .audio import AudioController
 from .perception.perception_system import PerceptionSystem
 from .robot_options import RobotOptions
@@ -18,11 +18,11 @@ class Robot:
     ----------
         ros_interface (ROSInterface): An object for managing ROS2 communications and functionalities.
         battery_state (BatteryState): Stores the current state of the robot's battery.
-        led_controller (LEDController): Controls the robot's LEDs.
-        display_controller (DisplayController): Manages the robot's display.
-        movement_controller (MovementController): Handles the robot's movement.
-        audio_controller (AudioController): Controls the robot's audio.
-        perception_system (PerceptionSystem): Handles the robot's perception system.
+        led (LEDController): Controls the robot's LEDs.
+        display (DisplayController): Manages the robot's display.
+        navigation (NavigationController): Handles the robot's movement.
+        audio (AudioController): Controls the robot's audio.
+        perception (PerceptionSystem): Handles the robot's perception system.
 
     Methods
     -------
@@ -47,7 +47,7 @@ class Robot:
         if robot_options.launch_controllers:
             self._led_controller = LEDController(self._ros_interface)
             self._display_controller = DisplayController(self._ros_interface)
-            self._movement_controller = MovementController(self._ros_interface)
+            self._navigation_controller = NavigationController(self._ros_interface)
             self._audio_controller = AudioController(self._ros_interface)
             self._ros_interface.create_subscriber(
                 "/battery_status", BatteryState, self.battery_state_cb)
@@ -78,7 +78,7 @@ class Robot:
         return self._battery_state
 
     @property
-    def perception_system(self) -> PerceptionSystem:
+    def perception(self) -> PerceptionSystem:
         """Creates perception system if it doesn't exist and returns it."""
         if self._perception_system is None:
             self._perception_system = PerceptionSystem(self._robot_options.namespace)
@@ -97,8 +97,8 @@ class Robot:
         return self._display_controller
 
     @property
-    def movement(self) -> MovementController:
-        return self._movement_controller
+    def navigation(self) -> NavigationController:
+        return self._navigation_controller
 
     @property
     def audio(self) -> AudioController:
