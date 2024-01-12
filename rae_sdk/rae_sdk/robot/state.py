@@ -13,8 +13,6 @@ class StateController:
     Methods
     -------
         battery_state_cb(data): Callback method for updating battery state.
-        start(): Initializes the robot's components and starts ROS2 communications.
-        stop(): Stops the ROS2 communications and shuts down the robot's components.
 
     """
 
