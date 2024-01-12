@@ -3,11 +3,11 @@ import logging as log
 from .api.ros.ros_interface import ROSInterface
 from .display import DisplayController
 from .led import LEDController
-from .movement import MovementController
+from .navigation import NavigationController
 from .audio import AudioController
+from .state import StateController
 from .perception.perception_system import PerceptionSystem
 from .robot_options import RobotOptions
-from sensor_msgs.msg import BatteryState
 
 
 class Robot:
@@ -17,16 +17,15 @@ class Robot:
     Attributes
     ----------
         ros_interface (ROSInterface): An object for managing ROS2 communications and functionalities.
-        battery_state (BatteryState): Stores the current state of the robot's battery.
-        led_controller (LEDController): Controls the robot's LEDs.
-        display_controller (DisplayController): Manages the robot's display.
-        movement_controller (MovementController): Handles the robot's movement.
-        audio_controller (AudioController): Controls the robot's audio.
-        perception_system (PerceptionSystem): Handles the robot's perception system.
+        led (LEDController): Controls the robot's LEDs.
+        display (DisplayController): Manages the robot's display.
+        navigation (NavigationController): Handles the robot's movement.
+        audio (AudioController): Controls the robot's audio.
+        state (StateController): Manages the robot's state information.
+        perception (PerceptionSystem): Handles the robot's perception system.
 
     Methods
     -------
-        battery_state_cb(data): Callback method for updating battery state.
         start(): Initializes the robot's components and starts ROS2 communications.
         stop(): Stops the ROS2 communications and shuts down the robot's components.
 
@@ -47,12 +46,11 @@ class Robot:
         if robot_options.launch_controllers:
             self._led_controller = LEDController(self._ros_interface)
             self._display_controller = DisplayController(self._ros_interface)
-            self._movement_controller = MovementController(self._ros_interface)
+            self._navigation_controller = NavigationController(self._ros_interface)
             self._audio_controller = AudioController(self._ros_interface)
-            self._ros_interface.create_subscriber(
-                "/battery_status", BatteryState, self.battery_state_cb)
-        self._perception_system = PerceptionSystem(self._robot_options.namespace)
+            self._state_controller = StateController(self._ros_interface)
 
+        self._perception_system = None
         log.info('Robot ready')
 
     def __del__(self) -> None:
@@ -64,20 +62,21 @@ class Robot:
 
         Ensures a clean shutdown of all components.
         """
-        self._perception_system.stop()
+        if self._perception_system is not None:
+            self._perception_system.stop()
         if self._display_controller is not None:
             self._display_controller.stop()
         self._ros_interface.stop()
 
-    def battery_state_cb(self, data):
-        self._battery_state = data
+    @property
+    def state(self) -> StateController:
+        return self._state_controller
 
     @property
-    def battery_state(self) -> BatteryState:
-        return self._battery_state
-
-    @property
-    def perception_system(self) -> PerceptionSystem:
+    def perception(self) -> PerceptionSystem:
+        """Create perception system if it doesn't exist and return it."""
+        if self._perception_system is None:
+            self._perception_system = PerceptionSystem(self._robot_options.namespace)
         return self._perception_system
 
     @property
@@ -93,8 +92,8 @@ class Robot:
         return self._display_controller
 
     @property
-    def movement(self) -> MovementController:
-        return self._movement_controller
+    def navigation(self) -> NavigationController:
+        return self._navigation_controller
 
     @property
     def audio(self) -> AudioController:
