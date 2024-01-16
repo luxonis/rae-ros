@@ -126,8 +126,8 @@ class DisplayController:
                               0, 0, axis_length], [0, 0, 0]]).reshape(-1, 3)
 
             # Project 3D points to 2D
-            focal_length = self.screen_width
-            camera_matrix = np.array([[focal_length, 0, self.screen_width / 2],
+            focal_length = self._screen_width
+            camera_matrix = np.array([[focal_length, 0, self._screen_width / 2],
                                       [0, focal_length, self.screen_height / 2],
                                       [0, 0, 1]], dtype='double')
             dist_coeffs = np.zeros((4, 1))  # Assuming no lens distortion
@@ -136,7 +136,7 @@ class DisplayController:
 
             # Create image and draw the axes
             image = np.zeros(
-                (self.screen_height, self.screen_width, 3), dtype=np.uint8)
+                (self.screen_height, self._screen_width, 3), dtype=np.uint8)
             axes_2d = np.int32(axes_2d).reshape(-1, 2)
             cv2.line(image, tuple(axes_2d[3]), tuple(
                 axes_2d[0]), (0, 0, 255), 3)  # X-axis in red
@@ -156,10 +156,10 @@ class DisplayController:
         self.ball_color = (255, 0, 255)  # Red in BGR format
 
         # Ball initial position and velocity
-        self.x, self.y = self.screen_width // 2, self.screen_height // 2
+        self.x, self.y = self._screen_width // 2, self.screen_height // 2
         self.vx, self.vy = 2, 3  # Speed of the ball in x and y direction
         image = np.zeros(
-            (self.screen_height, self.screen_width, 3), dtype=np.uint8)
+            (self.screen_height, self._screen_width, 3), dtype=np.uint8)
 
         # Draw the ball
         cv2.circle(image, (self.x, self.y),
@@ -170,7 +170,7 @@ class DisplayController:
         self.y += self.vy
 
         # Bounce off the walls
-        if self.x <= self.ball_size // 2 or self.x >= self.screen_width - self.ball_size // 2:
+        if self.x <= self.ball_size // 2 or self.x >= self._screen_width - self.ball_size // 2:
             self.vx = -self.vx
         if self.y <= self.ball_size // 2 or self.y >= self.screen_height - self.ball_size // 2:
             self.vy = -self.vy
