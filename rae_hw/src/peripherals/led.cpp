@@ -54,28 +54,33 @@ void LEDNode::timer_callback() {
             uint8_t r = convertColor(currentData_->data[0].color.r);
             uint8_t g = convertColor(currentData_->data[0].color.g);
             uint8_t b = convertColor(currentData_->data[0].color.b);
-            setAllPixels(r, g, b, currentData_->data[0].frequency);
+            float a = convertOpacity(currentData_->data[0].color.a);
+            setAllPixels(r, g, b, a, currentData_->data[0].frequency);
         } else if(currentData_->control_type == currentData_->CTRL_TYPE_SINGLE) {
             uint8_t r = convertColor(currentData_->data[0].color.r);
             uint8_t g = convertColor(currentData_->data[0].color.g);
             uint8_t b = convertColor(currentData_->data[0].color.b);
-            setSinglePixel(currentData_->single_led_n, r, g, b, currentData_->data[0].frequency);
+            float a = convertOpacity(currentData_->data[0].color.a);
+            setSinglePixel(currentData_->single_led_n, r, g, b, a, currentData_->data[0].frequency);
         } else if(currentData_->control_type == currentData_->CTRL_TYPE_SPINNER) {
             uint8_t r = convertColor(currentData_->data[0].color.r);
             uint8_t g = convertColor(currentData_->data[0].color.g);
             uint8_t b = convertColor(currentData_->data[0].color.b);
-            spinner(r, g, b, currentData_->animation_size, currentData_->animation_quantity, currentData_->data[0].frequency);
+            float a = convertOpacity(currentData_->data[0].color.a);
+            spinner(r, g, b, a, currentData_->animation_size, currentData_->animation_quantity, currentData_->data[0].frequency);
         } else if(currentData_->control_type == currentData_->CTRL_TYPE_FAN) {
             uint8_t r = convertColor(currentData_->data[0].color.r);
             uint8_t g = convertColor(currentData_->data[0].color.g);
             uint8_t b = convertColor(currentData_->data[0].color.b);
-            fan(r, g, b, true, currentData_->animation_quantity, currentData_->data[0].frequency);
+            float a = convertOpacity(currentData_->data[0].color.a);
+            fan(r, g, b, a, true, currentData_->animation_quantity, currentData_->data[0].frequency);
         } else {
             for(int i = 0; i < WS2812B_NUM_LEDS; i++) {
                 uint8_t r = convertColor(currentData_->data[i].color.r);
                 uint8_t g = convertColor(currentData_->data[i].color.g);
                 uint8_t b = convertColor(currentData_->data[i].color.b);
-                setSinglePixel(i, r, g, b, currentData_->data[i].frequency);
+                float a = convertOpacity(currentData_->data[i].color.a);
+                setSinglePixel(i, r, g, b, a, currentData_->data[i].frequency);
             }
         }
         transmitSPI();
@@ -85,6 +90,18 @@ void LEDNode::timer_callback() {
 uint8_t LEDNode::convertColor(float num) {
     return static_cast<uint8_t>(round(num * 255.0));
 }
+
+float LEDNode::convertOpacity(float num) {
+    if (num < 0) {
+        num = 0;
+    } 
+    else if (num > 1) {
+        num = 1;
+    }
+     
+    return num;
+}
+
 void LEDNode::transmitSPI() {
     struct spi_ioc_transfer tr = spi_ioc_transfer();
     tr.tx_buf = (unsigned long)ws2812b_buffer;
@@ -108,12 +125,12 @@ void LEDNode::fillBuffer(uint8_t color, float intensity) {
         ptr++;
     }
 }
-void LEDNode::setSinglePixel(uint16_t pixel, uint8_t r, uint8_t g, uint8_t b, float frequency) {
+void LEDNode::setSinglePixel(uint16_t pixel, uint8_t r, uint8_t g, uint8_t b, float a, float frequency) {
     auto mapping_pair = logicalToPhysicalMapping.find(pixel);
-    const float phaseOffset = 3.14 / 4;  // Initial phase offset, if needed
+    const float phaseOffset = (M_PI/ 4);  // Initial phase offset, if needed
     const float amplitudeOffset = 1.0f;  // Add 1 to sine wave to avoid negative values
     const float scaler = 2.0f;           // Scale the sine wave to 0-1
-    const float intensity = (std::sin(frame / (2 * M_PI) * frequency + phaseOffset) + amplitudeOffset) / scaler;
+    const float intensity = ((std::sin(frame / (2 * M_PI) * frequency + phaseOffset) + amplitudeOffset) / scaler) * a;
     if(mapping_pair != logicalToPhysicalMapping.end()) {
         uint16_t physicalID = mapping_pair->second;
         ptr = &ws2812b_buffer[24 * physicalID];
@@ -126,11 +143,11 @@ void LEDNode::setSinglePixel(uint16_t pixel, uint8_t r, uint8_t g, uint8_t b, fl
     fillBuffer(b, intensity);
 }
 
-void LEDNode::setAllPixels(uint8_t r, uint8_t g, uint8_t b, float frequency) {
-    const float phaseOffset = 3.14 / 4;  // Initial phase offset, if needed
+void LEDNode::setAllPixels(uint8_t r, uint8_t g, uint8_t b, float a, float frequency) {
+    const float phaseOffset = (M_PI / 4);  // Initial phase offset, if needed
     const float amplitudeOffset = 1.0f;  // Add 1 to sine wave to avoid negative values
     const float scaler = 2.0f;           // Scale the sine wave to 0-1
-    const float intensity = (std::sin(frame / (2 * M_PI) * frequency + phaseOffset) + amplitudeOffset) / scaler;
+    const float intensity = ((std::sin(frame / (2 * M_PI) * frequency + phaseOffset) + amplitudeOffset) / scaler) * a;
     ptr = ws2812b_buffer;
 
     for(uint16_t i = 0; i < WS2812B_NUM_LEDS; ++i) {
@@ -140,22 +157,22 @@ void LEDNode::setAllPixels(uint8_t r, uint8_t g, uint8_t b, float frequency) {
     }
 }
 
-void LEDNode::spinner(uint8_t r, uint8_t g, uint8_t b, uint8_t size, uint8_t blades, float frequency) {
+void LEDNode::spinner(uint8_t r, uint8_t g, uint8_t b, float a, uint8_t size, uint8_t blades, float frequency) {
     setAllPixels(0, 0, 0, 0);
     for(uint8_t i = 0; i < blades; i++) {
         for(uint32_t j = frame; j < frame + size; j++) {
-            setSinglePixel((j + i * (WS2812B_NUM_LEDS / blades)) % WS2812B_NUM_LEDS, r, g, b, frequency);
+            setSinglePixel((j + i * (WS2812B_NUM_LEDS / blades)) % WS2812B_NUM_LEDS, r, g, b, a, frequency);
         };
     };
 };
 
-void LEDNode::fan(uint8_t r, uint8_t g, uint8_t b, bool opening, uint8_t blades, float frequency) {
+void LEDNode::fan(uint8_t r, uint8_t g, uint8_t b, float a, bool opening, uint8_t blades, float frequency) {
     uint8_t blade_length = WS2812B_NUM_LEDS / blades;
     uint8_t tip = frame % blade_length;
     setAllPixels(0, 0, 0, 0);
     for(uint32_t i = 0; i < blades; i++) {
         for(uint32_t j = 0; j < (opening ? tip : blade_length - tip); j++) {
-            setSinglePixel((j + i * blade_length) % WS2812B_NUM_LEDS, r, g, b, frequency);
+            setSinglePixel((j + i * blade_length) % WS2812B_NUM_LEDS, r, g, b, a, frequency);
         };
     };
 };

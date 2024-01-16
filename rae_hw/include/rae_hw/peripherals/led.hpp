@@ -39,10 +39,11 @@ class LEDNode : public rclcpp::Node {
     void fillBuffer(uint8_t color, float intensity = 1);
     void LED_control();
     uint8_t convertColor(float num);
-    void setSinglePixel(uint16_t pixel, uint8_t r, uint8_t g, uint8_t b, float frequency = 0.0);
-    void setAllPixels(uint8_t r, uint8_t g, uint8_t b, float frequency = 0.0);
-    void spinner(uint8_t r, uint8_t g, uint8_t b, uint8_t size = 5, uint8_t blades = 1, float frequency = 0.0);
-    void fan(uint8_t r, uint8_t g, uint8_t b, bool opening, uint8_t blades = 1, float frequency = 0.0);
+    float convertOpacity(float num);
+    void setSinglePixel(uint16_t pixel, uint8_t r, uint8_t g, uint8_t b, float a, float frequency = 0.0);
+    void setAllPixels(uint8_t r, uint8_t g, uint8_t b, float a, float frequency = 0.0);
+    void spinner(uint8_t r, uint8_t g, uint8_t b, float a, uint8_t size = 5, uint8_t blades = 1, float frequency = 0.0);
+    void fan(uint8_t r, uint8_t g, uint8_t b, float a, bool opening, uint8_t blades = 1, float frequency = 0.0);
     void topic_callback(const rae_msgs::msg::LEDControl::SharedPtr msg);
 
     rclcpp::Subscription<rae_msgs::msg::LEDControl>::SharedPtr subscription_;
