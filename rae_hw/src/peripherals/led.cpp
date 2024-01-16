@@ -93,9 +93,8 @@ uint8_t LEDNode::convertColor(float num) {
 
 float LEDNode::convertOpacity(float num) {
     if (num < 0) {
-        num = 0;
-    } 
-    else if (num > 1) {
+        num = 0;} 
+    else if(num > 1) {
         num = 1;
     }
      
@@ -128,8 +127,8 @@ void LEDNode::fillBuffer(uint8_t color, float intensity) {
 void LEDNode::setSinglePixel(uint16_t pixel, uint8_t r, uint8_t g, uint8_t b, float a, float frequency) {
     auto mapping_pair = logicalToPhysicalMapping.find(pixel);
     const float phaseOffset = (M_PI/ 4);  // Initial phase offset, if needed
-    const float amplitudeOffset = 1.0f;  // Add 1 to sine wave to avoid negative values
-    const float scaler = 2.0f;           // Scale the sine wave to 0-1
+    const float amplitudeOffset = 1.0f;   // Add 1 to sine wave to avoid negative values
+    const float scaler = 2.0f;            // Scale the sine wave to 0-1
     const float intensity = ((std::sin(frame / (2 * M_PI) * frequency + phaseOffset) + amplitudeOffset) / scaler) * a;
     if(mapping_pair != logicalToPhysicalMapping.end()) {
         uint16_t physicalID = mapping_pair->second;
@@ -145,8 +144,8 @@ void LEDNode::setSinglePixel(uint16_t pixel, uint8_t r, uint8_t g, uint8_t b, fl
 
 void LEDNode::setAllPixels(uint8_t r, uint8_t g, uint8_t b, float a, float frequency) {
     const float phaseOffset = (M_PI / 4);  // Initial phase offset, if needed
-    const float amplitudeOffset = 1.0f;  // Add 1 to sine wave to avoid negative values
-    const float scaler = 2.0f;           // Scale the sine wave to 0-1
+    const float amplitudeOffset = 1.0f;    // Add 1 to sine wave to avoid negative values
+    const float scaler = 2.0f;             // Scale the sine wave to 0-1
     const float intensity = ((std::sin(frame / (2 * M_PI) * frequency + phaseOffset) + amplitudeOffset) / scaler) * a;
     ptr = ws2812b_buffer;
 
