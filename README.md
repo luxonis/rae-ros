@@ -37,7 +37,7 @@ Downloading prebuilt images is reccomended if you are not planning to considerab
 3. Upload docker image to robot. Connect robot to your PC via USB so you can transfer image quicker. Note that currently space on the robot is limited, so you need to have 7-8 GB of free space in `/data` directory - `docker save <docker-image-name>:<tag> | ssh -C root@192.168.197.55 docker load`
 4. SSH into robot and run docker image - `docker run -it --restart=unless-stopped -v /dev/:/dev/ -v /sys/:/sys/ --privileged  --net=host <docker-image-name>:<tag>`
 5. Search for docker container name with `docker ps`
-6. Attach to the shell - `docker attach <container_name>`, or if you want to create separate session `docker exec -it <container_name> zsh
+6. Attach to the shell - `docker attach <container_name>`, or if you want to create separate session `docker exec -it <container_name> zsh`
 7. To launch robot hardware - `ros2 launch rae_bringup robot.launch.py`. This launches:
    - Motor drivers and differential controller
    - Camera driver, currently set up to provide Depth and streams from left & right camera. Note here that you have to calibrate cameras (see steps below). Currently a default calibration file is loaded. It's located in `rae_camera/config/cal.json`. To use one on the device or from other path, change `i_external_calibration_path` parameter in  `rae_camera/config/camera.yaml`
@@ -201,7 +201,7 @@ LCD node is listening to messages on /lcd topic and showing it on the screen in 
 
 `img_msg = self.bridge.cv2_to_imgmsg(img_cv, encoding="bgr8")`
 
-### Microcphone and speakers
+### Microphone and speakers
 
 Microphone node expects audio messages and example of how to use that data (along with some other peripherals) can be found in rae_bringup/scripts/audio_spectrum.py . For fair amount of use caes, you will need to decode incoming data as shown in example below.
 
