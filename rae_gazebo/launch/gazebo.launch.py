@@ -12,9 +12,8 @@ from launch_ros.actions import Node
 def launch_setup(context, *args, **kwargs):
     rae_description_pkg = get_package_share_directory('rae_description')
     ros_gz_sim_pkg = get_package_share_directory('ros_gz_sim')
-
     world_file = LaunchConfiguration('sdf_file').perform(context)
-
+    print(f'world_file: {world_file}')
     return [
         SetEnvironmentVariable(
             name='IGN_GAZEBO_RESOURCE_PATH',
@@ -29,7 +28,7 @@ def launch_setup(context, *args, **kwargs):
                 os.path.join(ros_gz_sim_pkg, 'launch', 'gz_sim.launch.py')
             ]),
             launch_arguments={
-                'gz_args': '-r /home/mateo/Dev/Projects/rae/rae-sandbox/src/rae_gazebo/worlds/world_demo.sdf',
+                'gz_args': world_file,
                 'use_sim_time': 'True'
             }.items()
         ),
