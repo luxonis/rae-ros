@@ -2,7 +2,7 @@
 <robot name="rae"
   xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:include filename="inertial_moment_calc.xacro"/>
-  <!-- <xacro:include filename="rae_gazebo.xacro"/> -->
+  <xacro:include filename="rae_gazebo_control.urdf.xacro"/>
   <xacro:include filename="rae_ros2_control.urdf.xacro"/>
   <xacro:property name="deg_to_rad" value="0.01745329251994329577" />
 
