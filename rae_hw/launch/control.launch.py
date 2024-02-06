@@ -58,6 +58,12 @@ def launch_setup(context, *args, **kwargs):
             ]
         ),
         Node(
+            package='rae_hw',
+            executable='lifecycle_manager.py',
+            name='lifecycle_manager',
+            namespace=LaunchConfiguration('namespace')
+        ),
+        Node(
             package='controller_manager',
             executable='ros2_control_node',
             namespace=LaunchConfiguration('namespace'),

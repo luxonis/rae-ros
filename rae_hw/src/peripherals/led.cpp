@@ -2,10 +2,23 @@
 
 namespace rae_hw {
 LEDNode::LEDNode(const rclcpp::NodeOptions& options)
-    : Node("led_node", options), logicalToPhysicalMapping{{0, 0},   {1, 1},   {2, 2},   {3, 3},   {4, 4},   {5, 5},   {6, 6},   {7, 7},   {8, 8},   {9, 29},
-                                                          {10, 30}, {11, 31}, {12, 32}, {13, 33}, {14, 34}, {15, 35}, {16, 36}, {17, 37}, {18, 38}, {19, 19},
-                                                          {20, 20}, {21, 21}, {22, 22}, {23, 23}, {24, 24}, {25, 25}, {26, 26}, {27, 27}, {28, 28}, {29, 9},
-                                                          {30, 10}, {31, 11}, {32, 12}, {33, 13}, {34, 14}, {35, 15}, {36, 16}, {37, 17}, {38, 18}} {
+    : rclcpp_lifecycle::LifecycleNode("led_node", options),
+      logicalToPhysicalMapping{{0, 0},   {1, 1},   {2, 2},   {3, 3},   {4, 4},   {5, 5},   {6, 6},   {7, 7},   {8, 8},   {9, 29},
+                               {10, 30}, {11, 31}, {12, 32}, {13, 33}, {14, 34}, {15, 35}, {16, 36}, {17, 37}, {18, 38}, {19, 19},
+                               {20, 20}, {21, 21}, {22, 22}, {23, 23}, {24, 24}, {25, 25}, {26, 26}, {27, 27}, {28, 28}, {29, 9},
+                               {30, 10}, {31, 11}, {32, 12}, {33, 13}, {34, 14}, {35, 15}, {36, 16}, {37, 17}, {38, 18}} {
+}
+LEDNode::~LEDNode() {
+    cleanup();
+}
+
+void LEDNode::cleanup() {
+    setAllPixels(0, 0, 0, 0);
+    transmitSPI();
+    close(fd);
+}
+
+CallbackReturn LEDNode::on_configure(const rclcpp_lifecycle::State& /*previous_state*/) {
     int ret = 0;
     memset(ws2812b_buffer, 0, WS2812B_BUFFER_SIZE);
     fd = open("/dev/spidev3.0", O_RDWR);
@@ -35,12 +48,26 @@ LEDNode::LEDNode(const rclcpp::NodeOptions& options)
     transmitSPI();
 
     timer_ = this->create_wall_timer(std::chrono::milliseconds(50), std::bind(&LEDNode::timer_callback, this));
-    RCLCPP_INFO(this->get_logger(), "LED node running!");
+    RCLCPP_INFO(this->get_logger(), "LED node configured!");
+    return CallbackReturn::SUCCESS;
 }
-LEDNode::~LEDNode() {
-    setAllPixels(0, 0, 0, 0);
-    transmitSPI();
+
+CallbackReturn LEDNode::on_activate(const rclcpp_lifecycle::State& /*previous_state*/) {
+    RCLCPP_INFO(this->get_logger(), "LED node activated!");
+    return CallbackReturn::SUCCESS;
 }
+
+CallbackReturn LEDNode::on_deactivate(const rclcpp_lifecycle::State& /*previous_state*/) {
+    RCLCPP_INFO(this->get_logger(), "LED node deactivated!");
+    return CallbackReturn::SUCCESS;
+}
+
+CallbackReturn LEDNode::on_shutdown(const rclcpp_lifecycle::State& /*previous_state*/) {
+    RCLCPP_INFO(this->get_logger(), "LED node shuttind down!");
+    cleanup();
+    return CallbackReturn::SUCCESS;
+}
+
 void LEDNode::topic_callback(const rae_msgs::msg::LEDControl::SharedPtr msg) {
     std::lock_guard<std::mutex> lock(mutex_);
     currentData_ = msg;
@@ -169,8 +196,8 @@ void LEDNode::fan(uint8_t r, uint8_t g, uint8_t b, float a, bool opening, uint8_
     uint8_t blade_length = WS2812B_NUM_LEDS / blades;
     uint8_t tip = frame % blade_length;
     setAllPixels(0, 0, 0, 0);
-    for(uint32_t i = 0; i < blades; i++) {
-        for(uint32_t j = 0; j < (opening ? tip : blade_length - tip); j++) {
+    for(uint8_t i = 0; i < blades; i++) {
+        for(uint8_t j = 0; j < (opening ? tip : blade_length - tip); j++) {
             setSinglePixel((j + i * blade_length) % WS2812B_NUM_LEDS, r, g, b, a, frequency);
         };
     };

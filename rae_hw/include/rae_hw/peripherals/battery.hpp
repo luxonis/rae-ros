@@ -6,12 +6,20 @@
 
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/battery_state.hpp"
+#include "rclcpp_lifecycle/lifecycle_node.hpp"
 
 namespace rae_hw {
-class BatteryNode : public rclcpp::Node {
+using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
+class BatteryNode : public rclcpp_lifecycle::LifecycleNode {
    public:
     BatteryNode(const rclcpp::NodeOptions& options);
     ~BatteryNode();
+
+    CallbackReturn on_configure(const rclcpp_lifecycle::State& previous_state);
+    CallbackReturn on_activate(const rclcpp_lifecycle::State& previous_state);
+    CallbackReturn on_deactivate(const rclcpp_lifecycle::State& previous_state);
+    CallbackReturn on_shutdown(const rclcpp_lifecycle::State& previous_state);
+
 
    private:
     std::string readVarFromFile(const std::string& varName);

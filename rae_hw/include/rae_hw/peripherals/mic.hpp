@@ -11,13 +11,21 @@
 #include "rae_msgs/msg/rae_audio.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "std_srvs/srv/trigger.hpp"
+#include "rclcpp_lifecycle/lifecycle_node.hpp"
 
 namespace rae_hw {
-
-class MicNode : public rclcpp::Node {
+using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
+class MicNode : public rclcpp_lifecycle::LifecycleNode {
    public:
     MicNode(const rclcpp::NodeOptions& options);
     ~MicNode();
+
+    void cleanup();
+
+    CallbackReturn on_configure(const rclcpp_lifecycle::State& previous_state);
+    CallbackReturn on_activate(const rclcpp_lifecycle::State& previous_state);
+    CallbackReturn on_deactivate(const rclcpp_lifecycle::State& previous_state);
+    CallbackReturn on_shutdown(const rclcpp_lifecycle::State& previous_state);
 
    private:
     void configure_microphone();

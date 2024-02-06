@@ -9,20 +9,26 @@
 #include "audio_msgs/msg/audio.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/int32.hpp"
+#include "rclcpp_lifecycle/lifecycle_node.hpp"
 
 namespace rae_hw {
-
-class SpeakersNode : public rclcpp::Node {
+using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
+class SpeakersNode : public rclcpp_lifecycle::LifecycleNode {
    public:
     SpeakersNode(const rclcpp::NodeOptions& options);
     ~SpeakersNode();
+    void cleanup();
+
+    CallbackReturn on_configure(const rclcpp_lifecycle::State& previous_state);
+    CallbackReturn on_activate(const rclcpp_lifecycle::State& previous_state);
+    CallbackReturn on_deactivate(const rclcpp_lifecycle::State& previous_state);
+    CallbackReturn on_shutdown(const rclcpp_lifecycle::State& previous_state);
 
    private:
     void play_mp3(const char*);
     rclcpp::Service<rae_msgs::srv::PlayAudio>::SharedPtr play_audio_service_;
 
-    void play_audio_service_callback(const std::shared_ptr<rmw_request_id_t> request_header,
-                                     const std::shared_ptr<rae_msgs::srv::PlayAudio::Request> request,
+    void play_audio_service_callback(const std::shared_ptr<rae_msgs::srv::PlayAudio::Request> request,
                                      const std::shared_ptr<rae_msgs::srv::PlayAudio::Response> response);
     snd_pcm_t* alsaHandle;
 

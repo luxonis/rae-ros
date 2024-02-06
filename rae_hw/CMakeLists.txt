@@ -121,7 +121,7 @@ if(BUILD_TESTING)
     ros2_control_test_assets
   )
 endif()
-install(DIRECTORY launch config DESTINATION share/${PROJECT_NAME})
+install(DIRECTORY launch config assets DESTINATION share/${PROJECT_NAME})
 ament_export_include_directories(
   include
 )
@@ -147,6 +147,7 @@ install(
   scripts/mock_mic.py
   scripts/mock_speakers.py
   scripts/mock_wheels.py
+  scripts/lifecycle_manager.py
   DESTINATION lib/${PROJECT_NAME}
 )
 ament_package()

@@ -1,7 +1,7 @@
 
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, OpaqueFunction
-from launch_ros.actions import Node, LoadComposableNodes, ComposableNodeContainer
+from launch_ros.actions import Node, LoadComposableNodes, ComposableNodeContainer, LifecycleNode
 from launch.conditions import IfCondition
 from launch.substitutions import LaunchConfiguration
 from launch_ros.descriptions import ComposableNode
@@ -34,9 +34,6 @@ def launch_setup(context, *args, **kwargs):
                     namespace=LaunchConfiguration('namespace'),
                     package='rae_hw',
                     plugin='rae_hw::LCDNode',
-                    parameters=[{
-                        'default_logo_path': LaunchConfiguration('default_logo_path')
-                    }],
                 ),
                 ComposableNode(
                     name='led_node',
@@ -46,13 +43,17 @@ def launch_setup(context, *args, **kwargs):
                 )
 
             ]),
-        Node(
+        LifecycleNode(
             package='rae_hw',
-            executable='speakers_node'
+            executable='speakers_node',
+            name='speakers_node',
+            namespace=LaunchConfiguration('namespace')
         ),
-        Node(
+        LifecycleNode(
             package='rae_hw',
-            executable='mic_node'
+            executable='mic_node',
+            name='mic_node',
+            namespace=LaunchConfiguration('namespace')
         ),
     ]
 
@@ -62,7 +63,6 @@ def generate_launch_description():
         DeclareLaunchArgument('name', default_value='rae'),
         DeclareLaunchArgument('namespace', default_value=''),
         DeclareLaunchArgument('run_container', default_value='true'),
-        DeclareLaunchArgument('default_logo_path', default_value='/usr/share/rae-logo-white.jpg'),
     ]
 
     return LaunchDescription(

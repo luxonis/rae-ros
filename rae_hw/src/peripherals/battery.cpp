@@ -6,15 +6,36 @@
 #include <iostream>
 
 namespace rae_hw {
-BatteryNode::BatteryNode(const rclcpp::NodeOptions& options) : rclcpp::Node("battery", options) {
+BatteryNode::BatteryNode(const rclcpp::NodeOptions& options) : rclcpp_lifecycle::LifecycleNode("battery_node", options) {
+
+}
+BatteryNode::~BatteryNode() = default;
+
+CallbackReturn BatteryNode::on_configure(const rclcpp_lifecycle::State& /*previous_state*/) {
     using namespace std::chrono_literals;
     publisher = this->create_publisher<sensor_msgs::msg::BatteryState>("battery_status", 10);
     timer = this->create_wall_timer(500ms, std::bind(&BatteryNode::timerCallback, this));
     stateChangeTime = this->get_clock()->now();
     lastLogTime = this->get_clock()->now();
-    RCLCPP_INFO(this->get_logger(), "Battery node running!");
+    RCLCPP_INFO(this->get_logger(), "Battery node configured!");
+    return CallbackReturn::SUCCESS;
 }
-BatteryNode::~BatteryNode() = default;
+
+CallbackReturn BatteryNode::on_activate(const rclcpp_lifecycle::State& /*previous_state*/) {
+    RCLCPP_INFO(this->get_logger(), "Battery node activated!");
+    return CallbackReturn::SUCCESS;
+}
+
+CallbackReturn BatteryNode::on_deactivate(const rclcpp_lifecycle::State& /*previous_state*/) {
+    RCLCPP_INFO(this->get_logger(), "Battery node deactivated!");
+    return CallbackReturn::SUCCESS;
+}
+
+CallbackReturn BatteryNode::on_shutdown(const rclcpp_lifecycle::State& /*previous_state*/) {
+    RCLCPP_INFO(this->get_logger(), "Battery node shuttind down!");
+    return CallbackReturn::SUCCESS;
+}
+
 void BatteryNode::timerCallback() {
     auto message = sensor_msgs::msg::BatteryState();
     message.header.stamp = this->get_clock()->now();
