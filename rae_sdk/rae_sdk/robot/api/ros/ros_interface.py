@@ -18,6 +18,7 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.actions import IncludeLaunchDescription
 from launch import LaunchDescription, LaunchService
 from geometry_msgs.msg import TransformStamped
+from std_msgs.msg import String
 from tf2_ros.transform_listener import TransformListener
 from tf2_ros.buffer import Buffer
 from tf2_ros import TransformException
@@ -107,7 +108,8 @@ class ROSInterface:
         self._timers: dict[str, Timer] = {}
         self._tf_buffer = None
         self._tf_listener = None
-
+        self._controller_param_file = os.path.join(get_package_share_directory('rae_hw'), 'config', 'controller.yaml')
+        self._ready = False
     @property
     def node(self):
         return self._node
@@ -120,12 +122,17 @@ class ROSInterface:
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(
                     os.path.join(get_package_share_directory('rae_hw'), 'launch', launch_name)), 
-                    launch_arguments={'namespace': self._namespace}.items())
+                    launch_arguments={'namespace': self._namespace,
+                                      'controller_params_file': self._controller_param_file}.items())
         ])
         self._stop_event = multiprocessing.Event()
         self._process = multiprocessing.Process(
             target=self._run_process, args=(self._stop_event, ld), daemon=True)
         self._process.start()
+
+        # create subscribers for ready topic
+        self.create_subscriber('ready', String, self._ready_callback)
+
 
     def _run_process(self, stop_event, launch_description):
         loop = asyncio.get_event_loop()
@@ -146,8 +153,7 @@ class ROSInterface:
             start_hardware (bool): Whether to start the hardware process or not.
 
         """
-        if self._start_hardware or self._launch_mock:
-            self.start_hardware_process()
+
         self._context = rclpy.Context()
         self._context.init()
         log.info("ROS2 context initialized.")
@@ -162,6 +168,10 @@ class ROSInterface:
         self._executor_thread = threading.Thread(target=self._spin)
         self._executor_thread.start()
         log.info(f"Node started!")
+        if self._start_hardware or self._launch_mock:
+            self.start_hardware_process()
+        while not self._ready:
+            sleep(0.5)
 
     def _spin(self):
         log.info("rlcpy thread> Start")
@@ -373,3 +383,6 @@ class ROSInterface:
         except TransformException as e:
             log.error(e)
             return None
+    def _ready_callback(self, msg):
+        log.info(f"Received ready message: {msg}")
+        self._ready = True
