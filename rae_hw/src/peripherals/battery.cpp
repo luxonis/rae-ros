@@ -6,9 +6,7 @@
 #include <iostream>
 
 namespace rae_hw {
-BatteryNode::BatteryNode(const rclcpp::NodeOptions& options) : rclcpp_lifecycle::LifecycleNode("battery_node", options) {
-
-}
+BatteryNode::BatteryNode(const rclcpp::NodeOptions& options) : rclcpp_lifecycle::LifecycleNode("battery_node", options) {}
 BatteryNode::~BatteryNode() = default;
 
 CallbackReturn BatteryNode::on_configure(const rclcpp_lifecycle::State& /*previous_state*/) {

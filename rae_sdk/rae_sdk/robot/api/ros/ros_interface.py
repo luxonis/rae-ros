@@ -153,7 +153,6 @@ class ROSInterface:
             start_hardware (bool): Whether to start the hardware process or not.
 
         """
-
         self._context = rclpy.Context()
         self._context.init()
         log.info("ROS2 context initialized.")

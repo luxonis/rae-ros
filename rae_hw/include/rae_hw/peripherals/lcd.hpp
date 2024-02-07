@@ -8,8 +8,8 @@
 #include "cv_bridge/cv_bridge.h"
 #include "opencv2/opencv.hpp"
 #include "rclcpp/rclcpp.hpp"
-#include "sensor_msgs/msg/image.hpp"
 #include "rclcpp_lifecycle/lifecycle_node.hpp"
+#include "sensor_msgs/msg/image.hpp"
 
 namespace rae_hw {
 using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
@@ -26,6 +26,7 @@ class LCDNode : public rclcpp_lifecycle::LifecycleNode {
     void image_callback(const sensor_msgs::msg::Image::SharedPtr msg);
     void display_image(const cv::Mat& img);
     void cleanup();
+
    private:
     rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr subscription_;
     int fbfd;

@@ -1,14 +1,13 @@
+#include "rae_hw/peripherals/mic.hpp"
+
 #include <vector>
 
 #include "alsa/asoundlib.h"
 #include "alsa/pcm.h"
-#include "rae_hw/peripherals/mic.hpp"
 #include "rclcpp/rclcpp.hpp"
 
 namespace rae_hw {
-MicNode::MicNode(const rclcpp::NodeOptions& options) : rclcpp_lifecycle::LifecycleNode("mic_node", options), handle_(nullptr) {
-
-}
+MicNode::MicNode(const rclcpp::NodeOptions& options) : rclcpp_lifecycle::LifecycleNode("mic_node", options), handle_(nullptr) {}
 MicNode::~MicNode() {
     cleanup();
 }

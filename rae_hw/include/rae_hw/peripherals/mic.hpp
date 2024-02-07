@@ -10,8 +10,8 @@
 #include "rae_msgs/action/recording.hpp"
 #include "rae_msgs/msg/rae_audio.hpp"
 #include "rclcpp/rclcpp.hpp"
-#include "std_srvs/srv/trigger.hpp"
 #include "rclcpp_lifecycle/lifecycle_node.hpp"
+#include "std_srvs/srv/trigger.hpp"
 
 namespace rae_hw {
 using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;

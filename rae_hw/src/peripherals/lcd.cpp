@@ -5,16 +5,14 @@
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 
+#include "ament_index_cpp/get_package_share_directory.hpp"
 #include "cv_bridge/cv_bridge.h"
 #include "opencv2/opencv.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/image.hpp"
-#include "ament_index_cpp/get_package_share_directory.hpp"
 
 namespace rae_hw {
-LCDNode::LCDNode(const rclcpp::NodeOptions& options) : rclcpp_lifecycle::LifecycleNode("lcd_node", options) {
-
-}
+LCDNode::LCDNode(const rclcpp::NodeOptions& options) : rclcpp_lifecycle::LifecycleNode("lcd_node", options) {}
 
 LCDNode::~LCDNode() {
     cleanup();

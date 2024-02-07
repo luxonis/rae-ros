@@ -29,7 +29,7 @@
 #define WS2812B_BUFFER_SIZE (WS2812B_NUM_LEDS * 24 + WS2812B_RESET_PULSE)
 
 namespace rae_hw {
-    using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
+using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
 class LEDNode : public rclcpp_lifecycle::LifecycleNode {
    public:
     LEDNode(const rclcpp::NodeOptions& options);
