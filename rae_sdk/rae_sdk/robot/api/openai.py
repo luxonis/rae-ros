@@ -7,10 +7,10 @@ import base64
 
 
 class OpenAIClient:
-    def __init__(self, key=""):
+    def __init__(self, key="", description="Assume you are a mobile robot that has a camera, speakers, microphone and LCD display. Let's say your main goal is to learn how to survive and interact with the world without causing harm to others."):
         self.client = OpenAI(api_key=key)
         self._description = {"role": "system",
-                             "content": "Assume you are a mobile robot that has a camera, speakers, microphone and LCD display. Let's say your main goal is to learn how to survive and interact with the world without causing harm to others."
+                             "content": description
                              }
 
     @property
@@ -31,12 +31,12 @@ class OpenAIClient:
 
         """
         speech_file_path = Path(__file__).parent / "speech.mp3"
-        response = self.client.audio.speech.create(
+        with self.client.audio.speech.with_streaming_response.create(
             model="tts-1",
             voice="alloy",
-            input=text
-        )
-        response.stream_to_file(speech_file_path)
+            input=text,
+        ) as response:
+            response.stream_to_file(speech_file_path)
         return str(speech_file_path.absolute())
 
     def _encode_image(self, image) -> bytes:
@@ -63,7 +63,7 @@ class OpenAIClient:
 
         # Maximum amount of tokens you want to use for this request
         max_tokens = 300
-        base64_image = self.encode_image(image)
+        base64_image = self._encode_image(image)
         # List of message objects that contains the actual queries
         messages = [
             {
@@ -78,15 +78,19 @@ class OpenAIClient:
                             "image_url": {
                                 "url": f"data:image/jpeg;base64,{base64_image}",
                             },
-                        },
+                    },
                 ],
             }
         ]
-        response = self.client.chat.completions.create(
-            model=model,
-            messages=messages,
-            max_tokens=max_tokens,
-        )
+        response = ''
+        try:
+            response = self.client.chat.completions.create(
+                model=model,
+                messages=messages,
+                max_tokens=max_tokens,
+            )
+        except Exception as e:
+            print(e)
         return response
 
     def respond(self, text: str) -> str:
