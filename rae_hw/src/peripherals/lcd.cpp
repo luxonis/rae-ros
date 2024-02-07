@@ -107,5 +107,14 @@ void LCDNode::image_callback(const sensor_msgs::msg::Image::SharedPtr msg) {
 };
 }  // namespace rae_hw
 
-#include "rclcpp_components/register_node_macro.hpp"
-RCLCPP_COMPONENTS_REGISTER_NODE(rae_hw::LCDNode);
+int main(int argc, char* argv[]) {
+    rclcpp::init(argc, argv);
+
+    auto node = std::make_shared<rae_hw::LCDNode>(rclcpp::NodeOptions());
+    rclcpp::executors::SingleThreadedExecutor executor;
+    executor.add_node(node->get_node_base_interface());
+    executor.spin();
+    rclcpp::shutdown();
+
+    return 0;
+}
