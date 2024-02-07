@@ -59,8 +59,8 @@ class LEDController:
         if 'interval' in payload.keys():
             color_msg.frequency = float(payload['interval'])
         else:
-            color_msg.frequency = 1.0
-        color_msg.color.a = 1.0
+            color_msg.frequency = 0.0
+        color_msg.color.a = float(payload['brightness']) / 100
         color_msg.color.r = self.normalize(r)
         color_msg.color.g = self.normalize(g)
         color_msg.color.b = self.normalize(b)

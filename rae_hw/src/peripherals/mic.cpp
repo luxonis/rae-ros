@@ -1,12 +1,22 @@
+#include "rae_hw/peripherals/mic.hpp"
+
 #include <vector>
 
 #include "alsa/asoundlib.h"
 #include "alsa/pcm.h"
-#include "rae_hw/peripherals/mic.hpp"
 #include "rclcpp/rclcpp.hpp"
 
 namespace rae_hw {
-MicNode::MicNode(const rclcpp::NodeOptions& options) : Node("mic_node", options), handle_(nullptr) {
+MicNode::MicNode(const rclcpp::NodeOptions& options) : rclcpp_lifecycle::LifecycleNode("mic_node", options), handle_(nullptr) {}
+MicNode::~MicNode() {
+    cleanup();
+}
+
+void MicNode::cleanup() {
+    snd_pcm_close(handle_);
+}
+
+CallbackReturn MicNode::on_configure(const rclcpp_lifecycle::State& /*previous_state*/) {
     publisher_ = this->create_publisher<rae_msgs::msg::RAEAudio>("audio_in", 10);
     configure_microphone();
 
@@ -14,10 +24,24 @@ MicNode::MicNode(const rclcpp::NodeOptions& options) : Node("mic_node", options)
     wav_filename_ = "/tmp/recording.wav";
     start_service_ = this->create_service<rae_msgs::srv::RecordAudio>("start_recording",
                                                                       std::bind(&MicNode::startRecording, this, std::placeholders::_1, std::placeholders::_2));
-    RCLCPP_INFO(this->get_logger(), "Mic node running!");
+    RCLCPP_INFO(this->get_logger(), "Mic node configured!");
+    return CallbackReturn::SUCCESS;
 }
-MicNode::~MicNode() {
-    snd_pcm_close(handle_);
+
+CallbackReturn MicNode::on_activate(const rclcpp_lifecycle::State& /*previous_state*/) {
+    RCLCPP_INFO(this->get_logger(), "Mic node activated!");
+    return CallbackReturn::SUCCESS;
+}
+
+CallbackReturn MicNode::on_deactivate(const rclcpp_lifecycle::State& /*previous_state*/) {
+    RCLCPP_INFO(this->get_logger(), "Mic node deactivated!");
+    return CallbackReturn::SUCCESS;
+}
+
+CallbackReturn MicNode::on_shutdown(const rclcpp_lifecycle::State& /*previous_state*/) {
+    RCLCPP_INFO(this->get_logger(), "Mic node shuttind down!");
+    cleanup();
+    return CallbackReturn::SUCCESS;
 }
 
 void MicNode::configure_microphone() {
@@ -138,7 +162,7 @@ int main(int argc, char* argv[]) {
 
     auto node = std::make_shared<rae_hw::MicNode>(rclcpp::NodeOptions());
     rclcpp::executors::StaticSingleThreadedExecutor executor;
-    executor.add_node(node);
+    executor.add_node(node->get_node_base_interface());
     executor.spin();
     rclcpp::shutdown();
 

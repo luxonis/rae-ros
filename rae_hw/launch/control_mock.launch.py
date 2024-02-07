@@ -7,7 +7,7 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.actions import IncludeLaunchDescription, OpaqueFunction, DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
 from launch.conditions import IfCondition
-from launch_ros.actions import Node
+from launch_ros.actions import Node, LifecycleNode
 import xacro
 
 
@@ -24,38 +24,45 @@ def launch_setup(context, *args, **kwargs):
         ),
         Node(
             package='rae_hw',
+            executable='lifecycle_manager.py',
+            name='lifecycle_manager',
+            namespace=LaunchConfiguration('namespace'),
+            parameters=[{'mock': True}]
+        ),
+        LifecycleNode(
+            package='rae_hw',
             executable='mock_wheels.py',
-            name='mock_wheels',
+            name='diff_controller',
             namespace=LaunchConfiguration('namespace')
         ),
-        Node(
+        LifecycleNode(
             package='rae_hw',
             executable='mock_leds.py',
-            name='mock_leds',
+            name='led_node',
             namespace=LaunchConfiguration('namespace')
         ),
-        Node(
+        LifecycleNode(
             package='rae_hw',
             executable='mock_battery.py',
-            name='mock_battery',
+            name='battery_node',
             namespace=LaunchConfiguration('namespace')
         ),
-        Node(
+        LifecycleNode(
             package='rae_hw',
             executable='mock_lcd.py',
-            name='mock_lcd',
+            name='lcd_node',
             namespace=LaunchConfiguration('namespace')
         ),
-        Node(
+        LifecycleNode(
             package='rae_hw',
             executable='mock_speakers.py',
-            name='mock_speakers',
+            name='speakers_node',
             namespace=LaunchConfiguration('namespace')
         ),
-        Node(
+        LifecycleNode(
             package='rae_hw',
             executable='mock_mic.py',
-            name='mock_mic',
+            name='mic_node',
             namespace=LaunchConfiguration('namespace')
         )
     ]

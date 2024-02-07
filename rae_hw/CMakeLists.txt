@@ -33,9 +33,6 @@ ament_auto_add_library(
   SHARED
   src/rae_hw.cpp
   src/rae_motors.cpp
-  src/peripherals/battery.cpp
-  src/peripherals/lcd.cpp
-  src/peripherals/led.cpp
 )
 
 ament_target_dependencies(${PROJECT_NAME} ${DEPENDENCIES} ALSA std_srvs)
@@ -50,11 +47,6 @@ target_link_libraries(
 # prevent pluginlib from using boost
 target_compile_definitions(${PROJECT_NAME} PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
 
-rclcpp_components_register_nodes(${PROJECT_NAME} "${PROJECT_NAME}::BatteryNode")
-rclcpp_components_register_nodes(${PROJECT_NAME} "${PROJECT_NAME}::LCDNode")
-rclcpp_components_register_nodes(${PROJECT_NAME} "${PROJECT_NAME}::LEDNode")
-rclcpp_components_register_nodes(${PROJECT_NAME} "${PROJECT_NAME}::SpeakersNode")
-
 pluginlib_export_plugin_description_file(
   hardware_interface rae_hw.xml)
 
@@ -66,13 +58,28 @@ install(
   LIBRARY DESTINATION lib
 )
 
-add_executable(mic_node src/mic_node.cpp)
+add_executable(mic_node src/peripherals/mic.cpp)
 ament_target_dependencies(mic_node rclcpp audio_msgs)
 target_link_libraries(mic_node ${PROJECT_NAME})
 
-add_executable(speakers_node src/speakers_node.cpp)
+add_executable(speakers_node src/peripherals/speakers.cpp)
 ament_target_dependencies(speakers_node rclcpp audio_msgs)
 target_link_libraries(speakers_node ${PROJECT_NAME})
+
+add_executable(led_node src/peripherals/led.cpp)
+ament_target_dependencies(led_node rclcpp rae_msgs)
+target_link_libraries(led_node ${PROJECT_NAME})
+
+add_executable(lcd_node src/peripherals/lcd.cpp)
+ament_target_dependencies(lcd_node rclcpp sensor_msgs)
+target_link_libraries(lcd_node ${PROJECT_NAME})
+
+add_executable(battery_node src/peripherals/battery.cpp)
+ament_target_dependencies(battery_node rclcpp sensor_msgs)
+target_link_libraries(battery_node ${PROJECT_NAME})
+
+
+
 
 add_executable(test_motors test/test_motors.cpp src/rae_motors.cpp)
 target_link_libraries(test_motors ${GPIOD_LIBRARY})
@@ -90,7 +97,7 @@ ament_target_dependencies(test_speed rclcpp geometry_msgs)
 
 install(TARGETS
 
-  test_motors test_encoders test_max_speed test_speed mic_node speakers_node
+  test_motors test_encoders test_max_speed test_speed mic_node speakers_node led_node lcd_node battery_node
 
   DESTINATION lib/${PROJECT_NAME})
 
@@ -121,7 +128,7 @@ if(BUILD_TESTING)
     ros2_control_test_assets
   )
 endif()
-install(DIRECTORY launch config DESTINATION share/${PROJECT_NAME})
+install(DIRECTORY launch config assets DESTINATION share/${PROJECT_NAME})
 ament_export_include_directories(
   include
 )
@@ -147,6 +154,7 @@ install(
   scripts/mock_mic.py
   scripts/mock_speakers.py
   scripts/mock_wheels.py
+  scripts/lifecycle_manager.py
   DESTINATION lib/${PROJECT_NAME}
 )
 ament_package()
