@@ -19,13 +19,13 @@ class OpenAIClient:
 
     def generate_speech(self, text: str) -> str:
         """
-        Generate speech from text using OpenAI's TTS model
+        Generate speech from text using OpenAI's TTS model.
 
         Args:
         ----
-            text (str): The text to generate speech from
+            text (str): The text to generate speech from.
 
-        Returns:
+        Returns
         -------
             str: The path to the generated speech file
 
@@ -47,16 +47,17 @@ class OpenAIClient:
 
     def describe_image(self, image: np.ndarray, query="What's in this image?") -> str:
         """
-        Describe an image using OpenAI's Vision model
+        Describe an image using OpenAI's Vision model.
 
         Args:
         ----
             image (np.ndarray): The image to describe
             query (str): The query to ask the model. Default is "What's in this image?"
 
-        Returns:
+        Returns
         -------    
             str: The description of the image
+
         """
         # OpenAI model to use for the request
         model = "gpt-4-vision-preview"
@@ -96,14 +97,14 @@ class OpenAIClient:
     def respond(self, text: str) -> str:
         """
 
-        Generate a response from the robot using OpenAI's Chat model
+        Generate a response from the robot using OpenAI's Chat model.
 
         Args:
         ----
-            text (str): The text to generate a response from
+            text (str): The text to generate a response from.
 
-            Returns:
-            -------
+        Returns
+        -------
             str: The response from the robot
 
         """
