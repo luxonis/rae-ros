@@ -136,7 +136,7 @@ class LifecycleManager(Node):
         msg.data = [color]
         msg.control_type = LEDControl.CTRL_TYPE_SPINNER
         msg.animation_size = 1
-        msg.animation_quantity = self._progress
+        msg.animation_quantity = self._progress + 1
         self._led_pub.publish(msg)
 
         img = cv2.imread(os.path.join(get_package_share_directory(
@@ -148,10 +148,10 @@ class LifecycleManager(Node):
 
         # add loading bar to the bottom of the image
         # add loading bar border
-        cv2.rectangle(img, (18, 60), (142, 76), (255, 255, 255), 1)
+        cv2.rectangle(img, (18, 64), (142, 76), (255, 255, 255), 1)
 
         cv2.rectangle(
-            img, (20, 62), (20 + self._progress*40, 74), (150, 240, 110), -1)
+            img, (20, 66), (20 + self._progress*40, 74), (150, 240, 110), -1)
 
         img_msg = self._bridge.cv2_to_imgmsg(img, 'bgr8')
         self._lcd_pub.publish(img_msg)

@@ -60,7 +60,6 @@ void SpeakersNode::play_mp3(const char* mp3_file) {
     // Initialize libmpg123
     mpg123_init();
     mh = mpg123_new(NULL, NULL);
-    int mic_rate = 44100;
     long rate;  // Set your desired sample rate here
     int channels, encoding;
     if(mpg123_open(mh, mp3_file) != MPG123_OK || mpg123_getformat(mh, &rate, &channels, &encoding) != MPG123_OK) {
@@ -76,7 +75,7 @@ void SpeakersNode::play_mp3(const char* mp3_file) {
 
     // Set ALSA parameters
 
-    snd_pcm_set_params(alsaHandle, SND_PCM_FORMAT_S16_LE, SND_PCM_ACCESS_RW_INTERLEAVED, channels, mic_rate * channels, 2, 50000);
+    snd_pcm_set_params(alsaHandle, SND_PCM_FORMAT_S16_LE, SND_PCM_ACCESS_RW_INTERLEAVED, 1, rate * channels, 2, 50000);
 
     // Read and play MP3 file
     size_t buffer_size = mpg123_outblock(mh) * 4;
