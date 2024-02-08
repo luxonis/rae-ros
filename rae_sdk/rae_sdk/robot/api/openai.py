@@ -91,7 +91,7 @@ class OpenAIClient:
             )
         except Exception as e:
             print(e)
-        return response
+        return response.choices[0].message.content
 
     def respond(self, text: str) -> str:
         """
