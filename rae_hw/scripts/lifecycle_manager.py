@@ -148,10 +148,10 @@ class LifecycleManager(Node):
 
         # add loading bar to the bottom of the image
         # add loading bar border
-        cv2.rectangle(img, (18, 60), (142, 76), (255, 255, 255), 1)
+        cv2.rectangle(img, (18, 64), (142, 76), (255, 255, 255), 1)
 
         cv2.rectangle(
-            img, (20, 62), (20 + self._progress*40, 74), (150, 240, 110), -1)
+            img, (20, 66), (20 + self._progress*40, 74), (150, 240, 110), -1)
 
         img_msg = self._bridge.cv2_to_imgmsg(img, 'bgr8')
         self._lcd_pub.publish(img_msg)
