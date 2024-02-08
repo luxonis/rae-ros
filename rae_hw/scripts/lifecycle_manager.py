@@ -136,7 +136,7 @@ class LifecycleManager(Node):
         msg.data = [color]
         msg.control_type = LEDControl.CTRL_TYPE_SPINNER
         msg.animation_size = 1
-        msg.animation_quantity = self._progress
+        msg.animation_quantity = self._progress + 1
         self._led_pub.publish(msg)
 
         img = cv2.imread(os.path.join(get_package_share_directory(
