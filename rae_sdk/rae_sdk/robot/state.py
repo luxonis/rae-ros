@@ -1,6 +1,7 @@
 import logging as log
 from sensor_msgs.msg import BatteryState
 
+
 class StateController:
     """
     A class for managing the robot's state.
@@ -20,7 +21,7 @@ class StateController:
         self._ros_interface = ros_interface
         self._ros_interface.create_subscriber(
             "/battery_status", BatteryState, self.battery_state_cb)
-        self._battery_state = None
+        self._battery_state = BatteryState()
         log.info("State Controller ready")
 
     def battery_state_cb(self, data):
