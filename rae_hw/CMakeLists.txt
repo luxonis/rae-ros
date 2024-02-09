@@ -155,6 +155,7 @@ install(
   scripts/mock_speakers.py
   scripts/mock_wheels.py
   scripts/lifecycle_manager.py
+  scripts/diff_controller_test.py
   DESTINATION lib/${PROJECT_NAME}
 )
 ament_package()

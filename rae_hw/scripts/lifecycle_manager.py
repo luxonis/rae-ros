@@ -52,7 +52,6 @@ class LifecycleManager(Node):
         self.startup_visual_nodes()
         self.startup_rest()
 
-        self.check_diff_controller()
 
         self.finish_indicator()
 
@@ -70,25 +69,6 @@ class LifecycleManager(Node):
             self.configure_and_activate(node_name)
             self.update_progress_indicators()
 
-    def check_diff_controller(self):
-        if self._mock:
-            return
-        self.get_logger().info('Checking diff controller...')
-        diff_controller_running = False
-        while not diff_controller_running:
-            self._controllers_client.wait_for_service()
-            req = ListControllers.Request()
-            future = self._controllers_client.call_async(req)
-            rclpy.spin_until_future_complete(self, future)
-            if future.result() is not None:
-                for controller in future.result().controller:
-                    if controller.name == 'diff_controller':
-                        if controller.state == 'active':
-                            self.get_logger().info('Diff controller running')
-                        diff_controller_running = True
-                        break
-            else:
-                self.get_logger().error('Failed to get controller list')
 
     def finish_indicator(self):
         if self._silent_startup:

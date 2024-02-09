@@ -4,8 +4,8 @@ from ament_index_python.packages import get_package_share_directory
 
 from launch import LaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.actions import IncludeLaunchDescription, OpaqueFunction, DeclareLaunchArgument, RegisterEventHandler
-from launch.substitutions import LaunchConfiguration
+from launch.actions import IncludeLaunchDescription, OpaqueFunction, DeclareLaunchArgument, RegisterEventHandler, ExecuteProcess
+from launch.substitutions import LaunchConfiguration, FindExecutable
 from launch.conditions import IfCondition
 from launch_ros.event_handlers import OnStateTransition
 from launch_ros.actions import Node, LifecycleNode
@@ -74,8 +74,9 @@ def launch_setup(context, *args, **kwargs):
         },
     )
 
-    diff_controller = Node(
+    diff_controller = LifecycleNode(
         package='controller_manager',
+        name='diff_controller',
         namespace=LaunchConfiguration('namespace'),
         executable='spawner',
         arguments=['diff_controller', '-c', '/controller_manager'],
@@ -127,6 +128,13 @@ def launch_setup(context, *args, **kwargs):
         executable='battery_node',
     )
 
+    diff_controller_test = Node(
+    package='rae_hw',
+    executable='diff_controller_test.py',
+    name='diff_controller_test',
+    namespace=LaunchConfiguration('namespace')
+)
+
     return [
         lifecycle_manager,
         led,
@@ -142,10 +150,15 @@ def launch_setup(context, *args, **kwargs):
                       imu_comp_filt,
                       controller_manager,
                       diff_controller,
-                      joint_state_broadcaster,
+                      joint_state_broadcaster
                       ]
-        ))
-
+        )
+        ),
+        RegisterEventHandler(OnStateTransition(
+        target_lifecycle_node=diff_controller,
+        goal_state='active',
+        entities=[diff_controller_test]
+    ))
     ]
 
 
