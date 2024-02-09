@@ -21,6 +21,7 @@
 #include "rae_hw/peripherals/spidev.h"
 #include "rae_msgs/msg/led_control.hpp"
 #include "rclcpp/rclcpp.hpp"
+#include "rclcpp_lifecycle/lifecycle_node.hpp"
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 #define WS2812B_NUM_LEDS 39
@@ -28,10 +29,18 @@
 #define WS2812B_BUFFER_SIZE (WS2812B_NUM_LEDS * 24 + WS2812B_RESET_PULSE)
 
 namespace rae_hw {
-class LEDNode : public rclcpp::Node {
+using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
+class LEDNode : public rclcpp_lifecycle::LifecycleNode {
    public:
     LEDNode(const rclcpp::NodeOptions& options);
     ~LEDNode();
+
+    void cleanup();
+
+    CallbackReturn on_configure(const rclcpp_lifecycle::State& previous_state);
+    CallbackReturn on_activate(const rclcpp_lifecycle::State& previous_state);
+    CallbackReturn on_deactivate(const rclcpp_lifecycle::State& previous_state);
+    CallbackReturn on_shutdown(const rclcpp_lifecycle::State& previous_state);
 
    private:
     std::map<uint16_t, uint16_t> logicalToPhysicalMapping;

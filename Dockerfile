@@ -30,7 +30,6 @@ ENV WS=/ws
 RUN mkdir -p $WS/src
 COPY ./ .$WS/src/rae-ros
 
-RUN cp -R .$WS/src/rae-ros/assets/. /usr/share
 RUN rm -rf .$WS/src/rae-ros/assets
 RUN rm -rf .$WS/src/rae-ros/rae_gazebo
 

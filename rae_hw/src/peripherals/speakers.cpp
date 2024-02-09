@@ -2,27 +2,49 @@
 
 namespace rae_hw {
 
-SpeakersNode::SpeakersNode(const rclcpp::NodeOptions& options) : Node("speakers_node", options) {
-    // Initialize ALSA or any other audio setup code here
-
-    // Create Audio Service
-    play_audio_service_ = create_service<rae_msgs::srv::PlayAudio>(
-        "play_audio", std::bind(&SpeakersNode::play_audio_service_callback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-
-    // Any other initialization code here
-
-    RCLCPP_INFO(this->get_logger(), "Speakers node running!");
-}
+SpeakersNode::SpeakersNode(const rclcpp::NodeOptions& options) : rclcpp_lifecycle::LifecycleNode("speakers_node", options) {}
 
 SpeakersNode::~SpeakersNode() {
+    cleanup();
+}
+
+void SpeakersNode::cleanup() {
     delete[] buffer;
     mpg123_close(mh);
     mpg123_delete(mh);
     mpg123_exit();
 }
 
-void SpeakersNode::play_audio_service_callback(const std::shared_ptr<rmw_request_id_t> request_header,
-                                               const std::shared_ptr<rae_msgs::srv::PlayAudio::Request> request,
+CallbackReturn SpeakersNode::on_configure(const rclcpp_lifecycle::State& /*previous_state*/) {
+    // Initialize ALSA or any other audio setup code here
+
+    // Create Audio Service
+    play_audio_service_ = create_service<rae_msgs::srv::PlayAudio>(
+        "play_audio", std::bind(&SpeakersNode::play_audio_service_callback, this, std::placeholders::_1, std::placeholders::_2));
+
+    // Any other initialization code here
+
+    RCLCPP_INFO(this->get_logger(), "Speakers node configured!");
+    return CallbackReturn::SUCCESS;
+}
+
+CallbackReturn SpeakersNode::on_activate(const rclcpp_lifecycle::State& /*previous_state*/) {
+    RCLCPP_INFO(this->get_logger(), "Speakers node activating!");
+    return CallbackReturn::SUCCESS;
+}
+
+CallbackReturn SpeakersNode::on_deactivate(const rclcpp_lifecycle::State& /*previous_state*/) {
+    RCLCPP_INFO(this->get_logger(), "Speakers node deactivating!");
+    return CallbackReturn::SUCCESS;
+}
+
+CallbackReturn SpeakersNode::on_shutdown(const rclcpp_lifecycle::State& /*previous_state*/) {
+    RCLCPP_INFO(this->get_logger(), "Speakers node shutting down!");
+    cleanup();
+    return CallbackReturn::SUCCESS;
+}
+
+void SpeakersNode::play_audio_service_callback(const std::shared_ptr<rae_msgs::srv::PlayAudio::Request> request,
                                                const std::shared_ptr<rae_msgs::srv::PlayAudio::Response> response) {
     // Use request->mp3_file to get the MP3 file location
     const char* mp3_file = request->mp3_file.c_str();
@@ -38,7 +60,6 @@ void SpeakersNode::play_mp3(const char* mp3_file) {
     // Initialize libmpg123
     mpg123_init();
     mh = mpg123_new(NULL, NULL);
-    int mic_rate = 44100;
     long rate;  // Set your desired sample rate here
     int channels, encoding;
     if(mpg123_open(mh, mp3_file) != MPG123_OK || mpg123_getformat(mh, &rate, &channels, &encoding) != MPG123_OK) {
@@ -54,7 +75,7 @@ void SpeakersNode::play_mp3(const char* mp3_file) {
 
     // Set ALSA parameters
 
-    snd_pcm_set_params(alsaHandle, SND_PCM_FORMAT_S16_LE, SND_PCM_ACCESS_RW_INTERLEAVED, channels, mic_rate * channels, 2, 50000);
+    snd_pcm_set_params(alsaHandle, SND_PCM_FORMAT_S16_LE, SND_PCM_ACCESS_RW_INTERLEAVED, 1, rate * channels, 2, 50000);
 
     // Read and play MP3 file
     size_t buffer_size = mpg123_outblock(mh) * 4;
@@ -84,7 +105,7 @@ int main(int argc, char* argv[]) {
 
     auto node = std::make_shared<rae_hw::SpeakersNode>(rclcpp::NodeOptions());
     rclcpp::executors::StaticSingleThreadedExecutor executor;
-    executor.add_node(node);
+    executor.add_node(node->get_node_base_interface());
     executor.spin();
     rclcpp::shutdown();
 

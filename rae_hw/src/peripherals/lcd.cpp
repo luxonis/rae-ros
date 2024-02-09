@@ -5,34 +5,51 @@
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 
+#include "ament_index_cpp/get_package_share_directory.hpp"
 #include "cv_bridge/cv_bridge.h"
 #include "opencv2/opencv.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/image.hpp"
 
 namespace rae_hw {
-LCDNode::LCDNode(const rclcpp::NodeOptions& options) : Node("lcd_node", options) {
-    std::string logo_key = "default_logo_path";
-    declare_parameter<std::string>(logo_key);
-    default_logo_path = get_parameter(logo_key).as_string();
+LCDNode::LCDNode(const rclcpp::NodeOptions& options) : rclcpp_lifecycle::LifecycleNode("lcd_node", options) {}
+
+LCDNode::~LCDNode() {
+    cleanup();
+}
+
+void LCDNode::cleanup() {
+    // Load default image
+    cv::Mat default_img = cv::imread(default_logo_path);
+    if(!default_img.empty()) {
+        display_image(default_img);
+    }
+
+    munmap(fbp, screensize);
+    close(fbfd);
+}
+
+CallbackReturn LCDNode::on_configure(const rclcpp_lifecycle::State& /*previous_state*/) {
+    std::string logo_path = ament_index_cpp::get_package_share_directory("rae_hw") + "/assets/rae-logo-white.jpg";
+    default_logo_path = declare_parameter<std::string>("logo_path", logo_path);
 
     // Open the framebuffer device
     fbfd = open("/dev/fb0", O_RDWR);
     if(fbfd == -1) {
         RCLCPP_ERROR(this->get_logger(), "Error: cannot open framebuffer device");
-        return;
+        return CallbackReturn::FAILURE;
     }
 
     // Get fixed screen information
     if(ioctl(fbfd, FBIOGET_FSCREENINFO, &finfo) == -1) {
         RCLCPP_ERROR(this->get_logger(), "Error reading fixed information");
-        return;
+        return CallbackReturn::FAILURE;
     }
 
     // Get variable screen information
     if(ioctl(fbfd, FBIOGET_VSCREENINFO, &vinfo) == -1) {
         RCLCPP_ERROR(this->get_logger(), "Error reading variable information");
-        return;
+        return CallbackReturn::FAILURE;
     }
 
     // Calculate the size of the screen in bytes
@@ -42,22 +59,28 @@ LCDNode::LCDNode(const rclcpp::NodeOptions& options) : Node("lcd_node", options)
     fbp = (char*)mmap(0, screensize, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, (off_t)0);
     if(fbp == MAP_FAILED) {
         RCLCPP_ERROR(this->get_logger(), "Error: failed to map framebuffer device to memory");
-        return;
+        return CallbackReturn::FAILURE;
     }
 
     subscription_ = this->create_subscription<sensor_msgs::msg::Image>("lcd", 10, std::bind(&LCDNode::image_callback, this, std::placeholders::_1));
-    RCLCPP_INFO(this->get_logger(), "LCD node running!");
+    RCLCPP_INFO(this->get_logger(), "LCD node configured!");
+    return CallbackReturn::SUCCESS;
 }
 
-LCDNode::~LCDNode() {
-    // Load default image
-    cv::Mat default_img = cv::imread(default_logo_path);
-    if(!default_img.empty()) {
-        display_image(default_img);
-    }
+CallbackReturn LCDNode::on_activate(const rclcpp_lifecycle::State& /*previous_state*/) {
+    RCLCPP_INFO(this->get_logger(), "LCD node activated!");
+    return CallbackReturn::SUCCESS;
+}
 
-    munmap(fbp, screensize);
-    close(fbfd);
+CallbackReturn LCDNode::on_deactivate(const rclcpp_lifecycle::State& /*previous_state*/) {
+    RCLCPP_INFO(this->get_logger(), "LCD node deactivated!");
+    return CallbackReturn::SUCCESS;
+}
+
+CallbackReturn LCDNode::on_shutdown(const rclcpp_lifecycle::State& /*previous_state*/) {
+    cleanup();
+    RCLCPP_INFO(this->get_logger(), "LCD node shuttind down!");
+    return CallbackReturn::SUCCESS;
 }
 
 void LCDNode::display_image(const cv::Mat& img) {
@@ -82,5 +105,14 @@ void LCDNode::image_callback(const sensor_msgs::msg::Image::SharedPtr msg) {
 };
 }  // namespace rae_hw
 
-#include "rclcpp_components/register_node_macro.hpp"
-RCLCPP_COMPONENTS_REGISTER_NODE(rae_hw::LCDNode);
+int main(int argc, char* argv[]) {
+    rclcpp::init(argc, argv);
+
+    auto node = std::make_shared<rae_hw::LCDNode>(rclcpp::NodeOptions());
+    rclcpp::executors::StaticSingleThreadedExecutor executor;
+    executor.add_node(node->get_node_base_interface());
+    executor.spin();
+    rclcpp::shutdown();
+
+    return 0;
+}
