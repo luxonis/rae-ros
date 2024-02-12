@@ -108,6 +108,7 @@ class RaeMotor {
     const State Clockwise{0, 1};
     const State Halfway{1, 1};
     const State Counter{1, 0};
+    float deadZoneThreshold = 4.0f;
     State prevState;
     PID currPID;
 

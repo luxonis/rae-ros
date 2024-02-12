@@ -74,10 +74,17 @@ void RaeMotor::controlSpeed() {
         uint32_t dutyCycle;
         float currSpeed = calcSpeed();
         int i_param_counter = 0;
+
+        // Apply dead zone compensation
+        float compensatedSpeed = targetSpeed;
+        if (std::abs(targetSpeed) < deadZoneThreshold) {
+            compensatedSpeed = 0.0; // Set to zero or any other desired value outside dead zone
+        }
+
         if(closedLoop_) {
             auto currTime = std::chrono::high_resolution_clock::now();
             float timeDiff = std::chrono::duration<float>(currTime - prevErrorTime).count();
-            float error = targetSpeed - currSpeed;
+            float error = compensatedSpeed - currSpeed;
             float eP = error * currPID.P;
             if(i_param_counter == 500) {
                 errSum = 0;
@@ -86,15 +93,15 @@ void RaeMotor::controlSpeed() {
             errSum += (error * timeDiff);
             float eI = errSum * currPID.I;
             float eD = (error - prevError) / timeDiff * currPID.D;
-            float outSpeed = targetSpeed + eP + eI + eD;
+            float outSpeed = compensatedSpeed + eP + eI + eD;
             dutyCycle = speedToPWM(outSpeed);
             dir = (outSpeed >= 0) ^ reversePhPinLogic_;
             prevErrorTime = currTime;
             prevError = error;
             i_param_counter++;
         } else {
-            uint32_t dutyCycle = speedToPWM(targetSpeed);
-            dir = (targetSpeed >= 0) ^ reversePhPinLogic_;
+            dutyCycle = speedToPWM(compensatedSpeed);
+            dir = (compensatedSpeed >= 0) ^ reversePhPinLogic_;
             if(dutyCycleFile.is_open()) {
                 dutyCycleFile << dutyCycle;
                 dutyCycleFile.close();
