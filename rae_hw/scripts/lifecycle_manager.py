@@ -118,7 +118,7 @@ class LifecycleManager(Node):
 
         # send startup sound
         req = PlayAudio.Request()
-        req.mp3_file = self._startup_sound_path
+        req.file_location = self._startup_sound_path
         self._audio_client.wait_for_service()
         future = self._audio_client.call_async(req)
         rclpy.spin_until_future_complete(self, future)

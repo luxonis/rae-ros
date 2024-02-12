@@ -46,15 +46,29 @@ CallbackReturn SpeakersNode::on_shutdown(const rclcpp_lifecycle::State& /*previo
 
 void SpeakersNode::play_audio_service_callback(const std::shared_ptr<rae_msgs::srv::PlayAudio::Request> request,
                                                const std::shared_ptr<rae_msgs::srv::PlayAudio::Response> response) {
-    // Use request->mp3_file to get the MP3 file location
-    const char* mp3_file = request->mp3_file.c_str();
+    const std::string& file_location = request->file_location;
 
-    // Call the play_mp3 function
-    play_mp3(mp3_file);
+    // Check if the file ends with ".wav"
+    if (file_location.size() >= 4 && file_location.substr(file_location.size() - 4) == ".wav") {
+        // Call the play_wav function
+        play_wav(file_location.c_str());
+        response->success = true;
+        return;
+    }
 
-    // Respond with success (modify based on your play_mp3 result)
-    response->success = true;
+    // Check if the file ends with ".mp3"
+    if (file_location.size() >= 4 && file_location.substr(file_location.size() - 4) == ".mp3") {
+        // Call the play_mp3 function
+        play_mp3(file_location.c_str());
+        response->success = true;
+        return;
+    }
+
+    // Unsupported file format
+    RCLCPP_ERROR(this->get_logger(), "Unsupported file format: %s", file_location.c_str());
+    response->success = false;
 }
+
 
 void SpeakersNode::play_mp3(const char* mp3_file) {
     // Initialize libmpg123
@@ -75,18 +89,20 @@ void SpeakersNode::play_mp3(const char* mp3_file) {
 
     // Set ALSA parameters
 
-    snd_pcm_set_params(alsaHandle, SND_PCM_FORMAT_S16_LE, SND_PCM_ACCESS_RW_INTERLEAVED, 1, rate * channels, 2, 50000);
+    
 
-    // Read and play MP3 file
+    snd_pcm_set_params(alsaHandle, SND_PCM_FORMAT_S16_LE, SND_PCM_ACCESS_RW_INTERLEAVED, channels, rate, 2, 50000);
+
     size_t buffer_size = mpg123_outblock(mh) * 4;
     unsigned char* buffer = new unsigned char[buffer_size];
     size_t err;
 
     while(mpg123_read(mh, buffer, buffer_size, &err) == MPG123_OK) {
-        if(snd_pcm_writei(alsaHandle, buffer, buffer_size / 2) < 0) {
+        if(snd_pcm_writei(alsaHandle, buffer, buffer_size/(2*channels)) < 0) {
             std::cerr << "Error in snd_pcm_writei: " << snd_strerror(err) << std::endl;
         }
     }
+
 
     // Cleanup
     delete[] buffer;
@@ -97,6 +113,54 @@ void SpeakersNode::play_mp3(const char* mp3_file) {
 
     return;
 }
+
+void SpeakersNode::play_wav(const char* wav_file) {
+    // Open WAV file
+    SF_INFO sfinfo;
+    SNDFILE* file = sf_open(wav_file, SFM_READ, &sfinfo);
+    if (!file) {
+        RCLCPP_ERROR(this->get_logger(), "Failed to open WAV file: %s", wav_file);
+        return;
+    }
+
+    // Open ALSA device
+    if (snd_pcm_open(&alsaHandle, "default", SND_PCM_STREAM_PLAYBACK, 0) < 0) {
+        RCLCPP_ERROR(this->get_logger(), "Failed to open ALSA playback device.");
+        return;
+    }
+
+   snd_pcm_set_params(alsaHandle, SND_PCM_FORMAT_S32_LE, SND_PCM_ACCESS_RW_INTERLEAVED,
+                       sfInfo.channels, sfInfo.samplerate, 1, 50000);
+
+    // Read and play WAV file
+    const int BUFFER_SIZE = 4096;
+    int32_t buffer[BUFFER_SIZE * sfInfo.channels]; // Use int32_t for 32-bit format
+    sf_count_t readCount;
+
+    const float gain = 4.0f; // Adjust this factor for desired gain
+
+    while ((readCount = sf_readf_int(file, buffer, BUFFER_SIZE)) > 0) {
+        // Apply gain to the samples
+        for (int i = 0; i < readCount * sfInfo.channels; ++i) {
+            float sample = static_cast<float>(buffer[i]) / std::numeric_limits<int32_t>::max();
+            sample *= gain; // Apply gain
+            buffer[i] = static_cast<int32_t>(sample * std::numeric_limits<int32_t>::max());
+        }
+
+        // Write the processed buffer to the playback device
+        if (snd_pcm_writei(alsaHandle, buffer, readCount) < 0) {
+            std::cerr << "Error in snd_pcm_writei: " << snd_strerror(readCount) << std::endl;
+            break;
+        }
+    }
+
+    // Cleanup
+    sf_close(file);
+    snd_pcm_close(alsaHandle);
+
+    return;
+}
+
 
 }  // namespace rae_hw
 

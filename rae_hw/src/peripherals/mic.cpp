@@ -24,6 +24,7 @@ CallbackReturn MicNode::on_configure(const rclcpp_lifecycle::State& /*previous_s
     wav_filename_ = "/tmp/recording.wav";
     start_service_ = this->create_service<rae_msgs::srv::RecordAudio>("start_recording",
                                                                       std::bind(&MicNode::startRecording, this, std::placeholders::_1, std::placeholders::_2));
+    stop_service_ = this->create_service<rae_msgs::srv::StopRecording>("stop_recording", std::bind(&MicNode::stopRecording, this, std::placeholders::_1, std::placeholders::_2));
     RCLCPP_INFO(this->get_logger(), "Mic node configured!");
     return CallbackReturn::SUCCESS;
 }
@@ -143,16 +144,32 @@ void MicNode::startRecording(const std::shared_ptr<rae_msgs::srv::RecordAudio::R
     // Start recording when the service is called
     recording_ = true;
     wav_filename_ = request->file_location;
-    stop_timer_ = this->create_wall_timer(std::chrono::seconds(5), std::bind(&MicNode::stopRecording, this));
+    if (stop_timer_) {
+        stop_timer_->reset();
+    }
+    else {
+        // Create a new timer if it doesn't exist
+        stop_timer_ = this->create_wall_timer(std::chrono::seconds(30), std::bind(&MicNode::timeoutRecording, this));
+    }
+
     response->success = true;
     response->message = "Recording started. File will be saved to " + wav_filename_ + ".";
     RCLCPP_INFO(get_logger(), "Recording started.");
 }
 
-void MicNode::stopRecording() {
+void MicNode::stopRecording(const std::shared_ptr<rae_msgs::srv::StopRecording::Request> stop_request,
+                            const std::shared_ptr<rae_msgs::srv::StopRecording::Response> stop_response) {
     recording_ = false;
     stop_timer_->cancel();  // Stop the timer
+    stop_response->success = true;
+    stop_response->message = "Recording started. File will be saved to " + wav_filename_ + ".";
     RCLCPP_INFO(get_logger(), "Recording stopped.");
+}
+
+void MicNode::timeoutRecording() {
+    recording_ = false;
+    stop_timer_->cancel();  // Stop the timer
+    RCLCPP_INFO(get_logger(), "Recording stopped. Timeout reached.");
 }
 
 };  // namespace rae_hw

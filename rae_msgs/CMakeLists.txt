@@ -16,6 +16,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/ColorPeriod.msg"
   "srv/PlayAudio.srv"
   "srv/RecordAudio.srv"
+  "srv/StopRecording.srv"
   "action/Recording.action"
   DEPENDENCIES std_msgs
 )
