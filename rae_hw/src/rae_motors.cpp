@@ -84,6 +84,18 @@ void RaeMotor::controlSpeed() {
         if(closedLoop_) {
             auto currTime = std::chrono::high_resolution_clock::now();
             float timeDiff = std::chrono::duration<float>(currTime - prevErrorTime).count();
+
+            if (compensatedSpeed == 0.0) {
+                errSum = 0;
+                i_param_counter = 0;
+                dutyCycle = speedToPWM(compensatedSpeed);
+                dir = (compensatedSpeed >= 0) ^ reversePhPinLogic_;
+                prevError = 0;
+                if(dutyCycleFile.is_open()) {
+                    dutyCycleFile << dutyCycle;
+                    dutyCycleFile.close();
+            }}
+            else {
             float error = compensatedSpeed - currSpeed;
             float eP = error * currPID.P;
             if(i_param_counter == 500) {
@@ -95,10 +107,12 @@ void RaeMotor::controlSpeed() {
             float eD = (error - prevError) / timeDiff * currPID.D;
             float outSpeed = compensatedSpeed + eP + eI + eD;
             dutyCycle = speedToPWM(outSpeed);
-            dir = (outSpeed >= 0) ^ reversePhPinLogic_;
-            prevErrorTime = currTime;
+            dir = (outSpeed >= 0) ^ reversePhPinLogic_; 
             prevError = error;
             i_param_counter++;
+            }
+            prevErrorTime = currTime;
+            
         } else {
             dutyCycle = speedToPWM(compensatedSpeed);
             dir = (compensatedSpeed >= 0) ^ reversePhPinLogic_;
