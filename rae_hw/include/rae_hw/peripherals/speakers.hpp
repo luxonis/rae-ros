@@ -5,7 +5,9 @@
 #include <mpg123.h>
 #include <sndfile.h>
 #include <rae_msgs/srv/play_audio.hpp>
-
+#include <iostream>
+#include <cstring>
+#include <limits>
 #include "audio_msgs/msg/audio.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_lifecycle/lifecycle_node.hpp"

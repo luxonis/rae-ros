@@ -129,32 +129,34 @@ void SpeakersNode::play_wav(const char* wav_file) {
         return;
     }
 
-   snd_pcm_set_params(alsaHandle, SND_PCM_FORMAT_S32_LE, SND_PCM_ACCESS_RW_INTERLEAVED,
-                       sfInfo.channels, sfInfo.samplerate, 1, 50000);
+   // Set ALSA parameters
+    snd_pcm_set_params(alsaHandle, SND_PCM_FORMAT_S32_LE, SND_PCM_ACCESS_RW_INTERLEAVED,
+                       sfinfo.channels, sfinfo.samplerate, 2, 50000);
 
     // Read and play WAV file
     const int BUFFER_SIZE = 4096;
-    int32_t buffer[BUFFER_SIZE * sfInfo.channels]; // Use int32_t for 32-bit format
+    int32_t* buffer_wav = new int32_t[BUFFER_SIZE * sfinfo.channels]; // Use int32_t for 32-bit format
     sf_count_t readCount;
 
     const float gain = 4.0f; // Adjust this factor for desired gain
 
-    while ((readCount = sf_readf_int(file, buffer, BUFFER_SIZE)) > 0) {
+    while ((readCount = sf_readf_int(file, buffer_wav, BUFFER_SIZE)) > 0) {
         // Apply gain to the samples
-        for (int i = 0; i < readCount * sfInfo.channels; ++i) {
-            float sample = static_cast<float>(buffer[i]) / std::numeric_limits<int32_t>::max();
+        for (int i = 0; i < readCount * sfinfo.channels; ++i) {
+            float sample = static_cast<float>(buffer_wav[i]) / std::numeric_limits<int32_t>::max();
             sample *= gain; // Apply gain
-            buffer[i] = static_cast<int32_t>(sample * std::numeric_limits<int32_t>::max());
+            buffer_wav[i] = static_cast<int32_t>(sample * std::numeric_limits<int32_t>::max());
         }
 
         // Write the processed buffer to the playback device
-        if (snd_pcm_writei(alsaHandle, buffer, readCount) < 0) {
+        if (snd_pcm_writei(alsaHandle, buffer_wav, readCount) < 0) {
             std::cerr << "Error in snd_pcm_writei: " << snd_strerror(readCount) << std::endl;
             break;
         }
     }
 
     // Cleanup
+    delete[] buffer_wav;
     sf_close(file);
     snd_pcm_close(alsaHandle);
 
