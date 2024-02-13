@@ -86,7 +86,7 @@ class LifecycleManager(Node):
                         if controller.state == 'active':
                             self.get_logger().info('Diff controller running')
                             diff_controller_running = True
-                            break
+                        break
             else:
                 self.get_logger().error('Failed to get controller list')
 
