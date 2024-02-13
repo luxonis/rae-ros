@@ -3,6 +3,7 @@
 #include <sndfile.h>
 
 #include <rae_msgs/srv/record_audio.hpp>
+#include <rae_msgs/srv/stop_recording.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
 #include <vector>
 
@@ -11,7 +12,6 @@
 #include "rae_msgs/msg/rae_audio.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_lifecycle/lifecycle_node.hpp"
-#include "std_srvs/srv/trigger.hpp"
 
 namespace rae_hw {
 using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
@@ -38,11 +38,15 @@ class MicNode : public rclcpp_lifecycle::LifecycleNode {
     snd_pcm_t* handle_;
     bool recording_;
     std::string wav_filename_;
+    void applyLowPassFilter(std::vector<int32_t>& buffer);
     rclcpp::Service<rae_msgs::srv::RecordAudio>::SharedPtr start_service_;
+    rclcpp::Service<rae_msgs::srv::StopRecording>::SharedPtr stop_service_;
     rclcpp::TimerBase::SharedPtr stop_timer_;
     void startRecording(const std::shared_ptr<rae_msgs::srv::RecordAudio::Request> request,
                         const std::shared_ptr<rae_msgs::srv::RecordAudio::Response> response);
-    void stopRecording();
+    void timeoutRecording();
+    void stopRecording(const std::shared_ptr<rae_msgs::srv::StopRecording::Request> stop_request,
+                       const std::shared_ptr<rae_msgs::srv::StopRecording::Response> stop_response);
 };
 
 }  // namespace rae_hw

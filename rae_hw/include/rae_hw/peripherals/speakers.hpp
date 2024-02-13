@@ -3,7 +3,11 @@
 
 #include <alsa/asoundlib.h>
 #include <mpg123.h>
+#include <sndfile.h>
 
+#include <cstring>
+#include <iostream>
+#include <limits>
 #include <rae_msgs/srv/play_audio.hpp>
 
 #include "audio_msgs/msg/audio.hpp"
@@ -26,6 +30,7 @@ class SpeakersNode : public rclcpp_lifecycle::LifecycleNode {
 
    private:
     void play_mp3(const char*);
+    void play_wav(const char*);
     rclcpp::Service<rae_msgs::srv::PlayAudio>::SharedPtr play_audio_service_;
 
     void play_audio_service_callback(const std::shared_ptr<rae_msgs::srv::PlayAudio::Request> request,

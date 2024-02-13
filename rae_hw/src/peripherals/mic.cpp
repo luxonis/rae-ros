@@ -24,6 +24,8 @@ CallbackReturn MicNode::on_configure(const rclcpp_lifecycle::State& /*previous_s
     wav_filename_ = "/tmp/recording.wav";
     start_service_ = this->create_service<rae_msgs::srv::RecordAudio>("start_recording",
                                                                       std::bind(&MicNode::startRecording, this, std::placeholders::_1, std::placeholders::_2));
+    stop_service_ = this->create_service<rae_msgs::srv::StopRecording>("stop_recording",
+                                                                       std::bind(&MicNode::stopRecording, this, std::placeholders::_1, std::placeholders::_2));
     RCLCPP_INFO(this->get_logger(), "Mic node configured!");
     return CallbackReturn::SUCCESS;
 }
@@ -107,6 +109,26 @@ void MicNode::timer_callback() {
     }
 }
 
+void MicNode::applyLowPassFilter(std::vector<int32_t>& buffer) {
+    static float prevSampleLeft = 0.0f;
+    static float prevSampleRight = 0.0f;
+    const float ALPHA = 0.1f;  // Smoothing factor
+
+    for(size_t i = 0; i < buffer.size(); i += 2) {
+        // Apply low-pass filter to attenuate high frequencies for left channel
+        float currentSampleLeft = static_cast<float>(buffer[i]);
+        float filteredSampleLeft = prevSampleLeft + ALPHA * (currentSampleLeft - prevSampleLeft);
+        prevSampleLeft = filteredSampleLeft;
+        buffer[i] = static_cast<int32_t>(filteredSampleLeft);
+
+        // Apply low-pass filter to attenuate high frequencies for right channel
+        float currentSampleRight = static_cast<float>(buffer[i + 1]);
+        float filteredSampleRight = prevSampleRight + ALPHA * (currentSampleRight - prevSampleRight);
+        prevSampleRight = filteredSampleRight;
+        buffer[i + 1] = static_cast<int32_t>(filteredSampleRight);
+    }
+}
+
 void MicNode::saveToWav(const std::vector<int32_t>& buffer, snd_pcm_uframes_t frames) {
     SF_INFO sfinfo;
     sfinfo.channels = 2;
@@ -129,8 +151,11 @@ void MicNode::saveToWav(const std::vector<int32_t>& buffer, snd_pcm_uframes_t fr
         return;
     }
 
+    std::vector<int32_t> filteredBuffer(buffer);
+    applyLowPassFilter(filteredBuffer);
+
     // Write the new frames to the file
-    count = sf_write_int(file, buffer.data(), frames * sfinfo.channels);
+    count = sf_write_int(file, filteredBuffer.data(), frames * sfinfo.channels);
     if(count != frames * sfinfo.channels) {
         RCLCPP_ERROR(this->get_logger(), "Error writing to WAV file: %s", sf_strerror(file));
     }
@@ -143,16 +168,31 @@ void MicNode::startRecording(const std::shared_ptr<rae_msgs::srv::RecordAudio::R
     // Start recording when the service is called
     recording_ = true;
     wav_filename_ = request->file_location;
-    stop_timer_ = this->create_wall_timer(std::chrono::seconds(5), std::bind(&MicNode::stopRecording, this));
+    if(stop_timer_) {
+        stop_timer_->reset();
+    } else {
+        // Create a new timer if it doesn't exist
+        stop_timer_ = this->create_wall_timer(std::chrono::seconds(30), std::bind(&MicNode::timeoutRecording, this));
+    }
+
     response->success = true;
     response->message = "Recording started. File will be saved to " + wav_filename_ + ".";
     RCLCPP_INFO(get_logger(), "Recording started.");
 }
 
-void MicNode::stopRecording() {
+void MicNode::stopRecording(const std::shared_ptr<rae_msgs::srv::StopRecording::Request> stop_request,
+                            const std::shared_ptr<rae_msgs::srv::StopRecording::Response> stop_response) {
     recording_ = false;
     stop_timer_->cancel();  // Stop the timer
+    stop_response->success = true;
+    stop_response->message = "Recording started. File will be saved to " + wav_filename_ + ".";
     RCLCPP_INFO(get_logger(), "Recording stopped.");
+}
+
+void MicNode::timeoutRecording() {
+    recording_ = false;
+    stop_timer_->cancel();  // Stop the timer
+    RCLCPP_INFO(get_logger(), "Recording stopped. Timeout reached.");
 }
 
 };  // namespace rae_hw
