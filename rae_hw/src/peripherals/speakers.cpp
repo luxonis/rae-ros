@@ -138,7 +138,7 @@ void SpeakersNode::play_wav(const char* wav_file) {
     int32_t* buffer_wav = new int32_t[BUFFER_SIZE * sfinfo.channels]; // Use int32_t for 32-bit format
     sf_count_t readCount;
 
-    const float gain = 4.0f; // Adjust this factor for desired gain
+    const float gain = 64.0f; // Adjust this factor for desired gain
 
     while ((readCount = sf_readf_int(file, buffer_wav, BUFFER_SIZE)) > 0) {
         // Apply gain to the samples

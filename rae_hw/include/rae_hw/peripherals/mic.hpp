@@ -39,6 +39,7 @@ class MicNode : public rclcpp_lifecycle::LifecycleNode {
     snd_pcm_t* handle_;
     bool recording_;
     std::string wav_filename_;
+    void applyLowPassFilter(std::vector<int32_t>& buffer);
     rclcpp::Service<rae_msgs::srv::RecordAudio>::SharedPtr start_service_;
     rclcpp::Service<rae_msgs::srv::StopRecording>::SharedPtr stop_service_;
     rclcpp::TimerBase::SharedPtr stop_timer_;

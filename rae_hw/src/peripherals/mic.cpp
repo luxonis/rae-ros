@@ -108,6 +108,26 @@ void MicNode::timer_callback() {
     }
 }
 
+void MicNode::applyLowPassFilter(std::vector<int32_t>& buffer) {
+    static float prevSampleLeft = 0.0f;
+    static float prevSampleRight = 0.0f;
+    const float ALPHA = 0.1f; // Smoothing factor
+
+    for (size_t i = 0; i < buffer.size(); i += 2) {
+        // Apply low-pass filter to attenuate high frequencies for left channel
+        float currentSampleLeft = static_cast<float>(buffer[i]);
+        float filteredSampleLeft = prevSampleLeft + ALPHA * (currentSampleLeft - prevSampleLeft);
+        prevSampleLeft = filteredSampleLeft;
+        buffer[i] = static_cast<int32_t>(filteredSampleLeft);
+
+        // Apply low-pass filter to attenuate high frequencies for right channel
+        float currentSampleRight = static_cast<float>(buffer[i + 1]);
+        float filteredSampleRight = prevSampleRight + ALPHA * (currentSampleRight - prevSampleRight);
+        prevSampleRight = filteredSampleRight;
+        buffer[i + 1] = static_cast<int32_t>(filteredSampleRight);
+    }
+}
+
 void MicNode::saveToWav(const std::vector<int32_t>& buffer, snd_pcm_uframes_t frames) {
     SF_INFO sfinfo;
     sfinfo.channels = 2;
@@ -130,8 +150,11 @@ void MicNode::saveToWav(const std::vector<int32_t>& buffer, snd_pcm_uframes_t fr
         return;
     }
 
+    std::vector<int32_t> filteredBuffer(buffer);
+    applyLowPassFilter(filteredBuffer);
+
     // Write the new frames to the file
-    count = sf_write_int(file, buffer.data(), frames * sfinfo.channels);
+    count = sf_write_int(file, filteredBuffer.data(), frames * sfinfo.channels);
     if(count != frames * sfinfo.channels) {
         RCLCPP_ERROR(this->get_logger(), "Error writing to WAV file: %s", sf_strerror(file));
     }
