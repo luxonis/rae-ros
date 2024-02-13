@@ -4,7 +4,6 @@
 
 #include <rae_msgs/srv/record_audio.hpp>
 #include <rae_msgs/srv/stop_recording.hpp>
-
 #include <rclcpp_action/rclcpp_action.hpp>
 #include <vector>
 
@@ -47,7 +46,7 @@ class MicNode : public rclcpp_lifecycle::LifecycleNode {
                         const std::shared_ptr<rae_msgs::srv::RecordAudio::Response> response);
     void timeoutRecording();
     void stopRecording(const std::shared_ptr<rae_msgs::srv::StopRecording::Request> stop_request,
-                            const std::shared_ptr<rae_msgs::srv::StopRecording::Response> stop_response);
+                       const std::shared_ptr<rae_msgs::srv::StopRecording::Response> stop_response);
 };
 
 }  // namespace rae_hw

@@ -77,15 +77,15 @@ void RaeMotor::controlSpeed() {
 
         // Apply dead zone compensation
         float compensatedSpeed = targetSpeed;
-        if (std::abs(targetSpeed) < deadZoneThreshold) {
-            compensatedSpeed = 0.0; // Set to zero or any other desired value outside dead zone
+        if(std::abs(targetSpeed) < deadZoneThreshold) {
+            compensatedSpeed = 0.0;  // Set to zero or any other desired value outside dead zone
         }
 
         if(closedLoop_) {
             auto currTime = std::chrono::high_resolution_clock::now();
             float timeDiff = std::chrono::duration<float>(currTime - prevErrorTime).count();
 
-            if (compensatedSpeed == 0.0) {
+            if(compensatedSpeed == 0.0) {
                 errSum = 0;
                 i_param_counter = 0;
                 dutyCycle = speedToPWM(compensatedSpeed);
@@ -94,25 +94,25 @@ void RaeMotor::controlSpeed() {
                 if(dutyCycleFile.is_open()) {
                     dutyCycleFile << dutyCycle;
                     dutyCycleFile.close();
-            }}
-            else {
-            float error = compensatedSpeed - currSpeed;
-            float eP = error * currPID.P;
-            if(i_param_counter == 500) {
-                errSum = 0;
-                i_param_counter = 0;
-            }
-            errSum += (error * timeDiff);
-            float eI = errSum * currPID.I;
-            float eD = (error - prevError) / timeDiff * currPID.D;
-            float outSpeed = compensatedSpeed + eP + eI + eD;
-            dutyCycle = speedToPWM(outSpeed);
-            dir = (outSpeed >= 0) ^ reversePhPinLogic_; 
-            prevError = error;
-            i_param_counter++;
+                }
+            } else {
+                float error = compensatedSpeed - currSpeed;
+                float eP = error * currPID.P;
+                if(i_param_counter == 500) {
+                    errSum = 0;
+                    i_param_counter = 0;
+                }
+                errSum += (error * timeDiff);
+                float eI = errSum * currPID.I;
+                float eD = (error - prevError) / timeDiff * currPID.D;
+                float outSpeed = compensatedSpeed + eP + eI + eD;
+                dutyCycle = speedToPWM(outSpeed);
+                dir = (outSpeed >= 0) ^ reversePhPinLogic_;
+                prevError = error;
+                i_param_counter++;
             }
             prevErrorTime = currTime;
-            
+
         } else {
             dutyCycle = speedToPWM(compensatedSpeed);
             dir = (compensatedSpeed >= 0) ^ reversePhPinLogic_;

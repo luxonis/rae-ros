@@ -24,7 +24,8 @@ CallbackReturn MicNode::on_configure(const rclcpp_lifecycle::State& /*previous_s
     wav_filename_ = "/tmp/recording.wav";
     start_service_ = this->create_service<rae_msgs::srv::RecordAudio>("start_recording",
                                                                       std::bind(&MicNode::startRecording, this, std::placeholders::_1, std::placeholders::_2));
-    stop_service_ = this->create_service<rae_msgs::srv::StopRecording>("stop_recording", std::bind(&MicNode::stopRecording, this, std::placeholders::_1, std::placeholders::_2));
+    stop_service_ = this->create_service<rae_msgs::srv::StopRecording>("stop_recording",
+                                                                       std::bind(&MicNode::stopRecording, this, std::placeholders::_1, std::placeholders::_2));
     RCLCPP_INFO(this->get_logger(), "Mic node configured!");
     return CallbackReturn::SUCCESS;
 }
@@ -111,9 +112,9 @@ void MicNode::timer_callback() {
 void MicNode::applyLowPassFilter(std::vector<int32_t>& buffer) {
     static float prevSampleLeft = 0.0f;
     static float prevSampleRight = 0.0f;
-    const float ALPHA = 0.1f; // Smoothing factor
+    const float ALPHA = 0.1f;  // Smoothing factor
 
-    for (size_t i = 0; i < buffer.size(); i += 2) {
+    for(size_t i = 0; i < buffer.size(); i += 2) {
         // Apply low-pass filter to attenuate high frequencies for left channel
         float currentSampleLeft = static_cast<float>(buffer[i]);
         float filteredSampleLeft = prevSampleLeft + ALPHA * (currentSampleLeft - prevSampleLeft);
@@ -167,10 +168,9 @@ void MicNode::startRecording(const std::shared_ptr<rae_msgs::srv::RecordAudio::R
     // Start recording when the service is called
     recording_ = true;
     wav_filename_ = request->file_location;
-    if (stop_timer_) {
+    if(stop_timer_) {
         stop_timer_->reset();
-    }
-    else {
+    } else {
         // Create a new timer if it doesn't exist
         stop_timer_ = this->create_wall_timer(std::chrono::seconds(30), std::bind(&MicNode::timeoutRecording, this));
     }
