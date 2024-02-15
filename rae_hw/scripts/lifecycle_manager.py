@@ -26,7 +26,7 @@ class LifecycleManager(Node):
             'silent_startup', False).value
         self._startup_sound_path = self.declare_parameter('startup_sound_path', os.path.join(
             get_package_share_directory('rae_hw'), 'assets', 'startup.mp3')).value
-        self._node_names = ['mic_node', 'battery_node', 'speakers_node']
+        self._node_names = ['mic_node', 'battery_node', 'speakers_node', 'sys_info']
 
         # for each node, create a service client to change state
         self._change_state_clients = {}

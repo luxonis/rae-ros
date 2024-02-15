@@ -64,6 +64,13 @@ def launch_setup(context, *args, **kwargs):
             executable='mock_mic.py',
             name='mic_node',
             namespace=LaunchConfiguration('namespace')
+        ),
+        LifecycleNode(
+            package='rae_hw',
+            executable='sys_info_node.py',
+            name='sys_info',
+            namespace=LaunchConfiguration('namespace'),
+            parameters=[{'mock': True}]
         )
     ]
 
