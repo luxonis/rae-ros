@@ -15,7 +15,7 @@ class MockSpeakers(Node):
         self.get_logger().info('I heard: "%s"' % msg.data)
 
     def play_callback(self, request: PlayAudio.Request, response):
-        self.get_logger().info('I heard: "%s"' % request.mp3_file)
+        self.get_logger().info('I heard: "%s"' % request.file_location)
         return response
     
     def on_configure(self, state: LifecycleState) -> TransitionCallbackReturn:

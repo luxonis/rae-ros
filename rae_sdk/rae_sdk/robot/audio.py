@@ -35,7 +35,7 @@ class AudioController:
 
     def play_audio_file(self, audio_file_path):
         req = PlayAudio.Request()
-        req.mp3_file = audio_file_path
+        req.file_location = audio_file_path
         res = self._ros_interface.call_async_srv('/play_audio', req)
         return res
 
