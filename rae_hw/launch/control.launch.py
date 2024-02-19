@@ -43,25 +43,6 @@ def launch_setup(context, *args, **kwargs):
                 'rae_hw'), 'config', 'ekf.yaml')],
     )
 
-    # imu_comp_filt = Node(
-    #     package='imu_complementary_filter',
-    #     executable='complementary_filter_node',
-    #     name='complementary_filter_gain_node',
-    #     namespace=LaunchConfiguration('namespace'),
-    #     output='screen',
-    #     parameters=[
-    #         {'do_bias_estimation': True},
-    #         {'do_adaptive_gain': True},
-    #         {'orientation_stddev': 0.001},
-    #         {'use_mag': False},
-    #         {'gain_acc': 0.04},
-    #         {'gain_mag': 0.01},
-    #     ],
-    #     remappings=[
-    #         ('imu/data_raw', '/rae/imu/data'),
-    #     ]
-    # )
-
     controller_manager = Node(
         package='controller_manager',
         executable='ros2_control_node',
