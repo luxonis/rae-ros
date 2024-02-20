@@ -4,7 +4,7 @@ from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, OpaqueFunction
 from launch.substitutions import LaunchConfiguration
-from launch_ros.actions import  LoadComposableNodes
+from launch_ros.actions import  Node,LoadComposableNodes
 from launch_ros.descriptions import ComposableNode
 
 
@@ -20,39 +20,38 @@ def launch_setup(context, *args, **kwargs):
     parameters = [
         {
             'frame_id': 'base_footprint',
-            'subscribe_rgb': True,
-            'subscribe_depth': True,
-            'subscribe_scan': True,
-            'subscribe_odom_info': False,
-            'approx_sync': True,
-            'Grid/MaxGroundHeight': '0.1',
-            'Grid/FromDepth': True,
-            'Grid/RangeMin': '0.4',
-            'Grid/RangeMax': '8.0',
-            'Kp/RoiRatio': '0 0 0 0.3',
-            # 'Grid/3D': 'false',
-            'Grid/MaxGroundAngle': '60.0',
-            'Grid/FootprintHeight': '0.1',
-            'Reg/Force3DoF': 'true',
-            'Optimizer/Slam2D': True,
-            'Rtabmap/DetectionRate': '1.0',
-            'Grid/RayTracing': 'true',
-            'RGBD/NeighborLinkRefining':'True',
-            'RGBD/LocalLoopDetectionTime': 'false',
-            'RGBD/OptimizeFromGraphEnd': 'false',
-            'RGBD/AngularUpdate': '0.01',
-            'RGBD/LinearUpdate': '0.01',
-#            'Reg/Strategy': '1',
-            'qos_scan': 2
+            "subscribe_depth": True,
+            "approx_sync": True,
+            "approx_sync_max_interval":0.001,
+            "Rtabmap/DetectionRate": "1",
+            #"odom_topic": "/odom",
+            "qos": 1,
+            "visual_odometry": True,
+            "queue_size":100,
+            "Rtabmap/TimeThr": "700",
+            "Kp/WordsPerImage": "200",
+            "Kp/RoiRatios": "0.03 0.03 0.04 0.04",
+            "Kp/DetectorStrategy": "0",
+            "SURF/HessianThreshold": "1000",
+            "Kp/NNStrategy": "1",
+            "LccBow/MinInliers":"10",
+            "LccBow/EstimationType":"1",
+	     "LccReextract/Activated":"true",
+            "LccReextract/MaxWords":"500",
+            "LccReextract/MaxDepth":"10",
+            "RGBD/OptimizeSlam2D" : True,
+            "RGBD/OptimizeStrategy" : 1,
+            "RGBD/OptimizeRobust": True,
+            "RGBD/OptimizeMaxError": "0",
         }
     ]
 
     remappings = [
         #   ('imu', '/imu/data'),
-        ('odom', '/diff_controller/odom'),
-        ('rgb/image', name+'/right/image_raw'),
+        #('odom', '/odometry/filtered'),
+        ('rgb/image', 'image_rect'),
         ('rgb/camera_info', name+'/right/camera_info'),
-        ('depth/image', name+'/stereo_front/image_raw'),
+        ('depth/image', name+'/stereo/image_raw'),
     ]
 
     return [
@@ -67,7 +66,8 @@ def launch_setup(context, *args, **kwargs):
                     name='rectify_color_node',
                     remappings=[('image', name+'/right/image_raw'),
                                 ('camera_info', name+'/right/camera_info'),
-                                ('image_rect', name+'/right/image_rect'),]
+                                #('image_rect', name+'/right/image_rect'),
+                                ]
                 ),
                 ComposableNode(
                     package='rtabmap_slam',
@@ -76,47 +76,30 @@ def launch_setup(context, *args, **kwargs):
                     remappings=remappings,
                     )
             ]),
+         Node(
+            package='rtabmap_odom', executable='rgbd_odometry', output='screen',
+            parameters=parameters,
+            remappings=remappings),
 
-        LoadComposableNodes(
-            target_container=name+'_container',
-            composable_node_descriptions=[
-                    ComposableNode(
-                        package='laserscan_kinect',
-                        plugin='laserscan_kinect::LaserScanKinectNode',
-                        name='laserscan_kinect_front',
-                        parameters=[laserscan_config],
-                        remappings=[
-                            ('/image', name+'/stereo_front/image_raw'),
-                            ('/camera_info', name+'/stereo_front/camera_info'),
-                            ('/scan', name+'/scan_front'),
-                            ('/debug_image', name+'/debug_image_front'),
-                            ('/debug_image/compressed', name+'/debug_image_front/compressed')
-                        ]
-                    ),
-                    ComposableNode(
-                        package='laserscan_kinect',
-                        plugin='laserscan_kinect::LaserScanKinectNode',
-                        name='laserscan_kinect_back',
-                        parameters=[laserscan_config],
-                        remappings=[
-                            ('/image', name+'/stereo_back/image_raw'),
-                            ('/camera_info', name+'/stereo_back/camera_info'),
-                            ('/scan', name+'/scan_back'),
-                            ('/debug_image', name+'/debug_image_back'),
-                            ('/debug_image/compressed', name+'/debug_image_back/compressed')
-                        ]
-                    ),
-                    ComposableNode(
-                        package='ira_laser_tools',
-                        name='laser_scan_multi_merger',
-                        plugin='ira_laser_tools::LaserscanMerger',
-                        parameters=[{'laserscan_topics': '/rae/scan_back /rae/scan_front',
-                                    'destination_frame': 'base_link',
-                                    'scan_destination_topic': '/scan'}
-                                    ]
-        ),
-            ]
-        )  
+        # LoadComposableNodes(
+        #     target_container=name+'_container',
+        #     composable_node_descriptions=[
+        #             ComposableNode(
+        #                 package='laserscan_kinect',
+        #                 plugin='laserscan_kinect::LaserScanKinectNode',
+        #                 name='laserscan_kinect_front',
+        #                 parameters=[laserscan_config],
+        #                 remappings=[
+        #                     ('/image', name+'/stereo/image_raw'),
+        #                     ('/camera_info', name+'/stereo/camera_info'),
+        #                    #('/scan', name+'/scan'),
+        #                    ('/debug_image', name+'/debug'),
+        #                    ('/debug_image/compressed', name+'/debug_image/compressed')
+        #                 ]
+        #             )
+                   
+        #     ]
+        # )  
         ]
 
 
