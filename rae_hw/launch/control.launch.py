@@ -126,7 +126,6 @@ def launch_setup(context, *args, **kwargs):
                       speakers,
                       robot_state_pub,
                       ekf_node,
-                      imu_comp_filt,
                       controller_manager,
                       diff_controller,
                       joint_state_broadcaster,
