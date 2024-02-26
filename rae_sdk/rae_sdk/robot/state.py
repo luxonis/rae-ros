@@ -4,6 +4,7 @@ from std_msgs.msg import Float32
 from sensor_msgs.msg import Temperature
 
 
+
 class StateController:
     """
     A class for managing the robot's state.
