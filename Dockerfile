@@ -26,6 +26,8 @@ RUN apt-get update && apt-get -y install --no-install-recommends \
     libsndfile1-dev \
     libsndfile1
 
+RUN pip3 install openai
+
 ENV WS=/ws
 RUN mkdir -p $WS/src
 COPY ./ .$WS/src/rae-ros
