@@ -46,10 +46,11 @@ class Robot:
         if robot_options.launch_controllers:
             self._led_controller = LEDController(self._ros_interface)
             self._display_controller = DisplayController(self._ros_interface)
-            self._navigation_controller = NavigationController(self._ros_interface)
+            self._navigation_controller = NavigationController(
+                self._ros_interface)
             self._audio_controller = AudioController(self._ros_interface)
-            self._state_controller = StateController(self._ros_interface)
-
+            self._state_controller = StateController(
+                self._ros_interface, robot_options.publish_state_info, self._display_controller)
         self._perception_system = None
         log.info('Robot ready')
 
@@ -76,7 +77,8 @@ class Robot:
     def perception(self) -> PerceptionSystem:
         """Create perception system if it doesn't exist and return it."""
         if self._perception_system is None:
-            self._perception_system = PerceptionSystem(self._robot_options.namespace)
+            self._perception_system = PerceptionSystem(
+                self._robot_options.namespace)
         return self._perception_system
 
     @property

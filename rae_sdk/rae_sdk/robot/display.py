@@ -1,10 +1,12 @@
 import os
 import logging as log
+from copy import deepcopy
 import cv2
 import numpy as np
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 from ament_index_python import get_package_share_directory
+from .state import StateInfo
 
 
 def quaternion_to_rotation_matrix(q):
@@ -68,19 +70,60 @@ class DisplayController:
         self._screen_height = 80
         self._assets_path = os.path.join(
             get_package_share_directory('rae_sdk'), 'assets')
+        self._default_img = cv2.imread(os.path.join(self._assets_path, 'img', 'rae-logo-white.jpg'))
+        self._last_image = None
+        self._state_info = None
+        self.display_default()
         log.info("Display Controller ready")
 
     def stop(self):
         self.display_default()
 
     def display_image(self, image_data):
+        self._last_image = image_data
+        if self._state_info:
+            overlay = self.battery_overlay()
+            image_data = cv2.addWeighted(image_data, 1, overlay, 1, 0)
         ros_image = self._bridge.cv2_to_imgmsg(image_data, encoding='bgra8')
         self._ros_interface.publish('/lcd', ros_image)
 
+    def add_state_overlay(self, info: StateInfo):
+        self._state_info = info
+        self.display_image(deepcopy(self._last_image))
+    
+    def display_text(self, text, on_default=True, location=(30,16), color=(255, 255, 255), font_scale=0.5, thickness=1, font=cv2.FONT_HERSHEY_SIMPLEX, line_type=cv2.LINE_AA):
+        img = np.zeros(
+                (self._screen_height, self._screen_width, 3), dtype=np.uint8)
+        if on_default:
+            self.display_default()
+            img = deepcopy(self._last_image)
+            
+        cv2.putText(img, text, location, font, font_scale, color, thickness, line_type)
+        bgra_image = cv2.cvtColor(img, cv2.COLOR_BGR2BGRA)
+        self.display_image(bgra_image)
+    
+    def battery_overlay(self):
+        # display battery state in a rectangle on the top right corner of the screen
+        battery_state = self._state_info.battery_state
+        img = self._last_image
+        # create battery symbol
+        cv2.rectangle(img, (140, 5), (156, 15), (255, 255, 255), 1)
+        cv2.rectangle(img, (156, 7), (158, 13), (255, 255, 255), -1)
+        # create 3 bars based on battery percentage, if above 66% color is green, 66-33% is yellow, below 33% is red
+        if battery_state.capacity > 66:
+            color = (0, 255, 0)
+        elif battery_state.capacity > 33:
+            color = (0, 255, 255)
+        else:
+            color = (0, 0, 255)
+        cv2.rectangle(img, (142, 7), (143 + int(battery_state.capacity / 10), 13), color, -1)
+        # fill the rest with black
+        cv2.rectangle(img, (143 + int(battery_state.capacity / 10), 7), (156, 13), (0, 0, 0), -1)
+        bgra_image = cv2.cvtColor(img, cv2.COLOR_BGR2BGRA)
+        return bgra_image
+
     def display_default(self):
-        path = os.path.join(self._assets_path, 'img', 'rae-logo-white.jpg')
-        image = cv2.imread(path)
-        bgra_image = cv2.cvtColor(image, cv2.COLOR_BGR2BGRA)
+        bgra_image = cv2.cvtColor(self._default_img, cv2.COLOR_BGR2BGRA)
         self.display_image(bgra_image)
 
     def display_face(self, payload):
