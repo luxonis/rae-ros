@@ -70,7 +70,8 @@ class DisplayController:
         self._screen_height = 80
         self._assets_path = os.path.join(
             get_package_share_directory('rae_sdk'), 'assets')
-        self._default_img = cv2.imread(os.path.join(self._assets_path, 'img', 'rae-logo-white.jpg'))
+        self._default_img = cv2.imread(os.path.join(
+            self._assets_path, 'img', 'rae-logo-white.jpg'))
         self._last_image = None
         self._state_info = None
         self.display_default()
@@ -90,18 +91,26 @@ class DisplayController:
     def add_state_overlay(self, info: StateInfo):
         self._state_info = info
         self.display_image(deepcopy(self._last_image))
-    
-    def display_text(self, text, on_default=True, location=(30,16), color=(255, 255, 255), font_scale=0.5, thickness=1, font=cv2.FONT_HERSHEY_SIMPLEX, line_type=cv2.LINE_AA):
+
+    def display_text(self, text, on_default=True, centerX=True, centerY=False, location=(30, 16), color=(255, 255, 255), font_scale=0.5, thickness=1, font=cv2.FONT_HERSHEY_SIMPLEX, line_type=cv2.LINE_AA):
         img = np.zeros(
-                (self._screen_height, self._screen_width, 3), dtype=np.uint8)
+            (self._screen_height, self._screen_width, 3), dtype=np.uint8)
         if on_default:
             self.display_default()
             img = deepcopy(self._last_image)
-            
-        cv2.putText(img, text, location, font, font_scale, color, thickness, line_type)
+        textY = location[1]
+        textX = location[0]
+        textsize = cv2.getTextSize(text, font, font_scale, thickness)[0]
+        if centerX:
+            textX = int((img.shape[1] - textsize[0]) / 2)
+        if centerY:
+            textY = int((img.shape[0] + textsize[1]) / 2)
+        print(textX, textY, textsize, img.shape)
+        cv2.putText(img, text, (textX, textY), font, font_scale,
+                    color, thickness, line_type)
         bgra_image = cv2.cvtColor(img, cv2.COLOR_BGR2BGRA)
         self.display_image(bgra_image)
-    
+
     def battery_overlay(self):
         # display battery state in a rectangle on the top right corner of the screen
         battery_state = self._state_info.battery_state
@@ -116,9 +125,11 @@ class DisplayController:
             color = (0, 255, 255)
         else:
             color = (0, 0, 255)
-        cv2.rectangle(img, (142, 7), (143 + int(battery_state.capacity / 10), 13), color, -1)
+        cv2.rectangle(
+            img, (142, 7), (143 + int(battery_state.capacity / 10), 13), color, -1)
         # fill the rest with black
-        cv2.rectangle(img, (143 + int(battery_state.capacity / 10), 7), (156, 13), (0, 0, 0), -1)
+        cv2.rectangle(img, (143 + int(battery_state.capacity / 10),
+                      7), (156, 13), (0, 0, 0), -1)
         bgra_image = cv2.cvtColor(img, cv2.COLOR_BGR2BGRA)
         return bgra_image
 
