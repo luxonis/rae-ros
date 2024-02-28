@@ -41,7 +41,11 @@ class SysInfoNode(Node):
 
     def timer_callback(self):
         cpu = psutil.cpu_percent()
+        if cpu > 90:
+            self.get_logger().warn(f'CPU usage is {cpu}%')
         mem = psutil.virtual_memory().percent
+        if mem > 90:
+            self.get_logger().warn(f'Memory usage is {mem}%')
         temp = psutil.sensors_temperatures()
         net = psutil.net_io_counters()
         disk = psutil.disk_usage('/').percent
@@ -49,7 +53,10 @@ class SysInfoNode(Node):
         self._mem_pub.publish(Float32(data=mem))
         self._disk_pub.publish(Float32(data=disk))
         if not self._mock:
-            self._temp_pub.publish(Temperature(temperature=temp['bq27441_0'][0].current))
+            curr_temp = temp['bq27441_0'][0].current
+            if curr_temp > 50:
+                self.get_logger().warn(f'Temperature is {curr_temp}°C')
+            self._temp_pub.publish(Temperature(temperature=curr_temp))
 
         mbs_up = (net.bytes_sent - self._prev_bytes_sent) / 1024 / 1024
         mbs_down = (net.bytes_recv - self._prev_bytes_recv) / 1024 / 1024
