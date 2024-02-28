@@ -148,13 +148,14 @@ ament_python_install_package(${PROJECT_NAME})
 # Install Python executables
 install(
   PROGRAMS
-  scripts/mock_battery.py
-  scripts/mock_lcd.py
-  scripts/mock_leds.py
-  scripts/mock_mic.py
-  scripts/mock_speakers.py
-  scripts/mock_wheels.py
+  scripts/mock/mock_battery.py
+  scripts/mock/mock_lcd.py
+  scripts/mock/mock_leds.py
+  scripts/mock/mock_mic.py
+  scripts/mock/mock_speakers.py
+  scripts/mock/mock_wheels.py
   scripts/lifecycle_manager.py
+  scripts/sys_info_node.py
   DESTINATION lib/${PROJECT_NAME}
 )
 ament_package()

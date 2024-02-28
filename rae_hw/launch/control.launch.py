@@ -107,6 +107,12 @@ def launch_setup(context, *args, **kwargs):
         package='rae_hw',
         executable='battery_node',
     )
+    sys_info = LifecycleNode(
+            package='rae_hw',
+            executable='sys_info_node.py',
+            name='sys_info',
+            namespace=LaunchConfiguration('namespace'),
+        )
 
     return [
         lifecycle_manager,
@@ -120,10 +126,10 @@ def launch_setup(context, *args, **kwargs):
                       speakers,
                       robot_state_pub,
                       ekf_node,
-                      imu_comp_filt,
                       controller_manager,
                       diff_controller,
                       joint_state_broadcaster,
+                      sys_info
                       ]
         ))
 
