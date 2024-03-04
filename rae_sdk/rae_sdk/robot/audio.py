@@ -4,7 +4,6 @@ import logging as log
 from ament_index_python import get_package_share_directory
 import base64
 import ffmpeg
-
 from rae_msgs.srv import PlayAudio
 
 
@@ -35,28 +34,10 @@ class AudioController:
         log.info("Audio Controller ready")
 
 
-    def play_audio_file(self, audio_file_path, delete_after_play=False):
-        """
-         Play an audio file and optionally delete it after playback.
-
-        Args:
-            audio_file_path (str): Path to the audio file.
-            delete_after_play (bool, optional): Whether to delete the audio file after playback. Defaults to False.
-
-        Returns:
-            res: Response from the service call.
-        """
+    def play_audio_file(self, audio_file_path):
         req = PlayAudio.Request()
         req.file_location = audio_file_path
         res = self._ros_interface.call_async_srv('/play_audio', req)
-    
-        # Delete the file if requested
-        if delete_after_play:
-            try:
-                os.remove(audio_file_path)
-            except OSError as e:
-                print(f"Error deleting file: {e}")
-    
         return res
     
     def save_recorded_sound(self, audio_data, output_file="/app/mic_recording.wav"):
@@ -80,8 +61,6 @@ class AudioController:
         # Write the output to the specified WAV file
         with open(output_file, 'wb') as wave_file:
             wave_file.write(output)
-
-
 
     def honk(self):
         horn_path = os.path.join(self._assets_path, 'sfx', 'horn.mp3')
