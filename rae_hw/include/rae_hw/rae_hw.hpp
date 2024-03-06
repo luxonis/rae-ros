@@ -4,6 +4,8 @@
 #include <chrono>
 #include <string>
 #include <vector>
+#include <thread>
+#include <memory>
 
 #include "gpiod.hpp"
 #include "hardware_interface/handle.hpp"
@@ -15,6 +17,8 @@
 #include "rclcpp/macros.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_lifecycle/state.hpp"
+#include "rclcpp_lifecycle/node_interfaces/lifecycle_node_interface.hpp"
+#include "nav_msgs/msg/odometry.hpp"
 
 namespace rae_hw {
 
@@ -48,11 +52,18 @@ class RaeHW : public hardware_interface::SystemInterface {
     hardware_interface::return_type write(const rclcpp::Time& time, const rclcpp::Duration& period) override;
 
    private:
+    void imu_callback(const sensor_msgs::msg::Imu::SharedPtr msg);
+    void odom_callback(const nav_msgs::msg::Odometry::SharedPtr msg);
     std::unique_ptr<RaeMotor> motorL, motorR;
     double leftMotorCMD, rightMotorCMD;
     int pwmA, pwmB, phA, phB;
+    double yaw_imu, yaw_odom, kp, ki, kd, sumerr, prev_yaw_imu, prev_yaw_odom, prev_err;
     double leftPos, rightPos, leftVel, rightVel;
     std::string leftWheelName, rightWheelName;
+    rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr imu_subscriber_;
+    rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_subscriber_;
+    rclcpp::Node::SharedPtr node_;
+    
 };
 
 }  // namespace rae_hw

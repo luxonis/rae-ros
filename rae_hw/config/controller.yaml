@@ -29,7 +29,7 @@ diff_controller:
     # velocity computation filtering
     velocity_rolling_window_size: 1
 
-    open_loop: false
+    open_loop: true
     enable_odom_tf: false
 
     cmd_vel_timeout: 0.5
