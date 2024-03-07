@@ -34,13 +34,14 @@ class AudioController:
         log.info("Audio Controller ready")
 
 
-    def play_audio_file(self, audio_file_path):
+    def play_audio_file(self, audio_file_path, gain = 1.0):
         req = PlayAudio.Request()
         req.file_location = audio_file_path
+        req.gain = gain
         res = self._ros_interface.call_async_srv('/play_audio', req)
         return res
     
-    def save_recorded_sound(self, audio_data, output_file="/tmp/mic_recording.wav"):
+    def save_recorded_sound(self, audio_data, output_file="/app/mic_recording.wav"):
         """
         Decode the Base64 audio data and save it as a WAV file.
         

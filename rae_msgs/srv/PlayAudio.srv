@@ -1,3 +1,4 @@
 string file_location
+float32 gain 16.0
 ---
 bool success
