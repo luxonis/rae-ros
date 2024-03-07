@@ -49,7 +49,6 @@ void SpeakersNode::play_audio_service_callback(const std::shared_ptr<rae_msgs::s
     const std::string& file_location = request->file_location;
     const float gain = request->gain;
 
-
     // Check if the file ends with ".wav"
     if(file_location.size() >= 4 && file_location.substr(file_location.size() - 4) == ".wav") {
         // Call the play_wav function
