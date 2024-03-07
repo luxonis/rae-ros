@@ -43,10 +43,13 @@ class AudioController:
     def save_recorded_sound(self, audio_data, output_file="/app/mic_recording.wav"):
         """
         Decode the Base64 audio data and save it as a WAV file.
-
-        Args:
+        
+        Attributes
+        ----------
             audio_data (str): Base64 encoded audio data.
             output_file (str, optional): Path to save the WAV file. Defaults to "/app/output.wav".
+
+            
         """
         # Decode Base64 data
         binary_data = base64.b64decode(audio_data)
