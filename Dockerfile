@@ -26,7 +26,7 @@ RUN apt-get update && apt-get -y install --no-install-recommends \
     libsndfile1-dev \
     libsndfile1
 
-RUN pip3 install openai
+RUN pip3 install openai ffmpeg-python
 
 ENV WS=/ws
 RUN mkdir -p $WS/src

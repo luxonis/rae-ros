@@ -2,7 +2,8 @@ import os
 import random
 import logging as log
 from ament_index_python import get_package_share_directory
-
+import base64
+import ffmpeg
 from rae_msgs.srv import PlayAudio
 
 
@@ -33,11 +34,37 @@ class AudioController:
         log.info("Audio Controller ready")
 
 
-    def play_audio_file(self, audio_file_path):
+    def play_audio_file(self, audio_file_path, gain = 1.0):
         req = PlayAudio.Request()
         req.file_location = audio_file_path
+        req.gain = gain
         res = self._ros_interface.call_async_srv('/play_audio', req)
         return res
+    
+    def save_recorded_sound(self, audio_data, output_file="/app/mic_recording.wav"):
+        """
+        Decode the Base64 audio data and save it as a WAV file.
+        
+        Attributes
+        ----------
+            audio_data (str): Base64 encoded audio data.
+            output_file (str, optional): Path to save the WAV file. Defaults to "/app/output.wav".
+
+            
+        """
+        # Decode Base64 data
+        binary_data = base64.b64decode(audio_data)
+    
+        # Convert WebM to WAV using ffmpeg
+        output, _ = (
+            ffmpeg.input('pipe:', format='webm')
+            .output('pipe:', format='wav')
+            .run(input=binary_data, capture_stdout=True, capture_stderr=True)
+        )
+    
+        # Write the output to the specified WAV file
+        with open(output_file, 'wb') as wave_file:
+            wave_file.write(output)
 
     def honk(self):
         horn_path = os.path.join(self._assets_path, 'sfx', 'horn.mp3')
