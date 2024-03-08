@@ -2,23 +2,23 @@
 #define RAE_HW__RAE_HW_HPP_
 
 #include <chrono>
-#include <string>
-#include <vector>
-#include <thread>
 #include <memory>
+#include <string>
+#include <thread>
+#include <vector>
 
 #include "gpiod.hpp"
 #include "hardware_interface/handle.hpp"
 #include "hardware_interface/hardware_info.hpp"
 #include "hardware_interface/system_interface.hpp"
 #include "hardware_interface/types/hardware_interface_return_values.hpp"
+#include "nav_msgs/msg/odometry.hpp"
 #include "rae_hw/rae_motors.hpp"
 #include "rae_hw/visibility_control.h"
 #include "rclcpp/macros.hpp"
 #include "rclcpp/rclcpp.hpp"
-#include "rclcpp_lifecycle/state.hpp"
 #include "rclcpp_lifecycle/node_interfaces/lifecycle_node_interface.hpp"
-#include "nav_msgs/msg/odometry.hpp"
+#include "rclcpp_lifecycle/state.hpp"
 
 namespace rae_hw {
 
@@ -64,7 +64,6 @@ class RaeHW : public hardware_interface::SystemInterface {
     rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr imu_subscriber_;
     rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_subscriber_;
     rclcpp::Node::SharedPtr node_;
-    
 };
 
 }  // namespace rae_hw
