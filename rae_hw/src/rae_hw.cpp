@@ -1,9 +1,9 @@
 #include "rae_hw/rae_hw.hpp"
 
+#include <cmath>
 #include <fstream>
 #include <limits>
 #include <vector>
-#include <cmath>
 
 #include "hardware_interface/types/hardware_interface_type_values.hpp"
 #include "rclcpp/rclcpp.hpp"
@@ -45,13 +45,16 @@ hardware_interface::CallbackReturn RaeHW::on_init(const hardware_interface::Hard
     sumerr = 0.0;
     prev_err = 0.0;
     static_err = 0.0;
-    static_correction = static_cast<bool>(std::stoi(info_.hardware_parameters["static_correction"]));;
-    PID pidIMU{std::stof(info_.hardware_parameters["PID_P_IMU"]), std::stof(info_.hardware_parameters["PID_I_IMU"]), std::stof(info_.hardware_parameters["PID_D_IMU"])};
+    static_correction = static_cast<bool>(std::stoi(info_.hardware_parameters["static_correction"]));
+    ;
+    PID pidIMU{std::stof(info_.hardware_parameters["PID_P_IMU"]),
+               std::stof(info_.hardware_parameters["PID_I_IMU"]),
+               std::stof(info_.hardware_parameters["PID_D_IMU"])};
     kp = pidIMU.P;
     ki = pidIMU.I;
     kd = pidIMU.D;
     rclcpp::NodeOptions options;
-    options.arguments({ "--ros-args", "-r", "__node:=topic_based_ros2_control_" });
+    options.arguments({"--ros-args", "-r", "__node:=topic_based_ros2_control_"});
     node_ = rclcpp::Node::make_shared("_", options);
 
     return CallbackReturn::SUCCESS;
@@ -61,12 +64,9 @@ hardware_interface::CallbackReturn RaeHW::on_configure(const rclcpp_lifecycle::S
     motorL->run();
     motorR->run();
 
-    imu_subscriber_ = node_->create_subscription<sensor_msgs::msg::Imu>(
-        "/rae/imu/data", 10,
-        std::bind(&RaeHW::imu_callback, this, std::placeholders::_1));
-    odom_subscriber_ = node_->create_subscription<nav_msgs::msg::Odometry>(
-        "/diff_controller/odom", 10,
-        std::bind(&RaeHW::odom_callback, this, std::placeholders::_1));
+    imu_subscriber_ = node_->create_subscription<sensor_msgs::msg::Imu>("/rae/imu/data", 10, std::bind(&RaeHW::imu_callback, this, std::placeholders::_1));
+    odom_subscriber_ =
+        node_->create_subscription<nav_msgs::msg::Odometry>("/diff_controller/odom", 10, std::bind(&RaeHW::odom_callback, this, std::placeholders::_1));
 
     return CallbackReturn::SUCCESS;
 }
@@ -128,9 +128,9 @@ void RaeHW::odom_callback(const nav_msgs::msg::Odometry::SharedPtr msg) {
 }
 
 hardware_interface::return_type RaeHW::read(const rclcpp::Time& /*time*/, const rclcpp::Duration& /*period*/) {
-    if (rclcpp::ok())  //spin node
+    if(rclcpp::ok())  // spin node
     {
-    rclcpp::spin_some(node_);
+        rclcpp::spin_some(node_);
     }
     float currLeftPos = motorL->getPos();
     float currRightPos = motorR->getPos();
@@ -142,58 +142,52 @@ hardware_interface::return_type RaeHW::read(const rclcpp::Time& /*time*/, const 
     return hardware_interface::return_type::OK;
 }
 
-
 hardware_interface::return_type RaeHW::write(const rclcpp::Time& /*time*/, const rclcpp::Duration& period) {
     double dt = period.seconds();
-    auto adjustForWrap= [](double previousYaw, double currentYaw) {  //lambda for wraping, see nunmpy unwrap
-    double delta = currentYaw - previousYaw;
-    if (delta > M_PI) {
-        currentYaw -= 2 * M_PI;
-    } else if (delta < -M_PI) {
-        currentYaw += 2 * M_PI;
-    }
-    return currentYaw;
+    auto adjustForWrap = [](double previousYaw, double currentYaw) {  // lambda for wraping, see nunmpy unwrap
+        double delta = currentYaw - previousYaw;
+        if(delta > M_PI) {
+            currentYaw -= 2 * M_PI;
+        } else if(delta < -M_PI) {
+            currentYaw += 2 * M_PI;
+        }
+        return currentYaw;
     };
 
-    double yaw_imu_wraped = adjustForWrap(prev_yaw_imu, yaw_imu);  // to handle -pi pi discontinuity 
+    double yaw_imu_wraped = adjustForWrap(prev_yaw_imu, yaw_imu);  // to handle -pi pi discontinuity
     double yaw_odom_wraped = adjustForWrap(prev_yaw_odom, yaw_odom - static_err);
     double err = yaw_odom_wraped - yaw_imu_wraped;
     double out = 0;
 
-    if (static_correction)
-    {
+    if(static_correction) {
         sumerr += err * dt;
-        if (sumerr > 10){  //anti windup 
+        if(sumerr > 10) {  // anti windup
             sumerr = 10;
         }
-        if (sumerr < -10){
+        if(sumerr < -10) {
             sumerr = -10;
-         }
-        float delta_err = (err - prev_err)/ dt;
-        if (yaw_imu){    //prevent unwanted moves before initialization
-            if (leftMotorCMD || rightMotorCMD){
-                out = err * kp + sumerr * ki + delta_err * kd;  
-            }
-            else{
+        }
+        float delta_err = (err - prev_err) / dt;
+        if(yaw_imu) {  // prevent unwanted moves before initialization
+            if(leftMotorCMD || rightMotorCMD) {
+                out = err * kp + sumerr * ki + delta_err * kd;
+            } else {
                 out = (std::signbit(err) ? -3.95 : 3.95) + err * kp + sumerr * ki + delta_err * kd;
-                } //feedforward controller to bypass deadzone
-            }
-    }
-    else
-    {
+            }  // feedforward controller to bypass deadzone
+        }
+    } else {
         out = 0.0;
-        if (abs(err) > 0.01)
-            static_err += err;
+        if(abs(err) > 0.01) static_err += err;
     }
-    leftMotorCMD -= out; 
+    leftMotorCMD -= out;
     rightMotorCMD += out;
-    
+
     prev_yaw_imu = yaw_imu_wraped;
-    prev_yaw_odom =yaw_odom_wraped;
+    prev_yaw_odom = yaw_odom_wraped;
     prev_err = err;
-    
-    motorL->motorSet(leftMotorCMD );
-    motorR->motorSet(rightMotorCMD );
+
+    motorL->motorSet(leftMotorCMD);
+    motorR->motorSet(rightMotorCMD);
     return hardware_interface::return_type::OK;
 }
 
