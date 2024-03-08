@@ -44,6 +44,8 @@ hardware_interface::CallbackReturn RaeHW::on_init(const hardware_interface::Hard
     prev_yaw_odom = 0.0;
     sumerr = 0.0;
     prev_err = 0.0;
+    static_err = 0.0;
+    static_correction = static_cast<bool>(std::stoi(info_.hardware_parameters["static_correction"]));;
     PID pidIMU{std::stof(info_.hardware_parameters["PID_P_IMU"]), std::stof(info_.hardware_parameters["PID_I_IMU"]), std::stof(info_.hardware_parameters["PID_D_IMU"])};
     kp = pidIMU.P;
     ki = pidIMU.I;
@@ -63,7 +65,7 @@ hardware_interface::CallbackReturn RaeHW::on_configure(const rclcpp_lifecycle::S
         "/rae/imu/data", 10,
         std::bind(&RaeHW::imu_callback, this, std::placeholders::_1));
     odom_subscriber_ = node_->create_subscription<nav_msgs::msg::Odometry>(
-        "/diff_controller/odom", 1,
+        "/diff_controller/odom", 10,
         std::bind(&RaeHW::odom_callback, this, std::placeholders::_1));
 
     return CallbackReturn::SUCCESS;
@@ -154,28 +156,38 @@ hardware_interface::return_type RaeHW::write(const rclcpp::Time& /*time*/, const
     };
 
     double yaw_imu_wraped = adjustForWrap(prev_yaw_imu, yaw_imu);  // to handle -pi pi discontinuity 
-    double yaw_odom_wraped = adjustForWrap(prev_yaw_odom, yaw_odom);
-
+    double yaw_odom_wraped = adjustForWrap(prev_yaw_odom, yaw_odom - static_err);
     double err = yaw_odom_wraped - yaw_imu_wraped;
-    sumerr += err * dt;
-    if (sumerr > 10){  //anti windup 
-        sumerr = 10;
-    }
-    if (sumerr < -10){
-        sumerr = -10;
-    }
-    float delta_err = (err - prev_err)/ dt;
-    if (yaw_imu){    //prevent unwanted moves before initialization
-        double out;
-        if (leftMotorCMD || rightMotorCMD){
-            out = err * kp + sumerr * ki + delta_err * kd;  
+    double out = 0;
+
+    if (static_correction)
+    {
+        sumerr += err * dt;
+        if (sumerr > 10){  //anti windup 
+            sumerr = 10;
         }
-        else{
-            out = (std::signbit(err) ? -3.95 : 3.95) + err * kp + sumerr * ki + delta_err * kd; //feedforward controller to bypass deadzone
-        }
+        if (sumerr < -10){
+            sumerr = -10;
+         }
+        float delta_err = (err - prev_err)/ dt;
+        if (yaw_imu){    //prevent unwanted moves before initialization
+            if (leftMotorCMD || rightMotorCMD){
+                out = err * kp + sumerr * ki + delta_err * kd;  
+            }
+            else{
+                out = (std::signbit(err) ? -3.95 : 3.95) + err * kp + sumerr * ki + delta_err * kd;
+                } //feedforward controller to bypass deadzone
+            }
+    }
+    else
+    {
+        out = 0.0;
+        if (abs(err) > 0.01)
+            static_err += err;
+    }
     leftMotorCMD -= out; 
     rightMotorCMD += out;
-    }
+    
     prev_yaw_imu = yaw_imu_wraped;
     prev_yaw_odom =yaw_odom_wraped;
     prev_err = err;

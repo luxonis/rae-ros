@@ -57,7 +57,8 @@ class RaeHW : public hardware_interface::SystemInterface {
     std::unique_ptr<RaeMotor> motorL, motorR;
     double leftMotorCMD, rightMotorCMD;
     int pwmA, pwmB, phA, phB;
-    double yaw_imu, yaw_odom, kp, ki, kd, sumerr, prev_yaw_imu, prev_yaw_odom, prev_err;
+    double yaw_imu, yaw_odom, kp, ki, kd, sumerr, prev_yaw_imu, prev_yaw_odom, prev_err, static_err;
+    bool static_correction;
     double leftPos, rightPos, leftVel, rightVel;
     std::string leftWheelName, rightWheelName;
     rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr imu_subscriber_;
