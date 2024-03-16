@@ -8,7 +8,7 @@ from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, Opaq
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch.conditions import IfCondition
-from launch_ros.actions import Node
+from launch_ros.actions import Node, SetParameter
 
 def launch_setup(context, *args, **kwargs):
     rae_description_pkg = get_package_share_directory('rae_description')
@@ -87,15 +87,19 @@ def launch_setup(context, *args, **kwargs):
 
         # Activate EKF
         Node(
-            condition=IfCondition(enable_localization),
+            # condition=IfCondition(enable_localization),
             package='robot_localization',
             executable='ekf_node',
             name='ekf_filter_node',
             namespace=LaunchConfiguration('namespace'),
             output='screen',
-            parameters=[os.path.join(get_package_share_directory(
-                    'rae_hw'), 'config', 'ekf.yaml')],
-        )
+            parameters=[{'use_sim_time': True},
+                        os.path.join(get_package_share_directory(
+                        'rae_hw'), 'config', 'ekf.yaml')],
+        ),
+
+        # Set all nodes to use simulation time
+        SetParameter(name="use_sim_time", value=True)
     ]
 
 
