@@ -19,6 +19,7 @@ def launch_setup(context, *args, **kwargs):
     )
     parameters = [
         {
+            'use_sim_time': 'True',
             'frame_id': 'base_footprint',
             'subscribe_rgb': True,
             'subscribe_depth': True,
@@ -84,7 +85,8 @@ def launch_setup(context, *args, **kwargs):
                         package='laserscan_kinect',
                         plugin='laserscan_kinect::LaserScanKinectNode',
                         name='laserscan_kinect_front',
-                        parameters=[laserscan_config],
+                        parameters=[{'use_sim_time': 'True'},
+                                    laserscan_config],
                         remappings=[
                             ('/image', name+'/stereo_front/image_raw'),
                             ('/camera_info', name+'/stereo_front/camera_info'),
@@ -97,7 +99,8 @@ def launch_setup(context, *args, **kwargs):
                         package='laserscan_kinect',
                         plugin='laserscan_kinect::LaserScanKinectNode',
                         name='laserscan_kinect_back',
-                        parameters=[laserscan_config],
+                        parameters=[{'use_sim_time': 'True'},
+                                    laserscan_config],
                         remappings=[
                             ('/image', name+'/stereo_back/image_raw'),
                             ('/camera_info', name+'/stereo_back/camera_info'),
@@ -110,7 +113,8 @@ def launch_setup(context, *args, **kwargs):
                         package='ira_laser_tools',
                         name='laser_scan_multi_merger',
                         plugin='ira_laser_tools::LaserscanMerger',
-                        parameters=[{'laserscan_topics': '/rae/scan_back /rae/scan_front',
+                        parameters=[{'use_sim_time': 'True',
+                                     'laserscan_topics': '/rae/scan_back /rae/scan_front',
                                     'destination_frame': 'base_link',
                                     'scan_destination_topic': '/scan'}
                                     ]

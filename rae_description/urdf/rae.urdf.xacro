@@ -398,23 +398,23 @@
       </plugin>
     </gazebo>
 
-    <link name="rae_depth_camera_front_frame">
+    <link name="rae_stereo_front_frame">
       <xacro:body mass="0.00001" d="0.00001" h="0.000003" w="0.00001">
         <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
       </xacro:body>
     </link>
     
-    <joint name="rae_depth_camera_front_frame_joint" type="fixed">
+    <joint name="rae_stereo_front_frame_joint" type="fixed">
       <origin xyz="${0.0208282} 0.0 0.0100195" rpy="0.0 ${-30.0/180*pi} 0.0"/>
       <parent link="base_link"/>
-      <child link="rae_depth_camera_front_frame"/>
+      <child link="rae_stereo_front_frame"/>
     </joint>
 
-    <gazebo reference="rae_depth_camera_front_frame">
+    <gazebo reference="rae_stereo_front_frame">
       <sensor name="front_depth_camera" type="depth_camera">
         <update_rate>15.0</update_rate>
-        <topic>/front/depth/image</topic>
-        <ignition_frame_id>rae_depth_camera_front_frame</ignition_frame_id>
+        <topic>/stereo_front/image_raw</topic>
+        <ignition_frame_id>rae_stereo_front_frame</ignition_frame_id>
         <camera>
           <horizontal_fov>${60.0/180.0*pi}</horizontal_fov>
           <image>
@@ -429,24 +429,24 @@
       </sensor>
     </gazebo>
 
-    <link name="rae_depth_camera_rear_frame">
+    <link name="rae_stereo_rear_frame">
       <xacro:body mass="0.00001" d="0.00001" h="0.00001" w="0.00001">
         <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
       </xacro:body>
     </link>
 
-    <joint name="rae_depth_camera_rear_frame_joint" type="fixed">
+    <joint name="rae_stereo_rear_frame_joint" type="fixed">
       <origin xyz="${-0.0822282} 0.0 0.0100195" rpy="0.0 ${-30.0/180*pi} ${pi}"/>
       <parent link="base_link"/>
-      <child link="rae_depth_camera_rear_frame"/>
+      <child link="rae_stereo_rear_frame"/>
     </joint>
 
-    <gazebo reference="rae_depth_camera_rear_frame">
+    <gazebo reference="rae_stereo_rear_frame">
       <sensor name="rear_depth_camera" type="depth_camera">
         <update_rate>15.0</update_rate>
-        <topic>/rear/depth/image</topic>
+        <topic>/stereo_back/image_raw</topic>
         <vizualize>true</vizualize>
-        <ignition_frame_id>rae_depth_camera_rear_frame</ignition_frame_id>
+        <ignition_frame_id>rae_stereo_rear_frame</ignition_frame_id>
         <camera>
           <horizontal_fov>${60.0/180.0*pi}</horizontal_fov>
           <image>

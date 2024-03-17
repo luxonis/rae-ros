@@ -13,36 +13,26 @@
   gz_type_name: "ignition.msgs.CameraInfo"
   direction: GZ_TO_ROS
 
-- topic_name: "/rear/depth/image"
+- topic_name: "/stereo_back/image_raw"
   ros_type_name: "sensor_msgs/msg/Image"
   gz_type_name: "ignition.msgs.Image"
   direction: GZ_TO_ROS
 
-- topic_name: "/rear/depth/camera_info"
+- topic_name: "/stereo_back/camera_info"
   ros_type_name: "sensor_msgs/msg/CameraInfo"
   gz_type_name: "ignition.msgs.CameraInfo"
-  direction: GZ_TO_ROS
-
-- topic_name: "/rear/depth/image/points"
-  ros_type_name: "sensor_msgs/msg/PointCloud2"
-  gz_type_name: "ignition.msgs.PointCloudPacked"
-  direction: GZ_TO_ROS
-
-- topic_name: "/front/depth/image"
-  ros_type_name: "sensor_msgs/msg/Image"
-  gz_type_name: "ignition.msgs.Image"
-  direction: GZ_TO_ROS
-
-- topic_name: "/front/depth/camera_info"
-  ros_type_name: "sensor_msgs/msg/CameraInfo"
-  gz_type_name: "ignition.msgs.CameraInfo"
-  direction: GZ_TO_ROS
-
-- topic_name: "/front/depth/image/points"
-  ros_type_name: "sensor_msgs/msg/PointCloud2"
-  gz_type_name: "ignition.msgs.PointCloudPacked"
   direction: GZ_TO_ROS
   
+- topic_name: "/stereo_front/image_raw"
+  ros_type_name: "sensor_msgs/msg/Image"
+  gz_type_name: "ignition.msgs.Image"
+  direction: GZ_TO_ROS
+
+- topic_name: "/stereo_front/camera_info"
+  ros_type_name: "sensor_msgs/msg/CameraInfo"
+  gz_type_name: "ignition.msgs.CameraInfo"
+  direction: GZ_TO_ROS
+
 - topic_name: "/rae/imu/data"
   ros_type_name: "sensor_msgs/msg/Imu"
   gz_type_name: "ignition.msgs.IMU"
