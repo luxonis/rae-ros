@@ -10,11 +10,12 @@ from launch.substitutions import LaunchConfiguration
 from launch.conditions import IfCondition
 from launch_ros.actions import Node, SetParameter
 
+from nav2_common.launch import ReplaceString
+
 def launch_setup(context, *args, **kwargs):
     rae_description_pkg = get_package_share_directory('rae_description')
     ros_gz_sim_pkg = get_package_share_directory('ros_gz_sim')
-    enable_localization = LaunchConfiguration(
-        'enable_localization', default='true')
+    enable_localization = LaunchConfiguration('enable_localization')
     world_file = LaunchConfiguration('sdf_file').perform(context)
     print(f'world_file: {world_file}')
     return [
@@ -87,7 +88,7 @@ def launch_setup(context, *args, **kwargs):
 
         # Activate EKF
         Node(
-            # condition=IfCondition(enable_localization),
+            condition=IfCondition(enable_localization),
             package='robot_localization',
             executable='ekf_node',
             name='ekf_filter_node',
@@ -107,6 +108,7 @@ def launch_setup(context, *args, **kwargs):
 def generate_launch_description():
     rae_gazebo_pkg = get_package_share_directory('rae_gazebo')
     declared_arguments = [
+        DeclareLaunchArgument('enable_localization', default_value='True'),
         DeclareLaunchArgument('sdf_file', default_value=f"-r {os.path.join(rae_gazebo_pkg, 'worlds', 'world_demo.sdf')}"),
     ]
 

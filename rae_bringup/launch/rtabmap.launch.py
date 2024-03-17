@@ -127,7 +127,7 @@ def launch_setup(context, *args, **kwargs):
 def generate_launch_description():
     rae_prefix = get_package_share_directory('rae_bringup')
     declared_arguments = [
-        DeclareLaunchArgument('name', default_value='rae'),
+        
         DeclareLaunchArgument('params_file', default_value=os.path.join(
             rae_prefix, 'config', 'camera.yaml')),
     ]
