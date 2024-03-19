@@ -10,8 +10,6 @@ from launch.substitutions import LaunchConfiguration
 from launch.conditions import IfCondition
 from launch_ros.actions import Node, SetParameter
 
-from nav2_common.launch import ReplaceString
-
 def launch_setup(context, *args, **kwargs):
     rae_description_pkg = get_package_share_directory('rae_description')
     ros_gz_sim_pkg = get_package_share_directory('ros_gz_sim')
