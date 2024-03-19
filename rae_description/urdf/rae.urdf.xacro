@@ -2,6 +2,7 @@
 <robot name="rae"
   xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:arg name="sim_mode" default="false" />
+  <xacro:arg name="namespace" default="" />
 
   <xacro:include filename="inertial_moment_calc.xacro"/>
   <xacro:include filename="rae_ros2_control.urdf.xacro"/>
@@ -24,7 +25,7 @@
         <always_on>1</always_on>
         <update_rate>10.0</update_rate>
         <visualize>true</visualize>
-        <topic>rae/imu/data</topic>
+        <topic>/rae/imu/data</topic>
         <frame_id>rae_imu_frame</frame_id>
         <ignition_frame_id>rae_imu_frame</ignition_frame_id>
       </sensor>
@@ -353,7 +354,7 @@
     <child link="rae_imu_frame"/>
   </joint>
 
-  <xacro:rae_ros2_control sim_mode="$(arg sim_mode)"/>
+  <xacro:rae_ros2_control sim_mode="$(arg sim_mode)" namespace="$(arg namespace)" />
 
   <xacro:if value="$(arg sim_mode)">
     <link name="rae_rgb_camera_sim_frame">
@@ -373,7 +374,7 @@
       <sensor type="camera" name="rae_rgb_camera">
         <always_on>true</always_on>
         <update_rate>30.0</update_rate>  
-        <topic>/right/image_raw</topic>
+        <topic>/rae/right/image_raw</topic>
         <ignition_frame_id>rae_rgb_camera_optical_frame</ignition_frame_id>
         <camera>
           <horizontal_fov>${105.0/180.0*pi}</horizontal_fov>
@@ -413,7 +414,7 @@
     <gazebo reference="rae_stereo_front_frame">
       <sensor name="front_depth_camera" type="depth_camera">
         <update_rate>15.0</update_rate>
-        <topic>/stereo_front/image_raw</topic>
+        <topic>/rae/stereo_front/image_raw</topic>
         <ignition_frame_id>rae_stereo_front_frame</ignition_frame_id>
         <camera>
           <horizontal_fov>${60.0/180.0*pi}</horizontal_fov>
@@ -444,7 +445,7 @@
     <gazebo reference="rae_stereo_rear_frame">
       <sensor name="rear_depth_camera" type="depth_camera">
         <update_rate>15.0</update_rate>
-        <topic>/stereo_back/image_raw</topic>
+        <topic>/rae/stereo_back/image_raw</topic>
         <vizualize>true</vizualize>
         <ignition_frame_id>rae_stereo_rear_frame</ignition_frame_id>
         <camera>

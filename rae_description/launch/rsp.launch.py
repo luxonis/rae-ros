@@ -11,6 +11,7 @@ from launch.conditions import IfCondition
 
 def launch_setup(context, *args, **kwargs):
     use_sim_time = LaunchConfiguration('use_sim_time')
+    ns = LaunchConfiguration('namespace').perform(context)
     pkg_path = os.path.join(get_package_share_directory('rae_description'))
     xacro_path = os.path.join(pkg_path, 'urdf', 'rae.urdf.xacro')
 
@@ -21,8 +22,10 @@ def launch_setup(context, *args, **kwargs):
             name='robot_state_publisher',
             namespace=LaunchConfiguration('namespace'),
             parameters=[{
-                'robot_description': Command(['xacro ', xacro_path, ' sim_mode:=', use_sim_time]),
-                'use_sim_time': use_sim_time
+                'robot_description': Command(['xacro ', xacro_path,
+                                              ' sim_mode:=', use_sim_time,
+                                              ' namespace:=', ns]),
+                'use_sim_time:=': use_sim_time,
             }]
         )
     ]

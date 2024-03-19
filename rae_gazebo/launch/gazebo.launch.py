@@ -15,9 +15,15 @@ from nav2_common.launch import ReplaceString
 def launch_setup(context, *args, **kwargs):
     rae_description_pkg = get_package_share_directory('rae_description')
     ros_gz_sim_pkg = get_package_share_directory('ros_gz_sim')
+    namespace = LaunchConfiguration('namespace')
     enable_localization = LaunchConfiguration('enable_localization')
     world_file = LaunchConfiguration('sdf_file').perform(context)
     print(f'world_file: {world_file}')
+
+    ns_srt = namespace.perform(context)
+    ns_srt = f'/{ns_srt}' if ns_srt else ''
+    rae_name = 'rae' if ns_srt else ns_srt + '/rae'
+
     return [
         SetEnvironmentVariable(
             name='IGN_GAZEBO_RESOURCE_PATH',
@@ -43,15 +49,18 @@ def launch_setup(context, *args, **kwargs):
                 os.path.join(rae_description_pkg, 'launch', 'rsp.launch.py')
             ]),
             launch_arguments={
-                'use_sim_time': 'True'
+                'use_sim_time': 'True',
+                'namespace': namespace
             }.items()
         ),
 
         # ros_gz_bridge
         Node(
             package='ros_gz_bridge',
+            namespace=LaunchConfiguration('namespace'),
             executable='parameter_bridge',
             parameters=[{
+                'expand_gz_topic_names': True,
                 'use_sim_time': True,
                 'config_file': os.path.join(get_package_share_directory(
                     'rae_gazebo'),'config', 'gz_bridge.yaml')
@@ -62,8 +71,11 @@ def launch_setup(context, *args, **kwargs):
         # Ignition Gazebo - Spawn Entity
         Node(
             package='ros_gz_sim',
+            namespace=LaunchConfiguration('namespace'),
             executable='create',
             arguments=[
+                "-name", rae_name,
+                "-allow_renaming", "true",
                 '-topic', 'robot_description',
             ],
             output='screen'
@@ -74,7 +86,8 @@ def launch_setup(context, *args, **kwargs):
             package='controller_manager',
             namespace=LaunchConfiguration('namespace'),
             executable='spawner',
-            arguments=['diff_controller', '-c', '/controller_manager'],
+            arguments=['diff_controller',
+                       '--controller-manager', f'{ns_srt}/controller_manager'],
         ),
 
         # Activate joint state broadcaster
@@ -83,7 +96,7 @@ def launch_setup(context, *args, **kwargs):
             executable='spawner',
             namespace=LaunchConfiguration('namespace'),
             arguments=['joint_state_broadcaster',
-                    '--controller-manager', '/controller_manager'],
+                       '--controller-manager', f'{ns_srt}/controller_manager'],
         ),
 
         # Activate EKF
@@ -100,7 +113,7 @@ def launch_setup(context, *args, **kwargs):
         ),
 
         # Set all nodes to use simulation time
-        SetParameter(name="use_sim_time", value=True)
+        SetParameter(name='use_sim_time', value=True)
     ]
 
 
@@ -108,7 +121,8 @@ def launch_setup(context, *args, **kwargs):
 def generate_launch_description():
     rae_gazebo_pkg = get_package_share_directory('rae_gazebo')
     declared_arguments = [
-        DeclareLaunchArgument('enable_localization', default_value='True'),
+        DeclareLaunchArgument('namespace', default_value=''),
+        DeclareLaunchArgument('enable_localization', default_value='true'),
         DeclareLaunchArgument('sdf_file', default_value=f"-r {os.path.join(rae_gazebo_pkg, 'worlds', 'world_demo.sdf')}"),
     ]
 
