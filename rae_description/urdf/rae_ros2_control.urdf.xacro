@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <robot name="rae"
   xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:macro name="rae_ros2_control" params="sim_mode">
+  <xacro:macro name="rae_ros2_control" params="sim_mode namespace">
     <ros2_control name="RAE" type="system">
       <xacro:unless value="${sim_mode}">
         <hardware>
@@ -63,7 +63,8 @@
         <plugin filename="ign_ros2_control-system" name="ign_ros2_control::IgnitionROS2ControlPlugin">
           <parameters>$(find rae_hw)/config/controller.yaml</parameters>
           <ros>
-            <remapping>/diff_controller/cmd_vel_unstamped:=/cmd_vel</remapping>
+            <namespace>${namespace}</namespace>
+            <remapping>diff_controller/cmd_vel_unstamped:=cmd_vel</remapping>
           </ros>
         </plugin>
       </gazebo>

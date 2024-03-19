@@ -2,6 +2,7 @@
 <robot name="rae"
   xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:arg name="sim_mode" default="false" />
+  <xacro:arg name="namespace" default="" />
 
   <xacro:include filename="inertial_moment_calc.xacro"/>
   <xacro:include filename="rae_ros2_control.urdf.xacro"/>
@@ -24,7 +25,7 @@
         <always_on>1</always_on>
         <update_rate>10.0</update_rate>
         <visualize>true</visualize>
-        <topic>rae/imu/data</topic>
+        <topic>/rae/imu/data</topic>
         <frame_id>rae_imu_frame</frame_id>
         <ignition_frame_id>rae_imu_frame</ignition_frame_id>
       </sensor>
@@ -238,7 +239,7 @@
   <joint name="rgb_camera_joint" type="fixed">
     <parent link="chassis"/>
     <child link="rae_rgb_camera_frame"/>
-    <origin xyz="-0.025 0.0101195 0.0517014" rpy="-0.523599 0 0"/>
+    <origin xyz="-0.025 0.0101195 0.0517014" rpy="${-30.0/180*pi} 0 0"/>
   </joint>
 
   <link name="rae_left_camera_frame">
@@ -251,7 +252,7 @@
   <joint name="rae_left_camera_joint" type="fixed">
     <parent link="chassis"/>
     <child link="rae_left_camera_frame"/>
-    <origin xyz="0.0375 0.0100195 0.0515282" rpy="-0.523599 0 0"/>
+    <origin xyz="0.0375 0.0100195 0.0515282" rpy="${-30.0/180*pi} 0 0"/>
   </joint>
 
   <link name="rae_left_camera_optical_frame">
@@ -277,7 +278,7 @@
   <joint name="rae_right_camera_joint" type="fixed">
     <parent link="chassis"/>
     <child link="rae_right_camera_frame"/>
-    <origin xyz="-0.0375 0.0100195 0.0515282" rpy="-0.523599 0 0"/>
+    <origin xyz="-0.0375 0.0100195 0.0515282" rpy="${-30.0/180*pi} 0 0"/>
   </joint>
 
   <link name="rae_right_camera_optical_frame">
@@ -303,7 +304,7 @@
   <joint name="rae_right_back_camera_joint" type="fixed">
     <parent link="chassis"/>
     <child link="rae_right_back_camera_frame"/>
-    <origin xyz="-0.0375 0.0100195 -0.0515282" rpy="0.523599 0 0"/>
+    <origin xyz="-0.0375 0.0100195 -0.0515282" rpy="${30.0/180*pi} 0 0"/>
   </joint>
 
   <link name="rae_right_back_camera_optical_frame">
@@ -329,7 +330,7 @@
   <joint name="rae_left_back_camera_joint" type="fixed">
     <parent link="chassis"/>
     <child link="rae_left_back_camera_frame"/>
-    <origin xyz="0.0375 0.0100195 -0.0515282" rpy="0.523599 0 0"/>
+    <origin xyz="0.0375 0.0100195 -0.0515282" rpy="${30.0/180*pi} 0 0"/>
   </joint>
 
   <link name="rae_left_back_camera_optical_frame">
@@ -353,6 +354,113 @@
     <child link="rae_imu_frame"/>
   </joint>
 
-  <xacro:rae_ros2_control sim_mode="$(arg sim_mode)"/>
+  <xacro:rae_ros2_control sim_mode="$(arg sim_mode)" namespace="$(arg namespace)" />
+
+  <xacro:if value="$(arg sim_mode)">
+    <link name="rae_rgb_camera_sim_frame">
+      <xacro:body mass="0.00001" d="0.0000010" h="0.000003" w="0.00003">
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+      </xacro:body>
+
+    </link>
+
+    <joint name="rae_rgb_camera_sim_frame_joint" type="fixed">
+      <origin xyz="0.0 0 0" rpy="${pi/2} ${-pi/2} 0.0"/>
+      <parent link="rae_rgb_camera_optical_frame"/>
+      <child link="rae_rgb_camera_sim_frame"/>
+    </joint>
+
+    <gazebo reference="rae_rgb_camera_sim_frame">
+      <sensor type="camera" name="rae_rgb_camera">
+        <always_on>true</always_on>
+        <update_rate>30.0</update_rate>  
+        <topic>/rae/right/image_raw</topic>
+        <ignition_frame_id>rae_rgb_camera_optical_frame</ignition_frame_id>
+        <camera>
+          <horizontal_fov>${105.0/180.0*pi}</horizontal_fov>
+          <image>
+            <width>320</width>
+            <height>240</height>
+          </image>  
+          <clip>
+            <near>0.1</near>
+            <far>100</far>
+          </clip>
+          <noise>
+            <type>gaussian</type>
+            <mean>0.0</mean>
+            <stddev>0.007</stddev>
+          </noise>
+        </camera>
+      </sensor>
+
+      <plugin filename="ignition-gazebo-sensors-system" name="ignition::gazebo::systems::Sensors">
+        <engine>ogre2</engine>
+      </plugin>
+    </gazebo>
+
+    <link name="rae_stereo_front_frame">
+      <xacro:body mass="0.00001" d="0.00001" h="0.000003" w="0.00001">
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+      </xacro:body>
+    </link>
+    
+    <joint name="rae_stereo_front_frame_joint" type="fixed">
+      <origin xyz="${0.0208282} 0.0 0.0100195" rpy="0.0 ${-30.0/180*pi} 0.0"/>
+      <parent link="base_link"/>
+      <child link="rae_stereo_front_frame"/>
+    </joint>
+
+    <gazebo reference="rae_stereo_front_frame">
+      <sensor name="front_depth_camera" type="depth_camera">
+        <update_rate>15.0</update_rate>
+        <topic>/rae/stereo_front/image_raw</topic>
+        <ignition_frame_id>rae_stereo_front_frame</ignition_frame_id>
+        <camera>
+          <horizontal_fov>${60.0/180.0*pi}</horizontal_fov>
+          <image>
+            <width>320</width>
+            <height>240</height>
+          </image>
+          <clip>
+            <near>0.2</near>
+            <far>6.0</far>
+          </clip>
+        </camera>
+      </sensor>
+    </gazebo>
+
+    <link name="rae_stereo_rear_frame">
+      <xacro:body mass="0.00001" d="0.00001" h="0.00001" w="0.00001">
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+      </xacro:body>
+    </link>
+
+    <joint name="rae_stereo_rear_frame_joint" type="fixed">
+      <origin xyz="${-0.0822282} 0.0 0.0100195" rpy="0.0 ${-30.0/180*pi} ${pi}"/>
+      <parent link="base_link"/>
+      <child link="rae_stereo_rear_frame"/>
+    </joint>
+
+    <gazebo reference="rae_stereo_rear_frame">
+      <sensor name="rear_depth_camera" type="depth_camera">
+        <update_rate>15.0</update_rate>
+        <topic>/rae/stereo_back/image_raw</topic>
+        <vizualize>true</vizualize>
+        <ignition_frame_id>rae_stereo_rear_frame</ignition_frame_id>
+        <camera>
+          <horizontal_fov>${60.0/180.0*pi}</horizontal_fov>
+          <image>
+            <width>320</width>
+            <height>240</height>
+          </image>
+          <clip>
+            <near>0.2</near>
+            <far>6.0</far>
+          </clip>
+        </camera>
+      </sensor>
+    </gazebo>
+  </xacro:if>
 
 </robot>
