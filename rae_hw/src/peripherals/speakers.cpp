@@ -47,11 +47,12 @@ CallbackReturn SpeakersNode::on_shutdown(const rclcpp_lifecycle::State& /*previo
 void SpeakersNode::play_audio_service_callback(const std::shared_ptr<rae_msgs::srv::PlayAudio::Request> request,
                                                const std::shared_ptr<rae_msgs::srv::PlayAudio::Response> response) {
     const std::string& file_location = request->file_location;
+    const float gain = request->gain;
 
     // Check if the file ends with ".wav"
     if(file_location.size() >= 4 && file_location.substr(file_location.size() - 4) == ".wav") {
         // Call the play_wav function
-        play_wav(file_location.c_str());
+        play_wav(file_location.c_str(), gain);
         response->success = true;
         return;
     }
@@ -110,7 +111,7 @@ void SpeakersNode::play_mp3(const char* mp3_file) {
     return;
 }
 
-void SpeakersNode::play_wav(const char* wav_file) {
+void SpeakersNode::play_wav(const char* wav_file, const float gain) {
     // Open WAV file
     SF_INFO sfinfo;
     SNDFILE* file = sf_open(wav_file, SFM_READ, &sfinfo);
@@ -132,8 +133,6 @@ void SpeakersNode::play_wav(const char* wav_file) {
     const int BUFFER_SIZE = 4096;
     int32_t* buffer_wav = new int32_t[BUFFER_SIZE * sfinfo.channels];  // Use int32_t for 32-bit format
     sf_count_t readCount;
-
-    const float gain = 64.0f;  // Adjust this factor for desired gain
 
     while((readCount = sf_readf_int(file, buffer_wav, BUFFER_SIZE)) > 0) {
         // Apply gain to the samples

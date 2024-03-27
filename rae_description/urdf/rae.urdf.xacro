@@ -1,8 +1,9 @@
 <?xml version="1.0"?>
 <robot name="rae"
   xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:arg name="sim_mode" default="false" />
+
   <xacro:include filename="inertial_moment_calc.xacro"/>
-  <xacro:include filename="rae_gazebo_control.urdf.xacro"/>
   <xacro:include filename="rae_ros2_control.urdf.xacro"/>
   <xacro:property name="deg_to_rad" value="0.01745329251994329577" />
 
@@ -17,14 +18,23 @@
       <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
     </xacro:body>
   </link>
-  <gazebo reference="base_link">
-    <sensor name="imu_sensor" type="imu">
-      <always_on>1</always_on>
-      <update_rate>1</update_rate>
-      <visualize>true</visualize>
-      <topic>imu</topic>
-    </sensor>
-  </gazebo>
+  <xacro:if value="$(arg sim_mode)">
+    <gazebo reference="rae_imu_frame">
+      <sensor name="rae_imu_sensor" type="imu">
+        <always_on>1</always_on>
+        <update_rate>10.0</update_rate>
+        <visualize>true</visualize>
+        <topic>rae/imu/data</topic>
+        <frame_id>rae_imu_frame</frame_id>
+        <ignition_frame_id>rae_imu_frame</ignition_frame_id>
+      </sensor>
+    </gazebo>
+    <gazebo>
+      <plugin
+        filename="ignition-gazebo-imu-system" name="ignition::gazebo::systems::Imu">
+      </plugin>
+    </gazebo>
+  </xacro:if>
   <link name="base_link_back">
     <xacro:body mass="0.00001" d="0.0000010" h="0.000003" w="0.00003">
       <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0"/>
@@ -150,6 +160,12 @@
 
     </visual>
   </link>
+  <xacro:if value="$(arg sim_mode)">
+    <gazebo reference="left_caster_wheel">
+        <mu1>0.0001</mu1>
+        <mu2>0.0001</mu2>
+    </gazebo>
+  </xacro:if>
 
   <joint name="base_left_caster_wheel" type="fixed">
     <parent link="base_link"/>
@@ -184,6 +200,12 @@
 
     </visual>
   </link>
+  <xacro:if value="$(arg sim_mode)">
+    <gazebo reference="right_caster_wheel">
+        <mu1>0.0001</mu1>
+        <mu2>0.0001</mu2>
+    </gazebo>
+  </xacro:if>
 
   <joint name="base_right_caster_wheel" type="fixed">
     <parent link="base_link"/>
@@ -331,5 +353,6 @@
     <child link="rae_imu_frame"/>
   </joint>
 
+  <xacro:rae_ros2_control sim_mode="$(arg sim_mode)"/>
 
 </robot>

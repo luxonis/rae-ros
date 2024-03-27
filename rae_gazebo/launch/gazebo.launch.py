@@ -7,11 +7,14 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, OpaqueFunction, SetEnvironmentVariable
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
+from launch.conditions import IfCondition
 from launch_ros.actions import Node
 
 def launch_setup(context, *args, **kwargs):
     rae_description_pkg = get_package_share_directory('rae_description')
     ros_gz_sim_pkg = get_package_share_directory('ros_gz_sim')
+    enable_localization = LaunchConfiguration(
+        'enable_localization', default='true')
     world_file = LaunchConfiguration('sdf_file').perform(context)
     print(f'world_file: {world_file}')
     return [
@@ -47,22 +50,10 @@ def launch_setup(context, *args, **kwargs):
         Node(
             package='ros_gz_bridge',
             executable='parameter_bridge',
-            arguments=[
-                '/cmd_vel@geometry_msgs/msg/Twist]ignition.msgs.Twist',
-                '/camera/image@sensor_msgs/msg/Image@ignition.msgs.Image',
-                '/camera/depth_image@sensor_msgs/msg/Image@ignition.msgs.Image',
-                '/camera/camera_info@sensor_msgs/msg/CameraInfo@ignition.msgs.CameraInfo',
-
-                '/image_out@sensor_msgs/msg/Image@ignition.msgs.Image',
-                '/image_tuning@sensor_msgs/msg/Image@ignition.msgs.Image',
-
-                '/odom@nav_msgs/msg/Odometry@ignition.msgs.Odometry',
-                '/clock@rosgraph_msgs/msg/Clock[ignition.msgs.Clock',
-                '/tf@tf2_msgs/msg/TFMessage[ignition.msgs.Pose_V',
-                '/scan@sensor_msgs/msg/LaserScan@ignition.msgs.LaserScan',
-            ],
             parameters=[{
-                'use_sim_time': True
+                'use_sim_time': True,
+                'config_file': os.path.join(get_package_share_directory(
+                    'rae_gazebo'),'config', 'gz_bridge.yaml')
             }],
             output='screen'
         ),
@@ -75,6 +66,35 @@ def launch_setup(context, *args, **kwargs):
                 '-topic', 'robot_description',
             ],
             output='screen'
+        ),
+
+        # Activate diff controller
+        Node(
+            package='controller_manager',
+            namespace=LaunchConfiguration('namespace'),
+            executable='spawner',
+            arguments=['diff_controller', '-c', '/controller_manager'],
+        ),
+
+        # Activate joint state broadcaster
+        Node(
+            package='controller_manager',
+            executable='spawner',
+            namespace=LaunchConfiguration('namespace'),
+            arguments=['joint_state_broadcaster',
+                    '--controller-manager', '/controller_manager'],
+        ),
+
+        # Activate EKF
+        Node(
+            condition=IfCondition(enable_localization),
+            package='robot_localization',
+            executable='ekf_node',
+            name='ekf_filter_node',
+            namespace=LaunchConfiguration('namespace'),
+            output='screen',
+            parameters=[os.path.join(get_package_share_directory(
+                    'rae_hw'), 'config', 'ekf.yaml')],
         )
     ]
 
