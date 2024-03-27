@@ -15,6 +15,8 @@
 #include <string>
 #include <thread>
 
+#include "sensor_msgs/msg/imu.hpp"
+
 namespace rae_hw {
 /// @brief Struct representing encoder GPIO states. Following states are used to calculate rotation:
 ///

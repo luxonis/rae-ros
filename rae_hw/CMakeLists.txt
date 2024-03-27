@@ -12,7 +12,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 find_package(ament_cmake_auto REQUIRED)
 ament_auto_find_build_dependencies()
 find_package(ALSA REQUIRED)
-
+find_package(sensor_msgs REQUIRED)
 find_library(GPIOD_LIBRARY NAMES libgpiodcxx.so)
 if(NOT GPIOD_LIBRARY)
   message(FATAL_ERROR "gpiod library not found. Install apt install libgpiod-dev")
@@ -26,7 +26,7 @@ pkg_check_modules(MPG123 REQUIRED libmpg123)
 find_path(SNDFILE_INCLUDE_DIR sndfile.h)
 find_library(SNDFILE_LIBRARY NAMES sndfile)
 
-include_directories(include ${GST_INCLUDE_DIRS} ${MPG123_INCLUDE_DIRS} ${SNDFILE_INCLUDE_DIR})
+include_directories(include ${GST_INCLUDE_DIRS} ${MPG123_INCLUDE_DIRS} ${SNDFILE_INCLUDE_DIR} ${sensor_msgs_INCLUDE_DIRS})
 
 ament_auto_add_library(
   ${PROJECT_NAME}
@@ -35,7 +35,9 @@ ament_auto_add_library(
   src/rae_motors.cpp
 )
 
-ament_target_dependencies(${PROJECT_NAME} ${DEPENDENCIES} ALSA std_srvs)
+ament_target_dependencies(${PROJECT_NAME} ${DEPENDENCIES}  nav_msgs ALSA std_srvs)
+set(dependencies
+    sensor_msgs)
 
 target_link_libraries(
   ${PROJECT_NAME}

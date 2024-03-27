@@ -30,6 +30,11 @@
           <param name="PID_I_R">0.1</param>
           <param name="PID_D_R">0.0005</param>
 
+          <param name="PID_P_IMU">5.3</param>
+          <param name="PID_I_IMU">4.7</param>
+          <param name="PID_D_IMU">0.3</param>
+          <param name="static_correction">0</param>
+
           <param name="loop_rate">30</param>
           <param name="chip_name">gpiochip0</param>
         </hardware>
