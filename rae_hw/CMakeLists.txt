@@ -19,14 +19,31 @@ if(NOT GPIOD_LIBRARY)
 endif()
 
 # Find mpg123 package
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(MPG123 REQUIRED libmpg123)
+# Find path to mpg123.h header file
+find_path(MPG123_INCLUDE_DIR NAMES mpg123.h)
+
+# Find the mpg123 library
+find_library(MPG123_LIBRARY NAMES mpg123)
+
+# Check if mpg123 is found
+if (MPG123_INCLUDE_DIR AND MPG123_LIBRARY)
+    set(MPG123_FOUND TRUE)
+else()
+    set(MPG123_FOUND FALSE)
+endif()
+
+# Provide information about mpg123
+if (MPG123_FOUND)
+    message(STATUS "Found mpg123: ${MPG123_INCLUDE_DIR} ${MPG123_LIBRARY}")
+else()
+    message(FATAL_ERROR "mpg123 not found")
+endif()
 
 # Find SNDFILE library
 find_path(SNDFILE_INCLUDE_DIR sndfile.h)
 find_library(SNDFILE_LIBRARY NAMES sndfile)
 
-include_directories(include ${GST_INCLUDE_DIRS} ${MPG123_INCLUDE_DIRS} ${SNDFILE_INCLUDE_DIR} ${sensor_msgs_INCLUDE_DIRS})
+include_directories(include ${GST_INCLUDE_DIRS} ${MPG123_INCLUDE_DIR} ${SNDFILE_INCLUDE_DIR} ${sensor_msgs_INCLUDE_DIRS})
 
 ament_auto_add_library(
   ${PROJECT_NAME}
@@ -41,7 +58,7 @@ set(dependencies
 
 target_link_libraries(
   ${PROJECT_NAME}
-  ${MPG123_LIBRARIES}
+  ${MPG123_LIBRARY}
   ${GPIOD_LIBRARY}
   ${SNDFILE_LIBRARY}
 )
