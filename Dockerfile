@@ -4,7 +4,9 @@ ARG BUILD_TYPE="RelWithDebInfo"
 ARG SIM=0
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get -y install --no-install-recommends \
+RUN apt-get update && \
+    apt-get -y upgrade && \
+    apt-get -y install --no-install-recommends \
     software-properties-common \
     libusb-1.0-0-dev \
     python3-colcon-common-extensions \
@@ -24,7 +26,8 @@ RUN apt-get update && apt-get -y install --no-install-recommends \
     git \
     htop \
     libsndfile1-dev \
-    libsndfile1
+    libsndfile1 \
+    busybox
 
 RUN pip3 install openai ffmpeg-python
 
